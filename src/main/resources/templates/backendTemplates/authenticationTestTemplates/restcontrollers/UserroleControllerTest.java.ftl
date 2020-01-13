@@ -200,9 +200,9 @@ public class [=AuthenticationTable]roleControllerTest {
   		<#list PrimaryKeys as key,value>
 		<#if value?lower_case == "long">
 		[=AuthenticationTable?uncap_first]role.set[=AuthenticationTable][=key?cap_first](3L);
-		<#elseif value.fieldType?lower_case == "integer">
+		<#elseif value?lower_case == "integer">
 		[=AuthenticationTable?uncap_first]role.set[=AuthenticationTable][=key?cap_first](3);
-		<#elseif value.fieldType?lower_case == "short">
+		<#elseif value?lower_case == "short">
 		[=AuthenticationTable?uncap_first]role.set[=AuthenticationTable][=key?cap_first]((short)3);
 		<#elseif value?lower_case == "double">
 		[=AuthenticationTable?uncap_first]role.set[=AuthenticationTable][=key?cap_first](3D);

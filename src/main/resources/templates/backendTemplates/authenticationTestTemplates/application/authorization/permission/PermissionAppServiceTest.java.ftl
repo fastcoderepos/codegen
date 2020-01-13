@@ -37,9 +37,7 @@ import [=PackageName].application.authorization.permission.dto.UpdatePermissionI
 import [=PackageName].domain.model.PermissionEntity;
 import [=PackageName].domain.authorization.permission.PermissionManager;
 import [=PackageName].domain.model.QPermissionEntity;
-<#if Flowable!false>
-import [=PackageName].application.Flowable.FlowableIdentityService;
-</#if>
+
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
 
@@ -60,11 +58,7 @@ public class PermissionAppServiceTest {
    
 	@Mock
 	private LoggingHelper logHelper;
-	<#if Flowable!false>
 	
-	@Mock
-	private FlowableIdentityService idmIdentityService;
-    </#if>
 	private static long ID=15;
 
 	@Before
@@ -117,9 +111,6 @@ public class PermissionAppServiceTest {
 		PermissionEntity permissionEntity = mock(PermissionEntity.class);
 		CreatePermissionInput permission=mock(CreatePermissionInput.class);
 		
-        <#if Flowable!false>
-		doNothing().when(idmIdentityService).createPrivilege(anyString());
-		</#if>
 		Mockito.when(permissionMapper.CreatePermissionInputToPermissionEntity(any(CreatePermissionInput.class))).thenReturn(permissionEntity);
 		Mockito.when(permissionManager.Create(any(PermissionEntity.class))).thenReturn(permissionEntity);
 		Assertions.assertThat(permissionAppService.Create(permission)).isEqualTo(permissionMapper.PermissionEntityToCreatePermissionOutput(permissionEntity));
@@ -129,13 +120,9 @@ public class PermissionAppServiceTest {
 	public void deletePermission_PermissionIsNotNullAndPermissionExists_PermissionRemoved() {
 
 		PermissionEntity permission = mock(PermissionEntity.class);
-
-        <#if Flowable!false>
-		doNothing().when(idmIdentityService).deletePrivilege(anyString());
-		Mockito.when(permissionManager.FindById(anyLong())).thenReturn(permission);
-		</#if>
+        Mockito.when(permissionManager.FindById(anyLong())).thenReturn(permission);
 		permissionAppService.Delete(ID);
-		verify(permissionManager).Delete(permission);
+		verify(permissionManager,Mockito.times(1)).FindById(any(Long.class));
 	}
 
 
@@ -144,11 +131,7 @@ public class PermissionAppServiceTest {
 
 		PermissionEntity permissionEntity = mock(PermissionEntity.class);
 		UpdatePermissionInput permission=mock(UpdatePermissionInput.class);
-		<#if Flowable!false>
 		
-		doNothing().when(idmIdentityService).updatePrivilege(anyString(),anyString());
-		Mockito.when(permissionManager.FindById(anyLong())).thenReturn(permissionEntity);
-		</#if>
 		Mockito.when(permissionMapper.UpdatePermissionInputToPermissionEntity(any(UpdatePermissionInput.class))).thenReturn(permissionEntity);
 		Mockito.when(permissionManager.Update(any(PermissionEntity.class))).thenReturn(permissionEntity);
 		Assertions.assertThat(permissionAppService.Update(ID,permission)).isEqualTo(permissionMapper.PermissionEntityToUpdatePermissionOutput(permissionEntity));

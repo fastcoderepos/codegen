@@ -68,15 +68,7 @@ public class UserAppServiceTest {
 
 	@Mock
 	private LoggingHelper logHelper;
-    <#if Flowable!false>
-   
-	@Mock
-	private ActIdUserMapper actIdUserMapper;
-	
-	@Mock
-	private FlowableIdentityService idmIdentityService;
     
-    </#if>
 	private static long ID=15;
 
 	@Before
@@ -135,11 +127,6 @@ public class UserAppServiceTest {
 		
 		Mockito.when(roleManager.FindById(anyLong())).thenReturn(foundRole);
 		Mockito.when(userManager.Create(any(UserEntity.class))).thenReturn(userEntity);
-		<#if Flowable!false>
-		ActIdUserEntity actIdUser = mock (ActIdUserEntity.class);
-		Mockito.when(actIdUserMapper.createUsersEntityToActIdUserEntity(any(UserEntity.class))).thenReturn(actIdUser);
-		doNothing().when(idmIdentityService).createUser(any(UserEntity.class),any(ActIdUserEntity.class));
-		</#if>
 		Mockito.when(userMapper.CreateUserInputToUserEntity(any(CreateUserInput.class))).thenReturn(userEntity);
 		
 		Assertions.assertThat(userAppService.Create(user)).isEqualTo(userMapper.UserEntityToCreateUserOutput(userEntity));
@@ -168,10 +155,6 @@ public class UserAppServiceTest {
 
 		UserEntity user=mock(UserEntity.class);
 
-        <#if Flowable!false>
-		Mockito.when(userManager.FindById(anyLong())).thenReturn(user);
-		doNothing().when(idmIdentityService).deleteUser(any(String.class));
-	    </#if>
 		userAppService.Delete(ID);
 		verify(userManager).Delete(user);
 	}
@@ -200,15 +183,8 @@ public class UserAppServiceTest {
 		UserEntity userEntity = mock(UserEntity.class);
 		UpdateUserInput user=mock(UpdateUserInput.class);
 		RoleEntity foundRole = mock(RoleEntity.class);
-		<#if Flowable!false>
-		ActIdUserEntity actIdUser = mock (ActIdUserEntity.class); 
-		Mockito.when(userManager.FindById(anyLong())).thenReturn(userEntity);
-		Mockito.when(actIdUserMapper.createUsersEntityToActIdUserEntity(any(UserEntity.class))).thenReturn(actIdUser);
-		doNothing().when(idmIdentityService).updateUser(any(UserEntity.class),any(ActIdUserEntity.class));
-        </#if>
         
 		Mockito.when(roleManager.FindById(anyLong())).thenReturn(foundRole);
-		
 		Mockito.when(userMapper.UpdateUserInputToUserEntity(any(UpdateUserInput.class))).thenReturn(userEntity);
 		Mockito.when(userManager.Update(any(UserEntity.class))).thenReturn(userEntity);
 		Assertions.assertThat(userAppService.Update(ID,user)).isEqualTo(userMapper.UserEntityToUpdateUserOutput(userEntity));

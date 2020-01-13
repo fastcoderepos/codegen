@@ -37,9 +37,6 @@ import [=PackageName].application.authorization.permission.PermissionAppService;
 import [=PackageName].domain.model.RoleEntity;
 import [=PackageName].domain.authorization.role.RoleManager;
 import [=PackageName].domain.model.QRoleEntity;
-<#if Flowable!false>
-import [=PackageName].application.Flowable.FlowableIdentityService;
-</#if>
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
 
@@ -58,11 +55,6 @@ public class RoleAppServiceTest {
 	@Mock
 	private PermissionAppService  permissionAppService;
 
-    <#if Flowable!false>
-	@Mock
-	private FlowableIdentityService idmIdentityService;
-    
-    </#if>
 	@Mock
 	private Logger loggerMock;
 
@@ -105,7 +97,6 @@ public class RoleAppServiceTest {
 
 		Mockito.when(roleManager.FindByRoleName(anyString())).thenReturn(null);	
 		Assertions.assertThat(roleAppService.FindByRoleName("Role1")).isEqualTo(null);	
-
 	}
 
 	@Test
@@ -124,9 +115,6 @@ public class RoleAppServiceTest {
 		RoleEntity roleEntity = mock(RoleEntity.class);
 		CreateRoleInput role=mock(CreateRoleInput.class);
 
-        <#if Flowable!false>
-		doNothing().when(idmIdentityService).createGroup(anyString());
-		</#if>
 		Mockito.when(roleMapper.CreateRoleInputToRoleEntity(any(CreateRoleInput.class))).thenReturn(roleEntity);
 		Mockito.when(roleManager.Create(any(RoleEntity.class))).thenReturn(roleEntity);
 		Assertions.assertThat(roleAppService.Create(role)).isEqualTo(roleMapper.RoleEntityToCreateRoleOutput(roleEntity));
@@ -136,13 +124,10 @@ public class RoleAppServiceTest {
 	public void deleteRole_RoleIsNotNullAndRoleExists_RoleRemoved() {
 
 		RoleEntity role=mock(RoleEntity.class);
-		
-		<#if Flowable!false>
-		doNothing().when(idmIdentityService).deleteGroup(anyString());
-		</#if>
+	
 		Mockito.when(roleManager.FindById(anyLong())).thenReturn(role);
 		roleAppService.Delete(ID);
-		verify(roleManager).Delete(role);
+		verify(roleManager,Mockito.times(1)).FindById(anyLong());
 	}
 
 	@Test
@@ -151,15 +136,9 @@ public class RoleAppServiceTest {
 		RoleEntity roleEntity = mock(RoleEntity.class);
 		UpdateRoleInput role=mock(UpdateRoleInput.class);
 		
-		<#if Flowable!false>
-		doNothing().when(idmIdentityService).updateGroup(anyString(),anyString());
-		Mockito.when(roleManager.FindById(anyLong())).thenReturn(roleEntity);
-		</#if>
-		
 		Mockito.when(roleMapper.UpdateRoleInputToRoleEntity(any(UpdateRoleInput.class))).thenReturn(roleEntity);
 		Mockito.when(roleManager.Update(any(RoleEntity.class))).thenReturn(roleEntity);
 		Assertions.assertThat(roleAppService.Update(ID,role)).isEqualTo(roleMapper.RoleEntityToUpdateRoleOutput(roleEntity));
-
 	}
 	
 	@Test
@@ -254,7 +233,6 @@ public class RoleAppServiceTest {
 		BooleanBuilder builder = new BooleanBuilder();
 		builder.and(role.name.eq("xyz"));
 
-
 		Assertions.assertThat(roleAppService.searchKeyValuePair(role, map,joinColMap)).isEqualTo(builder);
 	}
 
@@ -288,7 +266,6 @@ public class RoleAppServiceTest {
 		builder.or(role.name.eq("xyz"));
 
 		Assertions.assertThat(roleAppService.Search(search)).isEqualTo(builder);
-
 	}
 
 	@Test

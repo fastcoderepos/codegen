@@ -1,7 +1,6 @@
 package com.nfinity.codegen;
 
 import com.nfinity.entitycodegen.EntityDetails;
-import com.nfinity.entitycodegen.EntityGenerator;
 import com.nfinity.entitycodegen.EntityGeneratorUtils;
 import com.nfinity.entitycodegen.FieldDetails;
 import com.nfinity.entitycodegen.RelationDetails;
@@ -36,8 +35,8 @@ public class CodeGenerator {
 	EntityGeneratorUtils entityGeneratorUtils;
 	
 	//Build root map with all information required for templates
-	public Map<String, Object> buildEntityInfo(String entityName,String packageName,Boolean history,
-			String type,EntityDetails details,String authenticationType,Boolean email, String schema,String authenticationTable, Boolean flowable,Boolean cache) {
+	public Map<String, Object> buildEntityInfo(String entityName,String packageName,
+			String type,EntityDetails details,String authenticationType,String schema,String authenticationTable,Boolean cache) {
 
 		Map<String, Object> root = new HashMap<>();
 		String className = entityName.substring(entityName.lastIndexOf(".") + 1);
@@ -56,13 +55,10 @@ public class CodeGenerator {
 		root.put("IdClass", details.getIdClass());
 		root.put("DescriptiveField",details.getEntitiesDescriptiveFieldMap());
 		root.put("AuthenticationFields",details.getAuthenticationFieldsMap());
-		root.put("History", history);
 		root.put("IEntity", "I" + className);
 		root.put("IEntityFile", "i" + moduleName);
 		root.put("CommonModulePackage" , packageName.concat(".commonmodule"));
 		root.put("AuthenticationType", authenticationType);
-		root.put("EmailModule", email);
-		root.put("Flowable", flowable);
 		root.put("ApiPath", className.substring(0, 1).toLowerCase() + className.substring(1));
 		root.put("FrontendUrlPath", className.toLowerCase());
 		
@@ -84,8 +80,8 @@ public class CodeGenerator {
 	}
 	
 	//Method to generate all required modules for list of entities
-	public List<String> generateAllModulesForEntities(Map<String,EntityDetails> details, String backEndRootFolder, String clientRootFolder,String sourcePackageName,Boolean history,Boolean cache,
-			String destPath, String type, String schema, String authenticationType, Boolean scheduler, Boolean email,Boolean flowable,String authenticationTable)
+	public List<String> generateAllModulesForEntities(Map<String,EntityDetails> details, String backEndRootFolder, String clientRootFolder,String sourcePackageName,Boolean cache,
+			String destPath, String type, String schema, String authenticationType,String authenticationTable)
 	{
 		// generate all modules for each entity
 		List<String> entityNames=new ArrayList<String>();
@@ -93,8 +89,8 @@ public class CodeGenerator {
 		{
 			String className=entry.getKey().substring(entry.getKey().lastIndexOf(".") + 1);
 			entityNames.add(className);
-			generate(entry.getKey(), sourcePackageName, backEndRootFolder, clientRootFolder, sourcePackageName, history, 
-							destPath, type, entry.getValue(), authenticationType, scheduler, email,cache, schema,authenticationTable, flowable);
+			generate(entry.getKey(), sourcePackageName, backEndRootFolder, clientRootFolder, sourcePackageName,
+							destPath, type, entry.getValue(), authenticationType,cache, schema,authenticationTable);
 		}
 		
 		return entityNames;
@@ -102,33 +98,33 @@ public class CodeGenerator {
 
 	// Generate all components of the desired application
 	public void generateAll(String backEndRootFolder, String clientRootFolder, String sourcePackageName,
-			Boolean history,Boolean cache, String destPath, String type,Map<String,EntityDetails> details, String connectionString,
-			String schema,String authenticationType,Boolean scheduler, Boolean email,Boolean flowable,String authenticationTable) throws IOException {
+			Boolean cache, String destPath, String type,Map<String,EntityDetails> details, String connectionString,
+			String schema,String authenticationType,String authenticationTable) throws IOException {
 
 		String appName = sourcePackageName.substring(sourcePackageName.lastIndexOf(".") + 1);
 		//to generate all modules for list of entities
-		List<String> entityNames = generateAllModulesForEntities(details, backEndRootFolder, clientRootFolder, sourcePackageName, history, cache, destPath, type, schema, authenticationType, scheduler, email, flowable, authenticationTable);
+		List<String> entityNames = generateAllModulesForEntities(details, backEndRootFolder, clientRootFolder, sourcePackageName, cache, destPath, type, schema, authenticationType, authenticationTable);
 		FileUtils.copyFile(new File("src/main/resources/keystore.p12"), new File(destPath + "/" + backEndRootFolder + "/src/main/resources/keystore.p12"));
 
 		// additional code needs to be added if history option is true
-		if(history) {
-			String appFolderPath = destPath + "/" + appName.substring(appName.lastIndexOf(".") + 1) + "Client/src/app/";
-			generateEntityHistoryComponent(appFolderPath, authenticationTable, details); //to generate entity History Component
-			addhistoryComponentsToAppModule(appFolderPath); // edit app module to add history components
-			addhistoryComponentsToAppRoutingModule(appFolderPath, authenticationType, flowable); // edit routing module to add history components
-			generateAuditorController(details, sourcePackageName,backEndRootFolder,destPath,authenticationType,authenticationTable,email,scheduler); // generate audit controller to maintain history of entities
-		}
+//		if(history) {
+//			String appFolderPath = destPath + "/" + appName.substring(appName.lastIndexOf(".") + 1) + "Client/src/app/";
+//			generateEntityHistoryComponent(appFolderPath, authenticationTable, details); //to generate entity History Component
+//			addhistoryComponentsToAppModule(appFolderPath); // edit app module to add history components
+//			addhistoryComponentsToAppRoutingModule(appFolderPath, authenticationType); // edit routing module to add history components
+//			generateAuditorController(details, sourcePackageName,backEndRootFolder,destPath,authenticationType,authenticationTable,email,scheduler); // generate audit controller to maintain history of entities
+//		}
 		
-		if(email) {
-			new File(destPath + "/" + appName.substring(appName.lastIndexOf(".") + 1) + "/mjmlTemp").mkdirs();
-		}
+//		if(email) {
+//			new File(destPath + "/" + appName.substring(appName.lastIndexOf(".") + 1) + "/mjmlTemp").mkdirs();
+//		}
 		
 		//update front end modules
 		updateAppRouting(destPath,appName, entityNames, authenticationType);
 		updateAppModule(destPath,appName, entityNames);
 		updateEntitiesJsonFile(destPath + "/" + appName + "Client/src/app/common/components/main-nav/entities.json",entityNames,authenticationTable);
 
-		Map<String,Object> propertyInfo = getInfoForApplicationPropertiesFile(destPath,sourcePackageName, connectionString, schema,authenticationType,email,scheduler, flowable,cache);
+		Map<String,Object> propertyInfo = getInfoForApplicationPropertiesFile(destPath,sourcePackageName, connectionString, schema,authenticationType,cache);
         
 		//generate configuration files for backend
 		generateApplicationProperties(propertyInfo, destPath + "/" + backEndRootFolder + "/src/main/resources");
@@ -143,7 +139,7 @@ public class CodeGenerator {
 
 		String backendAppFolder = backEndRootFolder + "/src/main/java";
 		
-		Map<String, Object> root = getInfoForAuditControllerAndBeanConfig(details, packageName, authenticationType, authenticationTable, false, false);
+		Map<String, Object> root = getInfoForAuditControllerAndBeanConfig(details, packageName, authenticationType, authenticationTable);
 		Map<String, Object> template = new HashMap<>();
 		template.put("backendTemplates/BeanConfig.java.ftl", "BeanConfig.java");
 		String destFolder = destPath + "/" + backendAppFolder + "/" + packageName.replace(".", "/");
@@ -153,30 +149,25 @@ public class CodeGenerator {
 	}
 
 	// build root map for application properties
-	public Map<String,Object> getInfoForApplicationPropertiesFile(String destPath, String appName, String connectionString, String schema,String authenticationType,Boolean email,Boolean scheduler, Boolean flowable,Boolean cache){
+	public Map<String,Object> getInfoForApplicationPropertiesFile(String destPath, String appName, String connectionString, String schema,String authenticationType,Boolean cache){
 
 		Map<String,Object> propertyInfo = new HashMap<String,Object>();
 
 		propertyInfo.put("connectionStringInfo", entityGeneratorUtils.parseConnectionString(connectionString));
 		propertyInfo.put("appName", appName.substring(appName.lastIndexOf(".") + 1));
 		propertyInfo.put("Schema", schema);
-		propertyInfo.put("EmailModule",email);
-		propertyInfo.put("Scheduler",scheduler);
 		propertyInfo.put("Cache", cache);
 		propertyInfo.put("AuthenticationType",authenticationType);
 		propertyInfo.put("packageName",appName.replace(".", "/"));
-		propertyInfo.put("Flowable", flowable);
+
 		propertyInfo.put("packagePath", appName);
-		if(email) {
-			propertyInfo.put("MjmlTempPath", destPath + "/" + appName.substring(appName.lastIndexOf(".") + 1) + "/mjmlTemp");
-		}
+	
 
 		return propertyInfo;
 	}
 
 	// build root map for bean configuration and audit controller
-	public Map<String,Object> getInfoForAuditControllerAndBeanConfig(Map<String, EntityDetails> details,String packageName,String authenticationType,String authenticationTable,
-            Boolean email, Boolean scheduler) {
+	public Map<String,Object> getInfoForAuditControllerAndBeanConfig(Map<String, EntityDetails> details,String packageName,String authenticationType,String authenticationTable) {
 		
 		Map<String, Object> entitiesMap = new HashMap<String,Object>();
 		//set details for each entity in root map
@@ -200,8 +191,7 @@ public class CodeGenerator {
 		root.put("PackageName", packageName);
 		root.put("AuthenticationType", authenticationType);
 		root.put("CommonModulePackage" , packageName.concat(".commonmodule"));
-		root.put("email", email);
-		root.put("scheduler", scheduler);
+	
 		if(authenticationTable!=null) {
 			root.put("UserInput","true");
 			root.put("AuthenticationTable", authenticationTable);
@@ -216,12 +206,11 @@ public class CodeGenerator {
 	}
 	
 	// generate audit controller required to maintain history 
-	public void generateAuditorController(Map<String, EntityDetails> details,String packageName,String backEndRootFolder, String destPath,String authenticationType,String authenticationTable,
-			                 Boolean email, Boolean scheduler) {
+	public void generateAuditorController(Map<String, EntityDetails> details,String packageName,String backEndRootFolder, String destPath,String authenticationType,String authenticationTable ) {
 
 		String backendAppFolder = backEndRootFolder + "/src/main/java";
 		
-		Map<String, Object> root = getInfoForAuditControllerAndBeanConfig(details, packageName, authenticationType, authenticationTable, email, scheduler);
+		Map<String, Object> root = getInfoForAuditControllerAndBeanConfig(details, packageName, authenticationType, authenticationTable);
 		Map<String, Object> template = new HashMap<>();
 		template.put("backendTemplates/AuditController.java.ftl", "AuditController.java");
 
@@ -231,159 +220,159 @@ public class CodeGenerator {
 
 	}
 
-	// generate frontend entity history component 
-	public void generateEntityHistoryComponent(String destFolder, String authenticationTable, Map<String,EntityDetails> details){
-		
-		Map<String, Object> root = new HashMap<>();
-		
-		if(authenticationTable!=null) {
-			root.put("AuthenticationTable", authenticationTable);
-			EntityDetails authTableDetails = details.get(authenticationTable);
-			Map<String, FieldDetails> descFieldMap = authTableDetails.getEntitiesDescriptiveFieldMap();
-			FieldDetails authTableDescField = descFieldMap.get(authenticationTable);
-			
-			if(authTableDescField !=null)
-			root.put("DescriptiveField", authTableDescField.getFieldName());
-			else
-		    root.put("DescriptiveField", "UserName");
-			
-			Map<String, FieldDetails> authFieldMap = authTableDetails.getAuthenticationFieldsMap();
-			root.put("UserNameField",authFieldMap.get("UserName").getFieldName());
-			
-			String moduleName = codeGeneratorUtils.camelCaseToKebabCase(authenticationTable);
-			
-			root.put("ModuleName", moduleName);
-			
-		}
-		else
-		{
-			root.put("UserNameField","userName");
-			root.put("AuthenticationTable", "User");
-			root.put("ModuleName", "user");
-		}	
-		
-		new File(destFolder + "/entity-history").mkdirs();
-		codeGeneratorUtils.generateFiles(getEntityHistoryTemplates(), root, destFolder + "/entity-history",TEMPLATE_FOLDER);
+//	// generate frontend entity history component 
+//	public void generateEntityHistoryComponent(String destFolder, String authenticationTable, Map<String,EntityDetails> details){
+//		
+//		Map<String, Object> root = new HashMap<>();
+//		
+//		if(authenticationTable!=null) {
+//			root.put("AuthenticationTable", authenticationTable);
+//			EntityDetails authTableDetails = details.get(authenticationTable);
+//			Map<String, FieldDetails> descFieldMap = authTableDetails.getEntitiesDescriptiveFieldMap();
+//			FieldDetails authTableDescField = descFieldMap.get(authenticationTable);
+//			
+//			if(authTableDescField !=null)
+//			root.put("DescriptiveField", authTableDescField.getFieldName());
+//			else
+//		    root.put("DescriptiveField", "UserName");
+//			
+//			Map<String, FieldDetails> authFieldMap = authTableDetails.getAuthenticationFieldsMap();
+//			root.put("UserNameField",authFieldMap.get("UserName").getFieldName());
+//			
+//			String moduleName = codeGeneratorUtils.camelCaseToKebabCase(authenticationTable);
+//			
+//			root.put("ModuleName", moduleName);
+//			
+//		}
+//		else
+//		{
+//			root.put("UserNameField","userName");
+//			root.put("AuthenticationTable", "User");
+//			root.put("ModuleName", "user");
+//		}	
+//		
+//		new File(destFolder + "/entity-history").mkdirs();
+//		codeGeneratorUtils.generateFiles(getEntityHistoryTemplates(), root, destFolder + "/entity-history",TEMPLATE_FOLDER);
+//
+//		new File(destFolder + "/manage-entity-history").mkdirs();
+//		codeGeneratorUtils.generateFiles(getManageEntityHistoryTemplates(), root, destFolder + "/manage-entity-history",TEMPLATE_FOLDER);
+//
+//	}
+//	
+//	// templates for front-end entity history component
+//	public Map<String, Object> getEntityHistoryTemplates() {
+//
+//		Map<String, Object> template = new HashMap<>();
+//		template.put("entityHistory/entity-history/entity-history.component.html.ftl", "entity-history.component.html");
+//		template.put("entityHistory/entity-history/entity-history.component.scss.ftl", "entity-history.component.scss");
+//		template.put("entityHistory/entity-history/entity-history.component.spec.ts.ftl", "entity-history.component.spec.ts");
+//		template.put("entityHistory/entity-history/entity-history.component.ts.ftl", "entity-history.component.ts");
+//		template.put("entityHistory/entity-history/entity-history.service.ts.ftl", "entity-history.service.ts");
+//		template.put("entityHistory/entity-history/entityHistory.ts.ftl", "entityHistory.ts");
+//		template.put("entityHistory/entity-history/filter-item.directive.ts.ftl", "filter-item.directive.ts");
+//
+//		return template;
+//	}
+//	
+//	// templates for front-end entity history manager 
+//	public Map<String, Object> getManageEntityHistoryTemplates() {
+//
+//		Map<String, Object> template = new HashMap<>();
+//
+//		template.put("entityHistory/manage-entity-history/manage-entity-history.component.html.ftl", "manage-entity-history.component.html");
+//		template.put("entityHistory/manage-entity-history/manage-entity-history.component.scss.ftl", "manage-entity-history.component.scss");
+//		template.put("entityHistory/manage-entity-history/manage-entity-history.component.spec.ts.ftl", "manage-entity-history.component.spec.ts");
+//		template.put("entityHistory/manage-entity-history/manage-entity-history.component.ts.ftl", "manage-entity-history.component.ts");
+//
+//		return template;
+//	}
 
-		new File(destFolder + "/manage-entity-history").mkdirs();
-		codeGeneratorUtils.generateFiles(getManageEntityHistoryTemplates(), root, destFolder + "/manage-entity-history",TEMPLATE_FOLDER);
+//	// update app module file to add history components
+//	public void addhistoryComponentsToAppModule(String destPath)
+//	{
+//		StringBuilder sourceBuilder=new StringBuilder();
+//		sourceBuilder.setLength(0);
+//		sourceBuilder.append("\n    " + "EntityHistoryComponent," );
+//		sourceBuilder.append("\n    " + "ManageEntityHistoryComponent,");
+//
+//		String data = " ";
+//		try {
+//			System.out.println(" AA  " + destPath + "/app.module.ts");
+//			data = FileUtils.readFileToString(new File(destPath + "/app.module.ts"),"UTF8");
+//
+//			StringBuilder builder = new StringBuilder();
+//
+//			builder.append("import { EntityHistoryComponent } from './entity-history/entity-history.component';" + "\n");
+//			builder.append("import { ManageEntityHistoryComponent } from './manage-entity-history/manage-entity-history.component';" + "\n");
+//
+//			builder.append(data);
+//			int index = builder.lastIndexOf("declarations");
+//			index = builder.indexOf("[", index);
+//			builder.insert(index + 1 , sourceBuilder.toString());
+//			File fileName = new File(destPath + "/app.module.ts");
+//
+//			try (PrintWriter writer = new PrintWriter(fileName)) {
+//				writer.println(builder.toString());
+//			} catch (FileNotFoundException e) {
+//				e.printStackTrace();
+//			}
+//
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//	}
 
-	}
-	
-	// templates for front-end entity history component
-	public Map<String, Object> getEntityHistoryTemplates() {
-
-		Map<String, Object> template = new HashMap<>();
-		template.put("entityHistory/entity-history/entity-history.component.html.ftl", "entity-history.component.html");
-		template.put("entityHistory/entity-history/entity-history.component.scss.ftl", "entity-history.component.scss");
-		template.put("entityHistory/entity-history/entity-history.component.spec.ts.ftl", "entity-history.component.spec.ts");
-		template.put("entityHistory/entity-history/entity-history.component.ts.ftl", "entity-history.component.ts");
-		template.put("entityHistory/entity-history/entity-history.service.ts.ftl", "entity-history.service.ts");
-		template.put("entityHistory/entity-history/entityHistory.ts.ftl", "entityHistory.ts");
-		template.put("entityHistory/entity-history/filter-item.directive.ts.ftl", "filter-item.directive.ts");
-
-		return template;
-	}
-	
-	// templates for front-end entity history manager 
-	public Map<String, Object> getManageEntityHistoryTemplates() {
-
-		Map<String, Object> template = new HashMap<>();
-
-		template.put("entityHistory/manage-entity-history/manage-entity-history.component.html.ftl", "manage-entity-history.component.html");
-		template.put("entityHistory/manage-entity-history/manage-entity-history.component.scss.ftl", "manage-entity-history.component.scss");
-		template.put("entityHistory/manage-entity-history/manage-entity-history.component.spec.ts.ftl", "manage-entity-history.component.spec.ts");
-		template.put("entityHistory/manage-entity-history/manage-entity-history.component.ts.ftl", "manage-entity-history.component.ts");
-
-		return template;
-	}
-
-	// update app module file to add history components
-	public void addhistoryComponentsToAppModule(String destPath)
-	{
-		StringBuilder sourceBuilder=new StringBuilder();
-		sourceBuilder.setLength(0);
-		sourceBuilder.append("\n    " + "EntityHistoryComponent," );
-		sourceBuilder.append("\n    " + "ManageEntityHistoryComponent,");
-
-		String data = " ";
-		try {
-			System.out.println(" AA  " + destPath + "/app.module.ts");
-			data = FileUtils.readFileToString(new File(destPath + "/app.module.ts"),"UTF8");
-
-			StringBuilder builder = new StringBuilder();
-
-			builder.append("import { EntityHistoryComponent } from './entity-history/entity-history.component';" + "\n");
-			builder.append("import { ManageEntityHistoryComponent } from './manage-entity-history/manage-entity-history.component';" + "\n");
-
-			builder.append(data);
-			int index = builder.lastIndexOf("declarations");
-			index = builder.indexOf("[", index);
-			builder.insert(index + 1 , sourceBuilder.toString());
-			File fileName = new File(destPath + "/app.module.ts");
-
-			try (PrintWriter writer = new PrintWriter(fileName)) {
-				writer.println(builder.toString());
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	// update app routing module to add history components
-	public void addhistoryComponentsToAppRoutingModule(String destPath, String authenticationType, Boolean flowable)
-	{
-		StringBuilder sourceBuilder=new StringBuilder();
-		sourceBuilder.setLength(0);
-
-		if(authenticationType == "none") {
-			sourceBuilder.append("\n  " + " { path: 'entityHistory', component: EntityHistoryComponent},");
-			sourceBuilder.append("\n  " + " { path: 'manageEntityHistory', component: ManageEntityHistoryComponent},");
-		}
-		else {
-			sourceBuilder.append("\n  " + " { path: 'entityHistory', component: EntityHistoryComponent ,canActivate: [ AuthGuard ]},");
-			sourceBuilder.append("\n  " + " { path: 'manageEntityHistory', component: ManageEntityHistoryComponent ,canActivate: [ AuthGuard ]},");
-		}
-
-		String data = " ";
-		try {
-			data = FileUtils.readFileToString(new File(destPath + "/app.routing.ts"),"UTF8");
-
-			StringBuilder builder = new StringBuilder();
-
-			builder.append("import { EntityHistoryComponent } from './entity-history/entity-history.component';" + "\n");
-			builder.append("import { ManageEntityHistoryComponent } from './manage-entity-history/manage-entity-history.component';" + "\n");
-			builder.append(data);
-
-			int index = builder.lastIndexOf("{");
-			if(flowable) {
-				final String output = builder.substring(0, index);
-				index = output.lastIndexOf("{");
-			}
-			builder.insert(index - 1, sourceBuilder.toString());
-			File fileName = new File(destPath + "/app.routing.ts");
-
-			try (PrintWriter writer = new PrintWriter(fileName)) {
-				writer.println(builder.toString());
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+//	// update app routing module to add history components
+//	public void addhistoryComponentsToAppRoutingModule(String destPath, String authenticationType, Boolean flowable)
+//	{
+//		StringBuilder sourceBuilder=new StringBuilder();
+//		sourceBuilder.setLength(0);
+//
+//		if(authenticationType == "none") {
+//			sourceBuilder.append("\n  " + " { path: 'entityHistory', component: EntityHistoryComponent},");
+//			sourceBuilder.append("\n  " + " { path: 'manageEntityHistory', component: ManageEntityHistoryComponent},");
+//		}
+//		else {
+//			sourceBuilder.append("\n  " + " { path: 'entityHistory', component: EntityHistoryComponent ,canActivate: [ AuthGuard ]},");
+//			sourceBuilder.append("\n  " + " { path: 'manageEntityHistory', component: ManageEntityHistoryComponent ,canActivate: [ AuthGuard ]},");
+//		}
+//
+//		String data = " ";
+//		try {
+//			data = FileUtils.readFileToString(new File(destPath + "/app.routing.ts"),"UTF8");
+//
+//			StringBuilder builder = new StringBuilder();
+//
+//			builder.append("import { EntityHistoryComponent } from './entity-history/entity-history.component';" + "\n");
+//			builder.append("import { ManageEntityHistoryComponent } from './manage-entity-history/manage-entity-history.component';" + "\n");
+//			builder.append(data);
+//
+//			int index = builder.lastIndexOf("{");
+//			if(flowable) {
+//				final String output = builder.substring(0, index);
+//				index = output.lastIndexOf("{");
+//			}
+//			builder.insert(index - 1, sourceBuilder.toString());
+//			File fileName = new File(destPath + "/app.routing.ts");
+//
+//			try (PrintWriter writer = new PrintWriter(fileName)) {
+//				writer.println(builder.toString());
+//			} catch (FileNotFoundException e) {
+//				e.printStackTrace();
+//			}
+//
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//	}
 
 	// generate all required code and layers against single entity
 	public void generate(String entityName, String appName, String backEndRootFolder,String clientRootFolder,String packageName,
-            Boolean history, String destPath, String type,EntityDetails details,String authenticationType, Boolean scheduler, Boolean email, Boolean cache,String schema,String authenticationTable, Boolean flowable) {
+             String destPath, String type,EntityDetails details,String authenticationType, Boolean cache,String schema,String authenticationTable) {
 
 		String backendAppFolder = backEndRootFolder + "/src/main/java";
 		String clientAppFolder = clientRootFolder + "/src/app";
-		Map<String, Object> root = buildEntityInfo(entityName,packageName,history, type,details,authenticationType,email,schema,authenticationTable, flowable,cache);
+		Map<String, Object> root = buildEntityInfo(entityName,packageName,type,details,authenticationType,schema,authenticationTable, cache);
 
 		Map<String, Object> uiTemplate2DestMapping = getUITemplates(root.get("ModuleName").toString());
 

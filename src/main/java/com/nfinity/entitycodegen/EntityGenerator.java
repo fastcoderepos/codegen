@@ -83,7 +83,7 @@ public class EntityGenerator {
 		}
 		
 		Map<String, EntityDetails> entityDetailsMap = processAndGenerateRelevantEntities(targetPath, tempPackageName, schema, packageName, destinationPath, authenticationType, authenticationTable);
-	//	entityGeneratorUtils.deleteDirectory(destinationPath + "/" + tempPackageName.replaceAll("\\.", "/"));
+		entityGeneratorUtils.deleteDirectory(destinationPath + "/" + tempPackageName.replaceAll("\\.", "/"));
 		System.out.println(" exit ");
 
 		return entityDetailsMap;
@@ -107,11 +107,12 @@ public class EntityGenerator {
 			for (Class<?> currentClass : classList) {
 				String entityName = currentClass.getName();
 				String className = entityName.substring(entityName.lastIndexOf(".") + 1);
-
+               
 				// process each entities except many to many association entities
 				if (!entityName.endsWith("Id")) {
 
 					EntityDetails details = entityDetails.retreiveEntityFieldsAndRships(currentClass, entityName, classList);// GetEntityDetails.getDetails(currentClass,
+					
 					Map<String, RelationDetails> relationMap = details.getRelationsMap();
 					details.setCompositeKeyClasses(compositePrimaryKeyEntities);
 					details.setPrimaryKeys(entityGeneratorUtils.getPrimaryKeysFromMap(details.getFieldsMap()));
@@ -129,6 +130,7 @@ public class EntityGenerator {
 					entityDetailsMap.put(entityName.substring(entityName.lastIndexOf(".") + 1), details);
 					Map<String, Object> root =buildRootMap(details,entityName, packageName, schema, authenticationTable, authenticationType);
 					// Generate Entity based on template
+					
 					generateEntityAndIdClass(root, details, packageName, destinationPath,compositePrimaryKeyEntities);
 
 				}
@@ -253,7 +255,7 @@ public class EntityGenerator {
 			{
 				FieldDetails fieldDetails = fieldsMap.get(str.getJoinColumn());
 				fieldDetails.setrelationFieldName(fieldDetails.getFieldName());
-				fieldDetails.setFieldName(str.getReferenceColumn());
+			//	fieldDetails.setFieldName(str.getReferenceColumn());
 				fieldsMap.put(str.getJoinColumn(), fieldDetails);
 			}
 

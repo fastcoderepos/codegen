@@ -90,9 +90,48 @@ public class PomFileModifierTest {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 	    DocumentBuilder db = dbf.newDocumentBuilder();
 	    Document doc = db.newDocument();
-		Element element=doc.createElement("plugin");
-	
-		Assertions.assertThat(pomFileModifier.getMapStructPlugIn(doc)).isNotSameAs(element);
+	    Element mapStruct = doc.createElement("plugin");
+
+		Element elem = doc.createElement("groupId");
+		elem.appendChild(doc.createTextNode("org.apache.maven.plugins"));
+		mapStruct.appendChild(elem);
+
+		elem = doc.createElement("artifactId");
+		elem.appendChild(doc.createTextNode("maven-compiler-plugin"));
+		mapStruct.appendChild(elem);
+
+		elem = doc.createElement("version");
+		elem.appendChild(doc.createTextNode("3.5.1"));
+		mapStruct.appendChild(elem);
+
+		Element configuration = doc.createElement("configuration");
+
+		Element source = doc.createElement("source");
+		source.appendChild(doc.createTextNode("1.8"));
+		Element target = doc.createElement("target");
+		target.appendChild(doc.createTextNode("1.8"));
+
+		Element annotationProcessorPaths = doc.createElement("annotationProcessorPaths");
+		Element path = doc.createElement("path");
+		elem = doc.createElement("groupId");
+		elem.appendChild(doc.createTextNode("org.mapstruct"));
+		path.appendChild(elem);
+		elem = doc.createElement("artifactId");
+		elem.appendChild(doc.createTextNode("mapstruct-processor"));
+		path.appendChild(elem);
+		elem = doc.createElement("version");
+		elem.appendChild(doc.createTextNode("1.2.0.Final"));
+		path.appendChild(elem);
+
+		annotationProcessorPaths.appendChild(path);
+		configuration.appendChild(source);
+		configuration.appendChild(target);
+		configuration.appendChild(annotationProcessorPaths);
+
+		mapStruct.appendChild(configuration);
+		
+		
+		Assertions.assertThat(pomFileModifier.getMapStructPlugIn(doc)).isEqualToComparingFieldByFieldRecursively(mapStruct); 
 	}
 	
 	@Test

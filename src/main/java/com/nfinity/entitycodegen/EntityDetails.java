@@ -23,7 +23,7 @@ import com.nfinity.codegen.CodeGeneratorUtils;
 
 @Component
 public class EntityDetails {
-	
+
 	@Autowired
 	CodeGeneratorUtils codeGeneratorUtils;
 
@@ -31,7 +31,7 @@ public class EntityDetails {
 	Map<String, RelationDetails> relationsMap = new HashMap<>();
 	List<String> compositeKeyClasses = new ArrayList<>();
 	Map<String,String> primaryKeys = new HashMap<>();
-			
+
 	Map<String, FieldDetails> entitiesDescriptiveFieldMap = new HashMap<>();
 	Map<String, FieldDetails> authenticationFieldsMap = null;
 	String entityTableName;
@@ -44,7 +44,7 @@ public class EntityDetails {
 	public void setIdClass(String idClass) {
 		this.idClass = idClass;
 	}
-	
+
 
 	public Map<String, String> getPrimaryKeys() {
 		return primaryKeys;
@@ -77,10 +77,10 @@ public class EntityDetails {
 	public void setEntitiesDescriptiveFieldMap(Map<String, FieldDetails> entitiesDescriptiveFieldMap) {
 		this.entitiesDescriptiveFieldMap = entitiesDescriptiveFieldMap;
 	}
-    
+
 	public EntityDetails()
 	{
-		
+
 	}
 	public EntityDetails(Map<String, FieldDetails> fieldsMap, Map<String, RelationDetails> relationsMap,String tableName,String idClass) {
 		super();
@@ -113,7 +113,7 @@ public class EntityDetails {
 	public void setCompositeKeyClasses(List<String> compositeKeyClasses) {
 		this.compositeKeyClasses = compositeKeyClasses;
 	}
-	
+
 	public String getTableName(Annotation[] classAnnotations)
 	{
 		String tableName = null;
@@ -124,8 +124,19 @@ public class EntityDetails {
 				tableName= tableAnn.name();
 			}
 		}
-		
+
 		return tableName;
+	}
+
+	public String camelCaseToKebabCase(String name)
+	{
+		String[] splittedNames = StringUtils.splitByCharacterTypeCamelCase(name);
+		splittedNames[0] = StringUtils.lowerCase(splittedNames[0]);
+
+		for (int i = 0; i < splittedNames.length; i++) {
+			splittedNames[i] = StringUtils.lowerCase(splittedNames[i]);
+		}
+		return StringUtils.join(splittedNames, "-");
 	}
 	public EntityDetails retreiveEntityFieldsAndRships(Class<?> entityClass, String entityName,
 			List<Class<?>> classList) {
@@ -134,24 +145,26 @@ public class EntityDetails {
 		Map<String, RelationDetails> relationsMap = new HashMap<>();
 
 		String className = entityName.substring(entityName.lastIndexOf(".") + 1);
+
 		String tableName=null;
-        String idClass=className+"Id";
+		String idClass=className+"Id";
 		try {
 
 			Class<?> myClass = entityClass;
 			Object classObj = (Object) myClass.newInstance();
 			Annotation[] classAnnotations=classObj.getClass().getAnnotations();
 			tableName=getTableName(classAnnotations);
-			
+
 			Field[] fields = classObj.getClass().getDeclaredFields();
 
-			for (Field field : fields) {
+			for (Field field : fields) { 
 				FieldDetails details = new FieldDetails();
 				RelationDetails relation = new RelationDetails();
 				List<JoinDetails> joinDetailsList= new ArrayList<JoinDetails>();
 				JoinDetails joinDetails=new JoinDetails();
 				String str = field.getType().toString();
 				int index = str.lastIndexOf(".") + 1;
+				
 				details.setFieldName(field.getName());
 				String fieldType=str.substring(index);
 				if(fieldType.equals("int"))
@@ -165,12 +178,11 @@ public class EntityDetails {
 				for (Annotation a : annotations) {
 
 					if (a.annotationType().toString().equals("interface javax.persistence.Column")) {
-						//String column = a.toString();
 						Column column=(javax.persistence.Column) a;
 						if(!details.getIsPrimaryKey())
-						details.setIsNullable(column.nullable());
-						
-					    details.setLength(column.length());
+							details.setIsNullable(column.nullable());
+
+						details.setLength(column.length());
 						String colDef=column.columnDefinition();
 						if(colDef.equalsIgnoreCase("bigserial") || colDef.equalsIgnoreCase("serial"))
 						{
@@ -183,22 +195,22 @@ public class EntityDetails {
 					}
 					if (a.annotationType().toString().equals("interface javax.persistence.ManyToOne")) {
 						relation.setRelation("ManyToOne");
-						relation.setfName(field.getName());
+						relation.setfName(details.getFieldName());
 						relation.seteName(details.getFieldType());
-						relation.seteModuleName(codeGeneratorUtils.camelCaseToKebabCase(details.getFieldType()));
-						
+						relation.seteModuleName(camelCaseToKebabCase(details.getFieldType()));
+
 						joinDetails.setJoinEntityName(details.getFieldType());
 					}
 					if (a.annotationType().toString().equals("interface javax.persistence.OneToOne")) {
 						relation.setRelation("OneToOne");
 						OneToOne oneToOne= (javax.persistence.OneToOne) a;
-						relation.setfName(field.getName());
+						relation.setfName(details.getFieldName());
 						relation.seteName(details.getFieldType());
-						relation.seteModuleName(codeGeneratorUtils.camelCaseToKebabCase(details.getFieldType()));
+						relation.seteModuleName(camelCaseToKebabCase(details.getFieldType()));
 						joinDetails.setJoinEntityName(details.getFieldType());
 
 						String mappedBy = oneToOne.mappedBy();
-				
+
 						if(!mappedBy.isEmpty())
 						{
 							relation.setIsParent(true);	
@@ -276,7 +288,7 @@ public class EntityDetails {
 					if (a.annotationType().toString().equals("interface javax.persistence.OneToMany")) {
 						String relationalEntity = a.toString();
 						OneToMany oneToMany=(javax.persistence.OneToMany) a;
-                     
+
 						String entityPackage = null;
 						String[] word = relationalEntity.split("[\\(,//)]");
 						for (String s : word) {
@@ -294,11 +306,11 @@ public class EntityDetails {
 						details.setFieldName(targetEntity.toLowerCase());
 						details.setFieldType(targetEntity);
 						relation.seteName(targetEntity);
-						relation.seteModuleName(codeGeneratorUtils.camelCaseToKebabCase(targetEntity));
+						relation.seteModuleName(camelCaseToKebabCase(targetEntity));
 						relation.setfName(targetEntity.toLowerCase());
-					
+
 						joinDetails.setJoinEntityName(details.getFieldType());
-		
+
 						String mappedBy = oneToMany.mappedBy();
 						joinDetails.setMappedBy(mappedBy);
 					}
@@ -315,8 +327,10 @@ public class EntityDetails {
 					relation.setfDetails(getFields(relation.geteName(), classList));
 					relationsMap.put(className + "-" + relation.geteName(), relation);
 				}
-
+				
+				//details.setFieldName(details.getFieldName());
 				fieldsMap.put(details.getFieldName(), details);
+				
 			}
 		} catch (InstantiationException e) {
 			// TODO Auto-generated catch block
@@ -326,9 +340,10 @@ public class EntityDetails {
 			e.printStackTrace();
 		}
 		Map<String, FieldDetails> sortedMap = new TreeMap<>(fieldsMap);
+
 		return new EntityDetails(sortedMap, relationsMap,tableName,idClass);
 	}
-	
+
 	public String findPrimaryKey(String entityPackage, List<Class<?>> classList) {
 		String primaryKey = null;
 
@@ -375,6 +390,7 @@ public class EntityDetails {
 						String str = field.getType().toString();
 						int index = str.lastIndexOf(".") + 1;
 						details.setFieldName(field.getName());
+
 						String fieldType=str.substring(index);
 						if(fieldType.equals("int"))
 						{
@@ -384,12 +400,14 @@ public class EntityDetails {
 						details.setFieldType(fieldType);
 						Annotation[] annotations = field.getAnnotations();
 						for (Annotation a : annotations) {
-
 							if (a.annotationType().toString().equals("interface javax.persistence.Id")) {
 								details.setIsPrimaryKey(true);
 							}
 						}
+
+
 						fieldsList.add(details);
+
 					}
 
 				} catch (InstantiationException e) {
@@ -430,7 +448,7 @@ public class EntityDetails {
 									fieldType="Integer";
 								}
 								fieldType=fieldType.substring(0, 1).toUpperCase() + fieldType.substring(1);
-								
+
 								Annotation[] annotations = field.getAnnotations(); 
 
 								for (Annotation a : annotations) { 
@@ -454,7 +472,7 @@ public class EntityDetails {
 											}
 											else
 												joinDetails.setReferenceColumn(referenceCol);
-											
+
 											joinDetails.setJoinColumn(CaseFormat.LOWER_UNDERSCORE 
 													.to(CaseFormat.LOWER_CAMEL, jCol.name())); 
 
@@ -548,7 +566,7 @@ public class EntityDetails {
 								JoinDetails joinDetails = new JoinDetails();
 
 								String mappedBy=null;
-								
+
 								String str = field.getType().toString();
 								int index = str.lastIndexOf(".") + 1;
 								String fieldname=field.getName();
@@ -558,7 +576,7 @@ public class EntityDetails {
 									fieldType="Integer";
 								}
 								fieldType=fieldType.substring(0, 1).toUpperCase() + fieldType.substring(1);
-								
+
 								for(JoinDetails jd: childJoinDetailsList)
 								{
 									if(jd.getJoinEntityName()==fieldname)
@@ -589,7 +607,7 @@ public class EntityDetails {
 											}
 											else
 												joinDetails.setReferenceColumn(referenceCol);
-											
+
 											joinDetails.setJoinColumn(CaseFormat.LOWER_UNDERSCORE 
 													.to(CaseFormat.LOWER_CAMEL,j.name())); 
 											joinDetails.setIsJoinColumnOptional(j.nullable());

@@ -33,9 +33,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import [=PackageName].domain.authorization.[=AuthenticationTable?lower_case]role.*;
 import [=CommonModulePackage].search.*;
-<#if Flowable!false>
-import [=PackageName].application.Flowable.FlowableIdentityService;
-</#if>
 <#if CompositeKeyClasses?? && CompositeKeyClasses?seq_contains(AuthenticationTable)>
 import [=PackageName].domain.model.[=AuthenticationTable]Id;
 </#if>
@@ -74,11 +71,6 @@ public class [=AuthenticationTable]roleAppServiceTest {
 
 	@Mock
 	private LoggingHelper logHelper;
-	
-	<#if Flowable!false>
-	@Mock
-	private FlowableIdentityService idmIdentityService;
-    </#if>
 
 	@Mock
 	private [=AuthenticationTable]roleId [=AuthenticationTable?uncap_first]RoleId;
@@ -121,15 +113,11 @@ public class [=AuthenticationTable]roleAppServiceTest {
 		Mockito.when(_[=AuthenticationTable?uncap_first]Manager.FindById(<#if (AuthenticationType!="none" && !UserInput??)>any(Long.class)<#elseif AuthenticationType!="none" && UserInput??><#if CompositeKeyClasses?? && CompositeKeyClasses?seq_contains(ClassName)>any([=AuthenticationTable]Id.class)<#else><#list PrimaryKeys as key,value><#if value?lower_case == "long">anyLong()<#elseif value?lower_case == "integer">any(Integer.class)<#elseif value?lower_case == "short">any(Short.class)<#elseif value?lower_case == "double">any(Double.class)<#elseif value?lower_case == "string">anyString()</#if></#list></#if></#if>)).thenReturn([=AuthenticationTable?uncap_first]Entity);
 		Mockito.when(_roleManager.FindById(anyLong())).thenReturn(roleEntity);
         Mockito.when(_mapper.Create[=AuthenticationTable]roleInputTo[=AuthenticationTable]roleEntity(any(Create[=AuthenticationTable]roleInput.class))).thenReturn([=AuthenticationTable?uncap_first]roleEntity); 
-        <#if Flowable!false>
-        doNothing().when(idmIdentityService).addUserGroupMapping(anyString(),anyString());
-        </#if>
         Mockito.when(_[=AuthenticationTable?uncap_first]roleManager.Create(any([=AuthenticationTable]roleEntity.class))).thenReturn([=AuthenticationTable?uncap_first]roleEntity); 
         
         Assertions.assertThat(_appService.Create([=AuthenticationTable?uncap_first]role)).isEqualTo(_mapper.[=AuthenticationTable]roleEntityToCreate[=AuthenticationTable]roleOutput([=AuthenticationTable?uncap_first]roleEntity)); 
-    
-    } 
 
+    } 
 
     @Test 
 	public void create[=AuthenticationTable]role_[=AuthenticationTable]roleInputIsNotNullAnd[=AuthenticationTable]IdOrPermssionIdIsNotNullAndRoleIsAlreadyAssigned_Store[=AuthenticationTable]role() { 
@@ -146,13 +134,9 @@ public class [=AuthenticationTable]roleAppServiceTest {
 		Mockito.when(_[=AuthenticationTable?uncap_first]Manager.FindById(<#if (AuthenticationType!="none" && !UserInput??)>any(Long.class)<#elseif AuthenticationType!="none" && UserInput??><#if CompositeKeyClasses?? && CompositeKeyClasses?seq_contains(ClassName)>any([=AuthenticationTable]Id.class)<#else><#list PrimaryKeys as key,value><#if value?lower_case == "long">anyLong()<#elseif value?lower_case == "integer">any(Integer.class)<#elseif value?lower_case == "short">any(Short.class)<#elseif value?lower_case == "double">any(Double.class)<#elseif value?lower_case == "string">anyString()</#if></#list></#if></#if>)).thenReturn([=AuthenticationTable?uncap_first]Entity);
 		Mockito.when(_roleManager.FindById(anyLong())).thenReturn(roleEntity);
 		Mockito.when(_[=AuthenticationTable?uncap_first]roleManager.Create(any([=AuthenticationTable]roleEntity.class))).thenReturn([=AuthenticationTable?uncap_first]roleEntity); 
-		<#if Flowable!false>
-		doNothing().when(idmIdentityService).addUserGroupMapping(anyString(),anyString());
-        </#if>
-        
+		
 		Assertions.assertThat(_appService.Create([=AuthenticationTable?uncap_first]role)).isEqualTo(_mapper.[=AuthenticationTable]roleEntityToCreate[=AuthenticationTable]roleOutput(null)); 
 	} 
-
 
 	@Test
 	public void create[=AuthenticationTable]role_[=AuthenticationTable]roleIsNotNullAnd[=AuthenticationTable]roleDoesNotExistAnd[=AuthenticationTable]IdOrPermssionIdIsNull_ReturnNull() {
@@ -172,7 +156,6 @@ public class [=AuthenticationTable]roleAppServiceTest {
 		Assertions.assertThat(_appService.Create([=AuthenticationTable?uncap_first]role)).isEqualTo(null);
 	}	
 	
-
     @Test
 	public void update[=AuthenticationTable]role_[=AuthenticationTable]roleIsNotNullAnd[=AuthenticationTable]roleExistAnd[=AuthenticationTable]IdOrPermssionIdIsNull_ReturnNull() {
 
@@ -191,7 +174,6 @@ public class [=AuthenticationTable]roleAppServiceTest {
 		Assertions.assertThat(_appService.Update([=AuthenticationTable?uncap_first]RoleId,[=AuthenticationTable?uncap_first]role)).isEqualTo(null);
 	}
 
-
 	@Test
 	public void update[=AuthenticationTable]role_[=AuthenticationTable]roleIsNotNullAnd[=AuthenticationTable]roleDoesNotExistAndChildIsNotNullAndChildIsNotMandatory_ReturnUpdated[=AuthenticationTable]role() {
 
@@ -204,13 +186,9 @@ public class [=AuthenticationTable]roleAppServiceTest {
 		Mockito.when(_mapper.Update[=AuthenticationTable]roleInputTo[=AuthenticationTable]roleEntity(any(Update[=AuthenticationTable]roleInput.class))).thenReturn([=AuthenticationTable?uncap_first]roleEntity);
 		Mockito.when(_[=AuthenticationTable?uncap_first]Manager.FindById(<#if (AuthenticationType!="none" && !UserInput??)>any(Long.class)<#elseif AuthenticationType!="none" && UserInput??><#if CompositeKeyClasses?? && CompositeKeyClasses?seq_contains(ClassName)>any([=AuthenticationTable]Id.class)<#else><#list PrimaryKeys as key,value><#if value?lower_case == "long">anyLong()<#elseif value?lower_case == "integer">any(Integer.class)<#elseif value?lower_case == "short">any(Short.class)<#elseif value?lower_case == "double">any(Double.class)<#elseif value?lower_case == "string">anyString()</#if></#list></#if></#if>)).thenReturn([=AuthenticationTable?uncap_first]Entity);
 		Mockito.when(_roleManager.FindById(anyLong())).thenReturn(roleEntity); 
-		<#if Flowable!false>
-		doNothing().when(idmIdentityService).updateUserGroupMapping(anyString(),anyString());
-		</#if>
 		Mockito.when(_[=AuthenticationTable?uncap_first]roleManager.Update(any([=AuthenticationTable]roleEntity.class))).thenReturn([=AuthenticationTable?uncap_first]roleEntity);
 
 		Assertions.assertThat(_appService.Update([=AuthenticationTable?uncap_first]RoleId,[=AuthenticationTable?uncap_first]role)).isEqualTo(_mapper.[=AuthenticationTable]roleEntityToUpdate[=AuthenticationTable]roleOutput([=AuthenticationTable?uncap_first]roleEntity));
-
 	}
     
     @Test 
@@ -219,7 +197,6 @@ public class [=AuthenticationTable]roleAppServiceTest {
 	    RoleEntity roleEntity= mock(RoleEntity.class);
 		[=AuthenticationTable]Entity [=AuthenticationTable?uncap_first]Entity = mock ([=AuthenticationTable]Entity.class);
 	    Assertions.assertThat(_appService.checkIfRoleAlreadyAssigned([=AuthenticationTable?uncap_first]Entity, roleEntity)).isEqualTo(false);
-
 	}
 	
 	@Test 
@@ -243,16 +220,8 @@ public class [=AuthenticationTable]roleAppServiceTest {
 	public void delete[=AuthenticationTable]role_[=AuthenticationTable]roleIsNotNullAnd[=AuthenticationTable]roleExists_[=AuthenticationTable]roleRemoved() {
 
 		[=AuthenticationTable]roleEntity [=AuthenticationTable?uncap_first]role= mock([=AuthenticationTable]roleEntity.class);
-		 Mockito.when(_[=AuthenticationTable?uncap_first]roleManager.FindById(any([=AuthenticationTable]roleId.class))).thenReturn([=AuthenticationTable?uncap_first]role);
+		Mockito.when(_[=AuthenticationTable?uncap_first]roleManager.FindById(any([=AuthenticationTable]roleId.class))).thenReturn([=AuthenticationTable?uncap_first]role);
 		
-        <#if Flowable!false>
-        RoleEntity roleEntity= mock(RoleEntity.class);
-		[=AuthenticationTable]Entity [=AuthenticationTable?uncap_first]Entity = mock ([=AuthenticationTable]Entity.class);
-       
-		Mockito.when(_[=AuthenticationTable?uncap_first]Manager.FindById(<#if (AuthenticationType!="none" && !UserInput??)>any(Long.class)<#elseif AuthenticationType!="none" && UserInput??><#if CompositeKeyClasses?? && CompositeKeyClasses?seq_contains(ClassName)>any([=AuthenticationTable]Id.class)<#else><#list PrimaryKeys as key,value><#if value?lower_case == "long">anyLong()<#elseif value?lower_case == "integer">any(Integer.class)<#elseif value?lower_case == "short">any(Short.class)<#elseif value?lower_case == "double">any(Double.class)<#elseif value?lower_case == "string">anyString()</#if></#list></#if></#if>)).thenReturn([=AuthenticationTable?uncap_first]Entity);
-		Mockito.when(_roleManager.FindById(anyLong())).thenReturn(roleEntity); 
-		doNothing().when(idmIdentityService).updateUserGroupMapping(anyString(),anyString());
-        </#if>
 		_appService.Delete([=AuthenticationTable?uncap_first]RoleId); 
 		verify(_[=AuthenticationTable?uncap_first]roleManager).Delete([=AuthenticationTable?uncap_first]role);
 	}
@@ -371,7 +340,6 @@ public class [=AuthenticationTable]roleAppServiceTest {
 		BooleanBuilder builder = new BooleanBuilder();
 		builder.or([=AuthenticationTable?uncap_first]role.role.id.eq(ID));
 		Assertions.assertThat(_appService.Search(search)).isEqualTo(builder);
-		
 	}
 	
     @Test
@@ -401,7 +369,6 @@ public class [=AuthenticationTable]roleAppServiceTest {
 		builder.or([=AuthenticationTable?uncap_first]role.role.id.eq(ID));
 		
 		Assertions.assertThat(_appService.Search(search)).isEqualTo(builder);
-		
 	}
 	
 	@Test
@@ -466,7 +433,7 @@ public class [=AuthenticationTable]roleAppServiceTest {
 		<#elseif value?lower_case == "long" >
 		[=AuthenticationTable?uncap_first]roleId.set[=AuthenticationTable][=key?cap_first](Long.valueOf(ID));
 		<#elseif value?lower_case == "integer">
-		[=AuthenticationTable?uncap_first]roleId.set[=AuthenticationTable][=key?cap_first](Integer.valueOf(ID));
+		[=AuthenticationTable?uncap_first]roleId.set[=AuthenticationTable][=key?cap_first](Integer.valueOf(ID.intValue()));
         <#elseif value?lower_case == "short">
         [=AuthenticationTable?uncap_first]roleId.set[=AuthenticationTable][=key?cap_first](Short.valueOf(ID));
 		<#elseif value?lower_case == "double">

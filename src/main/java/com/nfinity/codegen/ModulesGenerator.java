@@ -103,7 +103,7 @@ public class ModulesGenerator {
 
 		pomFileModifier.updatePomFile(input.getDestinationPath() + "/" + artifactId + "/pom.xml",input.getAuthenticationType(),input.getCache());
 		commonModule.generateCommonModuleClasses(input.getDestinationPath()+ "/" + artifactId, groupArtifactId);
-	//	baseAppGen.CompileApplication(input.getDestinationPath() + "/" + artifactId);
+		baseAppGen.CompileApplication(input.getDestinationPath() + "/" + artifactId);
 
 		frontendGenerator.generate(input.getDestinationPath(), artifactId, input.getAuthenticationType(), input.getAuthenticationSchema());
 
@@ -112,9 +112,9 @@ public class ModulesGenerator {
 			authClasses.generateAutheticationClasses(input.getDestinationPath(), groupArtifactId,input.getCache(),input.getAuthenticationType(),input.getSchemaName(),input.getAuthenticationSchema(),details);
 		}
 
-		codeGenerator.generateAll(artifactId, artifactId + "Client", groupArtifactId, input.getHistory(), input.getCache(),
+		codeGenerator.generateAll(artifactId, artifactId + "Client", groupArtifactId, input.getCache(),
 						input.getDestinationPath(), input.getGenerationType(), details, input.getConnectionStr(),
-						input.getSchemaName(),input.getAuthenticationType(),input.getScheduler(),input.getEmail(),input.getFlowable(),input.getAuthenticationSchema());
+						input.getSchemaName(),input.getAuthenticationType(),input.getAuthenticationSchema());
 
 
 		gitRepositoryManager.addToGitRepository(input.getUpgrade(), sourceBranch);

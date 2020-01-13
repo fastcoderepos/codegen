@@ -14,9 +14,6 @@ import [=PackageName].domain.authorization.role.RoleManager;
 import [=PackageName].domain.model.RoleEntity;
 import [=CommonModulePackage].search.*;
 import [=CommonModulePackage].logging.LoggingHelper;
-<#if Flowable!false>
-import [=PackageName].application.Flowable.FlowableIdentityService;
-</#if>
 import com.querydsl.core.BooleanBuilder;
 
 import java.util.*;
@@ -55,11 +52,6 @@ public class [=AuthenticationTable]roleAppService implements I[=AuthenticationTa
 	
 	@Autowired
 	private LoggingHelper logHelper;
-	
-<#if Flowable!false>
-	@Autowired
-	private FlowableIdentityService idmIdentityService;
-</#if>
 
     @Transactional(propagation = Propagation.REQUIRED)
 	public Create[=AuthenticationTable]roleOutput Create(Create[=AuthenticationTable]roleInput input) {
@@ -84,13 +76,6 @@ public class [=AuthenticationTable]roleAppService implements I[=AuthenticationTa
 		else return null;
 		
 		[=AuthenticationTable]roleEntity created[=AuthenticationTable]role = _[=AuthenticationTable?uncap_first]roleManager.Create([=AuthenticationTable?uncap_first]role);
-		<#if Flowable!false>
-		<#if AuthenticationType!="none" && UserInput??>
-		idmIdentityService.addUserGroupMapping(created[=AuthenticationTable]role.get[=AuthenticationTable?cap_first]().get[=AuthenticationFields.UserName.fieldName?cap_first](), created[=AuthenticationTable]role.getRole().getName());
-		<#else>
-		idmIdentityService.addUserGroupMapping(created[=AuthenticationTable]role.get[=AuthenticationTable]().getUserName(), created[=AuthenticationTable]role.getRole().getName());
-		</#if>
-		</#if>
 		
 		return mapper.[=AuthenticationTable]roleEntityToCreate[=AuthenticationTable]roleOutput(created[=AuthenticationTable]role);
 	
@@ -122,13 +107,6 @@ public class [=AuthenticationTable]roleAppService implements I[=AuthenticationTa
 		else return null;
 		
 		[=AuthenticationTable]roleEntity updated[=AuthenticationTable]role = _[=AuthenticationTable?uncap_first]roleManager.Create([=AuthenticationTable?uncap_first]role);
-		<#if Flowable!false>
-		<#if AuthenticationType!="none" && UserInput??>
-		idmIdentityService.updateUserGroupMapping(updated[=AuthenticationTable]role.get[=AuthenticationTable?cap_first]().get[=AuthenticationFields.UserName.fieldName?cap_first](), updated[=AuthenticationTable]role.getRole().getName());
-		<#else>
-		idmIdentityService.updateUserGroupMapping(updated[=AuthenticationTable]role.get[=AuthenticationTable]().getUserName(), updated[=AuthenticationTable]role.getRole().getName());
-		</#if>
-		</#if>
 		return mapper.[=AuthenticationTable]roleEntityToUpdate[=AuthenticationTable]roleOutput(updated[=AuthenticationTable]role);
 	}
 	

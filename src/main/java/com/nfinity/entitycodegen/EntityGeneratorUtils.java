@@ -38,8 +38,11 @@ public class EntityGeneratorUtils {
 		List<String> primaryKeys= new ArrayList<String>();
 		for(FieldDetails f : fieldsList)
 		{
+			
 			if(f.getIsPrimaryKey())
+			{
 				primaryKeys.add(f.getFieldName());
+			}
 		}
 
 		return primaryKeys;
@@ -51,6 +54,7 @@ public class EntityGeneratorUtils {
 		for (Map.Entry<String, FieldDetails> entry : fieldsMap.entrySet()) {
 			if(entry.getValue().getIsPrimaryKey())
 			{
+				
 				if(entry.getValue().getFieldType().equalsIgnoreCase("long"))
 					primaryKeys.put(entry.getValue().getFieldName(),"Long");
 				else

@@ -90,7 +90,6 @@ public class AuthenticationClassesTemplateGenerator {
 				
 				if(!outputFileName.contains("GetCU"))
 				{
-					System.out.print("\ndd " + outputFileName);
 					templates.put(filePath, outputFileName);
 				}
 			}

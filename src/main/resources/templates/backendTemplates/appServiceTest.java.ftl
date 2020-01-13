@@ -51,11 +51,6 @@ import [=PackageName].domain.model.[=relationValue.eName]Id;
 <#if AuthenticationType != "none"  && ClassName == AuthenticationTable>
 import [=PackageName].domain.authorization.role.RoleManager;
 import [=PackageName].domain.model.RoleEntity;
-<#if Flowable!false>
-import [=PackageName].domain.Flowable.Users.ActIdUserEntity;
-import [=PackageName].application.Flowable.ActIdUserMapper;
-import [=PackageName].application.Flowable.FlowableIdentityService;
-</#if>
 </#if>
 import [=CommonModulePackage].logging.LoggingHelper;
 import com.querydsl.core.BooleanBuilder;
@@ -89,39 +84,32 @@ public class [=ClassName]AppServiceTest {
 	<#if AuthenticationType != "none"  && ClassName == AuthenticationTable>
 	@Mock
 	private RoleManager _roleManager;
-	
-    <#if Flowable!false>
-    @Mock
-	private ActIdUserMapper actIdUserMapper;
-	
-	@Mock
-	private FlowableIdentityService idmIdentityService;
-    </#if>
     </#if>
 
 	<#if CompositeKeyClasses?seq_contains(ClassName)>
-	@Mock
-	private [=IdClass] [=IdClass?uncap_first];
+    @Mock
+    private [=IdClass] [=IdClass?uncap_first];
+    
+    private static Long ID=15L;
+    <#else>
+    <#list Fields as key,value>
+    <#if value.isPrimaryKey!false>
+    <#if value.fieldType?lower_case == "long">
+    private static [=value.fieldType?cap_first] ID=15L;
+    
+    <#elseif value.fieldType?lower_case == "integer" || value.fieldType?lower_case == "short">
+    private static [=value.fieldType?cap_first] ID=15;
+    
+    <#elseif value.fieldType?lower_case == "double">
+    private static [value.fieldType?cap_first] ID=15D;
+    
+    <#elseif value.fieldType?lower_case == "string">
+    private static String ID="15";
+    </#if>
+    </#if>
+    </#list>
+    </#if>
 	
-	private static Long ID=15L;
-	<#else>
-	<#list Fields as key,value>
-	<#if value.isPrimaryKey!false>
-	<#if value.fieldType?lower_case == "long">
-	private static [=value.fieldType?cap_first] ID=15L;
-	
-	<#elseif value.fieldType?lower_case == "integer" || value.fieldType?lower_case == "short">
-	private static [=value.fieldType?cap_first] ID=15;
-	
-	<#elseif value.fieldType?lower_case == "double">
-	private static [value.fieldType?cap_first] ID=15D;
-	
-	<#elseif value.fieldType?lower_case == "string">
-	private static String ID="15";
-	</#if>
-	</#if>
-	</#list>
-	</#if>
 	@Before
 	public void setUp() throws Exception {
 
@@ -169,7 +157,7 @@ public class [=ClassName]AppServiceTest {
         <#elseif joinDetails.joinColumnType == "Long">
         [=ClassName?uncap_first].set[=joinDetails.joinColumn?cap_first](Long.valueOf(ID));
         <#elseif joinDetails.joinColumnType == "Integer">
-        [=ClassName?uncap_first].set[=joinDetails.joinColumn?cap_first](Integer.valueOf(ID));
+        [=ClassName?uncap_first].set[=joinDetails.joinColumn?cap_first](Integer.valueOf(ID.intValue()));
 		<#elseif joinDetails.joinColumnType == "Double">
 		[=ClassName?uncap_first].set[=joinDetails.joinColumn?cap_first](Double.valueOf(ID)); 
 		<#elseif joinDetails.joinColumnType == "Short">
@@ -182,7 +170,7 @@ public class [=ClassName]AppServiceTest {
         <#elseif joinDetails.joinColumnType == "Long">
         [=ClassName?uncap_first].set[=joinDetails.joinColumn?cap_first](Long.valueOf(ID));
         <#elseif joinDetails.joinColumnType == "Integer">
-        [=ClassName?uncap_first].set[=joinDetails.joinColumn?cap_first](Integer.valueOf(ID));
+        [=ClassName?uncap_first].set[=joinDetails.joinColumn?cap_first](Integer.valueOf(ID.intValue()));
 		<#elseif joinDetails.joinColumnType == "Double">
 		[=ClassName?uncap_first].set[=joinDetails.joinColumn?cap_first](Double.valueOf(ID)); 
 		<#elseif joinDetails.joinColumnType == "Short">
@@ -194,7 +182,7 @@ public class [=ClassName]AppServiceTest {
         <#elseif joinDetails.joinColumnType == "Long">
         [=ClassName?uncap_first].set[=joinDetails.referenceColumn?cap_first](Long.valueOf(ID));
         <#elseif joinDetails.joinColumnType == "Integer">
-        [=ClassName?uncap_first].set[=joinDetails.referenceColumn?cap_first](Integer.valueOf(ID));
+        [=ClassName?uncap_first].set[=joinDetails.referenceColumn?cap_first](Integer.valueOf(ID.intValue()));
 		<#elseif joinDetails.joinColumnType == "Double">
 		[=ClassName?uncap_first].set[=joinDetails.referenceColumn?cap_first](Double.valueOf(ID)); 
 		<#elseif joinDetails.joinColumnType == "Short">
@@ -210,17 +198,7 @@ public class [=ClassName]AppServiceTest {
         <#if joinDetails.joinColumnType == "String">any(String.class)<#elseif joinDetails.joinColumnType == "Long">any(Long.class)<#elseif joinDetails.joinColumnType == "Integer">any(Integer.class)<#elseif joinDetails.joinColumnType == "Double">any(Double.class)<#elseif joinDetails.joinColumnType == "Short">any(Short.class)</#if></#if></#if></#list><#else>any([=relationValue.eName]Id.class)</#if>)).thenReturn([=relationValue.eName?uncap_first]);
         </#if>
 		</#list>
-        
-       <#if AuthenticationType != "none"  && ClassName == AuthenticationTable>
-     //  RoleEntity foundRole = mock(RoleEntity.class);
-     //  Mockito.when(_roleManager.FindById(anyLong())).thenReturn(foundRole);
-       <#if Flowable!false>
-       ActIdUserEntity actIdUser = mock (ActIdUserEntity.class);
-			
-	   Mockito.when(actIdUserMapper.createUsersEntityToActIdUserEntity(any([=ClassName]Entity.class))).thenReturn(actIdUser);
-	   doNothing().when(idmIdentityService).createUser(any([=ClassName]Entity.class),any(ActIdUserEntity.class)); 
-       </#if>
-       </#if>
+
        Mockito.when(_mapper.Create[=ClassName]InputTo[=ClassName]Entity(any(Create[=ClassName]Input.class))).thenReturn([=ClassName?uncap_first]Entity); 
        Mockito.when(_[=ClassName?uncap_first]Manager.Create(any([=ClassName]Entity.class))).thenReturn([=ClassName?uncap_first]Entity);
       
@@ -259,7 +237,7 @@ public class [=ClassName]AppServiceTest {
         <#elseif joinDetails.joinColumnType == "Long">
         [=ClassName?uncap_first].set[=joinDetails.joinColumn?cap_first](Long.valueOf(ID));
         <#elseif joinDetails.joinColumnType == "Integer">
-        [=ClassName?uncap_first].set[=joinDetails.joinColumn?cap_first](Integer.valueOf(ID));
+        [=ClassName?uncap_first].set[=joinDetails.joinColumn?cap_first](Integer.valueOf(ID.intValue()));
 		<#elseif joinDetails.joinColumnType == "Double">
 		[=ClassName?uncap_first].set[=joinDetails.joinColumn?cap_first](Double.valueOf(ID)); 
 		<#elseif joinDetails.joinColumnType == "Short">
@@ -272,7 +250,7 @@ public class [=ClassName]AppServiceTest {
         <#elseif joinDetails.joinColumnType == "Long">
         [=ClassName?uncap_first].set[=joinDetails.joinColumn?cap_first](Long.valueOf(ID));
         <#elseif joinDetails.joinColumnType == "Integer">
-        [=ClassName?uncap_first].set[=joinDetails.joinColumn?cap_first](Integer.valueOf(ID));
+        [=ClassName?uncap_first].set[=joinDetails.joinColumn?cap_first](Integer.valueOf(ID.intValue()));
 		<#elseif joinDetails.joinColumnType == "Double">
 		[=ClassName?uncap_first].set[=joinDetails.joinColumn?cap_first](Double.valueOf(ID)); 
 		<#elseif joinDetails.joinColumnType == "Short">
@@ -284,7 +262,7 @@ public class [=ClassName]AppServiceTest {
         <#elseif joinDetails.joinColumnType == "Long">
         [=ClassName?uncap_first].set[=joinDetails.referenceColumn?cap_first](Long.valueOf(ID));
         <#elseif joinDetails.joinColumnType == "Integer">
-        [=ClassName?uncap_first].set[=joinDetails.referenceColumn?cap_first](Integer.valueOf(ID));
+        [=ClassName?uncap_first].set[=joinDetails.referenceColumn?cap_first](Integer.valueOf(ID.intValue()));
 		<#elseif joinDetails.joinColumnType == "Double">
 		[=ClassName?uncap_first].set[=joinDetails.referenceColumn?cap_first](Double.valueOf(ID)); 
 		<#elseif joinDetails.joinColumnType == "Short">
@@ -326,7 +304,7 @@ public class [=ClassName]AppServiceTest {
         <#elseif joinDetails.joinColumnType == "Long">
         [=ClassName?uncap_first].set[=joinDetails.joinColumn?cap_first](Long.valueOf(ID));
         <#elseif joinDetails.joinColumnType == "Integer">
-        [=ClassName?uncap_first].set[=joinDetails.joinColumn?cap_first](Integer.valueOf(ID));
+        [=ClassName?uncap_first].set[=joinDetails.joinColumn?cap_first](Integer.valueOf(ID.intValue()));
 		<#elseif joinDetails.joinColumnType == "Double">
 		[=ClassName?uncap_first].set[=joinDetails.joinColumn?cap_first](Double.valueOf(ID)); 
 		<#elseif joinDetails.joinColumnType == "Short">
@@ -339,7 +317,7 @@ public class [=ClassName]AppServiceTest {
         <#elseif joinDetails.joinColumnType == "Long">
         [=ClassName?uncap_first].set[=joinDetails.joinColumn?cap_first](Long.valueOf(ID));
         <#elseif joinDetails.joinColumnType == "Integer">
-        [=ClassName?uncap_first].set[=joinDetails.joinColumn?cap_first](Integer.valueOf(ID));
+        [=ClassName?uncap_first].set[=joinDetails.joinColumn?cap_first](Integer.valueOf(ID.intValue()));
 		<#elseif joinDetails.joinColumnType == "Double">
 		[=ClassName?uncap_first].set[=joinDetails.joinColumn?cap_first](Double.valueOf(ID)); 
 		<#elseif joinDetails.joinColumnType == "Short">
@@ -351,7 +329,7 @@ public class [=ClassName]AppServiceTest {
         <#elseif joinDetails.joinColumnType == "Long">
         [=ClassName?uncap_first].set[=joinDetails.referenceColumn?cap_first](Long.valueOf(ID));
         <#elseif joinDetails.joinColumnType == "Integer">
-        [=ClassName?uncap_first].set[=joinDetails.referenceColumn?cap_first](Integer.valueOf(ID));
+        [=ClassName?uncap_first].set[=joinDetails.referenceColumn?cap_first](Integer.valueOf(ID.intValue()));
 		<#elseif joinDetails.joinColumnType == "Double">
 		[=ClassName?uncap_first].set[=joinDetails.referenceColumn?cap_first](Double.valueOf(ID)); 
 		<#elseif joinDetails.joinColumnType == "Short">
@@ -424,7 +402,7 @@ public class [=ClassName]AppServiceTest {
         <#elseif joinDetails.joinColumnType == "Long">
         [=ClassName?uncap_first].set[=joinDetails.joinColumn?cap_first](Long.valueOf(ID));
         <#elseif joinDetails.joinColumnType == "Integer">
-        [=ClassName?uncap_first].set[=joinDetails.joinColumn?cap_first](Integer.valueOf(ID));
+        [=ClassName?uncap_first].set[=joinDetails.joinColumn?cap_first](Integer.valueOf(ID.intValue()));
 		<#elseif joinDetails.joinColumnType == "Double">
 		[=ClassName?uncap_first].set[=joinDetails.joinColumn?cap_first](Double.valueOf(ID)); 
 		<#elseif joinDetails.joinColumnType == "Short">
@@ -437,7 +415,7 @@ public class [=ClassName]AppServiceTest {
         <#elseif joinDetails.joinColumnType == "Long">
         [=ClassName?uncap_first].set[=joinDetails.joinColumn?cap_first](Long.valueOf(ID));
         <#elseif joinDetails.joinColumnType == "Integer">
-        [=ClassName?uncap_first].set[=joinDetails.joinColumn?cap_first](Integer.valueOf(ID));
+        [=ClassName?uncap_first].set[=joinDetails.joinColumn?cap_first](Integer.valueOf(ID.intValue()));
 		<#elseif joinDetails.joinColumnType == "Double">
 		[=ClassName?uncap_first].set[=joinDetails.joinColumn?cap_first](Double.valueOf(ID)); 
 		<#elseif joinDetails.joinColumnType == "Short">
@@ -449,7 +427,7 @@ public class [=ClassName]AppServiceTest {
         <#elseif joinDetails.joinColumnType == "Long">
         [=ClassName?uncap_first].set[=joinDetails.referenceColumn?cap_first](Long.valueOf(ID));
         <#elseif joinDetails.joinColumnType == "Integer">
-        [=ClassName?uncap_first].set[=joinDetails.referenceColumn?cap_first](Integer.valueOf(ID));
+        [=ClassName?uncap_first].set[=joinDetails.referenceColumn?cap_first](Integer.valueOf(ID.intValue()));
 		<#elseif joinDetails.joinColumnType == "Double">
 		[=ClassName?uncap_first].set[=joinDetails.referenceColumn?cap_first](Double.valueOf(ID)); 
 		<#elseif joinDetails.joinColumnType == "Short">
@@ -492,7 +470,7 @@ public class [=ClassName]AppServiceTest {
         <#elseif joinDetails.joinColumnType == "Long">
         [=ClassName?uncap_first].set[=joinDetails.joinColumn?cap_first](Long.valueOf(ID));
         <#elseif joinDetails.joinColumnType == "Integer">
-        [=ClassName?uncap_first].set[=joinDetails.joinColumn?cap_first](Integer.valueOf(ID));
+        [=ClassName?uncap_first].set[=joinDetails.joinColumn?cap_first](Integer.valueOf(ID.intValue()));
 		<#elseif joinDetails.joinColumnType == "Double">
 		[=ClassName?uncap_first].set[=joinDetails.joinColumn?cap_first](Double.valueOf(ID)); 
 		<#elseif joinDetails.joinColumnType == "Short">
@@ -505,7 +483,7 @@ public class [=ClassName]AppServiceTest {
         <#elseif joinDetails.joinColumnType == "Long">
         [=ClassName?uncap_first].set[=joinDetails.joinColumn?cap_first](Long.valueOf(ID));
         <#elseif joinDetails.joinColumnType == "Integer">
-        [=ClassName?uncap_first].set[=joinDetails.joinColumn?cap_first](Integer.valueOf(ID));
+        [=ClassName?uncap_first].set[=joinDetails.joinColumn?cap_first](Integer.valueOf(ID.intValue()));
 		<#elseif joinDetails.joinColumnType == "Double">
 		[=ClassName?uncap_first].set[=joinDetails.joinColumn?cap_first](Double.valueOf(ID)); 
 		<#elseif joinDetails.joinColumnType == "Short">
@@ -517,7 +495,7 @@ public class [=ClassName]AppServiceTest {
         <#elseif joinDetails.joinColumnType == "Long">
         [=ClassName?uncap_first].set[=joinDetails.referenceColumn?cap_first](Long.valueOf(ID));
         <#elseif joinDetails.joinColumnType == "Integer">
-        [=ClassName?uncap_first].set[=joinDetails.referenceColumn?cap_first](Integer.valueOf(ID));
+        [=ClassName?uncap_first].set[=joinDetails.referenceColumn?cap_first](Integer.valueOf(ID.intValue()));
 		<#elseif joinDetails.joinColumnType == "Double">
 		[=ClassName?uncap_first].set[=joinDetails.referenceColumn?cap_first](Double.valueOf(ID)); 
 		<#elseif joinDetails.joinColumnType == "Short">
@@ -544,16 +522,7 @@ public class [=ClassName]AppServiceTest {
 
 		[=EntityClassName] [=ClassName?uncap_first]Entity = mock([=EntityClassName].class);
 		Update[=ClassName]Input [=ClassName?uncap_first]= mock(Update[=ClassName]Input.class);
-		<#if AuthenticationType != "none"  && ClassName == AuthenticationTable>
-  //    RoleEntity foundRole = mock(RoleEntity.class);
-  //    Mockito.when(_roleManager.FindById(anyLong())).thenReturn(foundRole);
-        <#if Flowable!false>
-        ActIdUserEntity actIdUser = mock (ActIdUserEntity.class);
-		Mockito.when(actIdUserMapper.createUsersEntityToActIdUserEntity(any([=ClassName]Entity.class))).thenReturn(actIdUser);
-		doNothing().when(idmIdentityService).updateUser(any([=ClassName]Entity.class),any(ActIdUserEntity.class)); 
-	//	Mockito.when(_[=ClassName?uncap_first]Manager.FindById(<#if CompositeKeyClasses?seq_contains(ClassName)>any([=IdClass].class)<#else><#list Fields as key,value><#if value.isPrimaryKey!false><#if value.fieldType?lower_case == "long">anyLong()<#elseif value.fieldType?lower_case == "integer">any(Integer.class)<#elseif value.fieldType?lower_case == "short">any(Short.class)<#elseif value.fieldType?lower_case == "double">any(Double.class)<#elseif value.fieldType?lower_case == "string">anyString()</#if></#if></#list></#if>)).thenReturn([=ClassName?uncap_first]Entity);
-		</#if>
-		</#if>
+
 		Mockito.when(_mapper.Update[=ClassName]InputTo[=EntityClassName](any(Update[=ClassName]Input.class))).thenReturn([=ClassName?uncap_first]Entity);
 		Mockito.when(_[=ClassName?uncap_first]Manager.Update(any([=EntityClassName].class))).thenReturn([=ClassName?uncap_first]Entity);
 		Assertions.assertThat(_appService.Update(<#if CompositeKeyClasses?seq_contains(ClassName)>[=IdClass?uncap_first]<#else><#list Fields as key,value><#if value.isPrimaryKey!false><#if value.fieldType?lower_case == "long" || value.fieldType?lower_case == "integer" || value.fieldType?lower_case == "short" || value.fieldType?lower_case == "double" || value.fieldType?lower_case == "string">ID</#if></#if></#list></#if>,[=ClassName?uncap_first])).isEqualTo(_mapper.[=EntityClassName]ToUpdate[=ClassName]Output([=ClassName?uncap_first]Entity));
@@ -564,11 +533,7 @@ public class [=ClassName]AppServiceTest {
 
 		[=EntityClassName] [=ClassName?uncap_first]= mock([=EntityClassName].class);
 		Mockito.when(_[=ClassName?uncap_first]Manager.FindById(<#if CompositeKeyClasses?seq_contains(ClassName)>any([=IdClass].class)<#else><#list Fields as key,value><#if value.isPrimaryKey!false><#if value.fieldType?lower_case == "long">anyLong()<#elseif value.fieldType?lower_case == "integer">any(Integer.class)<#elseif value.fieldType?lower_case == "short">any(Short.class)<#elseif value.fieldType?lower_case == "double">any(Double.class)<#elseif value.fieldType?lower_case == "string">anyString()</#if></#if></#list></#if>)).thenReturn([=ClassName?uncap_first]);
-		<#if AuthenticationType != "none"  && ClassName == AuthenticationTable>
-		<#if Flowable!false>
-		doNothing().when(idmIdentityService).deleteUser(anyString()); 
-		</#if>
-		</#if>
+		
 		_appService.Delete(<#if CompositeKeyClasses?seq_contains(ClassName)>[=IdClass?uncap_first]<#else><#list Fields as key,value><#if value.isPrimaryKey!false><#if value.fieldType?lower_case == "long" || value.fieldType?lower_case == "integer" || value.fieldType?lower_case == "short" || value.fieldType?lower_case == "double" || value.fieldType?lower_case == "string">ID</#if></#if></#list></#if>); 
 		verify(_[=ClassName?uncap_first]Manager).Delete([=ClassName?uncap_first]);
 	}
@@ -616,7 +581,7 @@ public class [=ClassName]AppServiceTest {
     	<#list Fields as key,value>
         <#if value.fieldType?lower_case == "string">
         <#if value.isPrimaryKey==false>
-        builder.or([=ClassName?uncap_first].[=value.fieldName].eq(search));
+        builder.or([=ClassName?uncap_first].[=key?uncap_first].eq(search));
 		</#if> 
 		</#if> 
         </#list>
@@ -630,7 +595,7 @@ public class [=ClassName]AppServiceTest {
 		<#list Fields as key,value>
         <#if value.fieldType?lower_case == "string">
         <#if value.isPrimaryKey==false>
-        list.add("[=value.fieldName]");
+        list.add("[=key?uncap_first]");
 		</#if> 
 		</#if> 
         </#list>
@@ -640,7 +605,7 @@ public class [=ClassName]AppServiceTest {
 		<#list Fields as key,value>
         <#if value.fieldType?lower_case == "string">
         <#if value.isPrimaryKey==false>
-        builder.or([=ClassName?uncap_first].[=value.fieldName].eq("xyz"));
+        builder.or([=ClassName?uncap_first].[=key?uncap_first].eq("xyz"));
 		</#if> 
 		</#if> 
         </#list>
@@ -658,7 +623,7 @@ public class [=ClassName]AppServiceTest {
 	    <#list Fields as key,value>
         <#if value.fieldType?lower_case == "string">
         <#if value.isPrimaryKey==false>
-        map.put("[=value.fieldName]",searchFields);
+        map.put("[=key?uncap_first]",searchFields);
         <#break>
 		</#if> 
 		</#if> 
@@ -669,7 +634,7 @@ public class [=ClassName]AppServiceTest {
 		<#list Fields as key,value>
         <#if value.fieldType?lower_case == "string">
         <#if value.isPrimaryKey==false>
-         builder.and([=ClassName?uncap_first].[=value.fieldName].eq("xyz"));
+         builder.and([=ClassName?uncap_first].[=key?uncap_first].eq("xyz"));
         <#break>
 		</#if> 
 		</#if> 
@@ -690,7 +655,7 @@ public class [=ClassName]AppServiceTest {
 		<#list Fields as key,value>
         <#if value.fieldType?lower_case == "string">
         <#if value.isPrimaryKey==false>
-        list.add("[=value.fieldName]");
+        list.add("[=key?uncap_first]");
 		</#if> 
 		</#if> 
         </#list>
@@ -709,7 +674,7 @@ public class [=ClassName]AppServiceTest {
 		<#list Fields as key,value>
         <#if value.fieldType?lower_case == "string">
         <#if value.isPrimaryKey==false>
-        builder.or([=ClassName?uncap_first].[=value.fieldName].eq("xyz"));
+        builder.or([=ClassName?uncap_first].[=key?uncap_first].eq("xyz"));
 		</#if> 
 		</#if> 
         </#list>
@@ -762,7 +727,7 @@ public class [=ClassName]AppServiceTest {
 		<#list Fields as key,value>
         <#if value.fieldType?lower_case == "string">
         <#if value.isPrimaryKey==false>
-        fields.setFieldName("[=value.fieldName]");
+        fields.setFieldName("[=key?uncap_first]");
         <#break>
 		</#if> 
 		</#if> 
@@ -775,7 +740,7 @@ public class [=ClassName]AppServiceTest {
 	    <#list Fields as key,value>
         <#if value.fieldType?lower_case == "string">
         <#if value.isPrimaryKey==false>
-        builder.or([=ClassName?uncap_first].[=value.fieldName].eq("xyz"));
+        builder.or([=ClassName?uncap_first].[=key?uncap_first].eq("xyz"));
         <#break>
 		</#if> 
 		</#if> 
@@ -823,7 +788,7 @@ public class [=ClassName]AppServiceTest {
 		<#elseif fieldType?lower_case == "long" >
 		[=IdClass?uncap_first].set[=fieldName?cap_first](Long.valueOf(ID));
 		<#elseif fieldType?lower_case == "integer">
-		[=IdClass?uncap_first].set[=fieldName?cap_first](Integer.valueOf(ID));
+		[=IdClass?uncap_first].set[=fieldName?cap_first](Integer.valueOf(ID.intValue()));
         <#elseif fieldType?lower_case == "short">
 		[=IdClass?uncap_first].set[=fieldName?cap_first](Short.valueOf(ID));
         <#elseif fieldType?lower_case == "double">
