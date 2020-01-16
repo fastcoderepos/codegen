@@ -22,11 +22,6 @@ import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 <#if AuthenticationType != "none" && ClassName == AuthenticationTable>
 import javax.persistence.EntityExistsException;
-<#if Flowable!false>
-import [=PackageName].application.Flowable.ActIdUserMapper;
-import [=PackageName].application.Flowable.FlowableIdentityService;
-import [=PackageName].domain.Flowable.Users.ActIdUserEntity;
-</#if>
 </#if>
 
 import org.junit.AfterClass;
@@ -108,14 +103,6 @@ public class [=ClassName]ControllerTest {
     </#if>
     </#list>
     <#if AuthenticationType != "none" && ClassName == AuthenticationTable>
-    <#if Flowable!false>
-    
-	@Autowired
-    private FlowableIdentityService idmIdentityService;
-
-    @Autowired
-    private ActIdUserMapper actIdUserMapper;
-    </#if>
     
 	@SpyBean
     private PasswordEncoder pEncoder;
@@ -159,11 +146,6 @@ public class [=ClassName]ControllerTest {
 		</#if> 
 		</#if> 
 		</#list>
-		<#if AuthenticationType != "none" && ClassName == AuthenticationTable>
-		<#if Flowable!false>
-		em.createNativeQuery("drop table [=Schema].act_id_user CASCADE").executeUpdate();
-		</#if>
-		</#if>
 		em.getTransaction().commit();
 	}
 
@@ -230,7 +212,7 @@ public class [=ClassName]ControllerTest {
 		<#if value.fieldType?lower_case == "long">
 		[=ClassName?uncap_first].set[=value.fieldName?cap_first](2L);
 		<#elseif value.fieldType?lower_case == "integer">
-		[=ClassName?uncap_first].set[=value.fieldName?cap_first]2);
+		[=ClassName?uncap_first].set[=value.fieldName?cap_first](2);
 		<#elseif value.fieldType?lower_case == "short">
 		[=ClassName?uncap_first].set[=value.fieldName?cap_first]((short)2);
 		<#elseif value.fieldType?lower_case == "double">
@@ -269,8 +251,8 @@ public class [=ClassName]ControllerTest {
 		[=relationValue.eName?uncap_first]=[=relationValue.eName?uncap_first]Repository.save([=relationValue.eName?uncap_first]);
 		<#list relationValue.joinDetails as joinDetails>
 		<#list relationValue.fDetails as value>
-		<#if value.fieldName==joinDetails.joinColumn>
-		[=ClassName?uncap_first].set[=joinDetails.joinColumn?cap_first]([=relationValue.eName?uncap_first].get[=joinDetails.joinColumn?cap_first]());
+		<#if value.fieldName==joinDetails.referenceColumn>
+		[=ClassName?uncap_first].set[=joinDetails.joinColumn?cap_first]([=relationValue.eName?uncap_first].get[=joinDetails.referenceColumn?cap_first]());
 		</#if>
 		</#list>
 		</#list>
@@ -359,12 +341,6 @@ public class [=ClassName]ControllerTest {
 		List<[=ClassName]Entity> list= [=ClassName?uncap_first]_repository.findAll();
 		if(list.isEmpty()) {
 		   [=ClassName?uncap_first]_repository.save([=ClassName?uncap_first]);
-		   <#if AuthenticationType != "none" && ClassName == AuthenticationTable>
-		   <#if Flowable!false>
-		   ActIdUserEntity actIdUser = actIdUserMapper.createUsersEntityToActIdUserEntity([=ClassName?uncap_first]);
-		   idmIdentityService.createUser([=ClassName?uncap_first], actIdUser);
-		   </#if>
-		    </#if>
 		}
 
 	}
@@ -414,19 +390,19 @@ public class [=ClassName]ControllerTest {
 		<#if value.isNullable==false>
 		<#if !(AuthenticationFields?? && AuthenticationFields.Password.fieldName == value.fieldName)>
 		<#if value.fieldType?lower_case == "long">
-		output.set[=value.fieldName?cap_first](1L);
+		output.set[=key?cap_first](1L);
 		<#elseif value.fieldType?lower_case == "integer">
-		output.set[=value.fieldName?cap_first](1);
+		output.set[=key?cap_first](1);
 		<#elseif value.fieldType?lower_case == "short">
-		output.set[=value.fieldName?cap_first]((short)1);
+		output.set[=key?cap_first]((short)1);
 		<#elseif value.fieldType?lower_case == "double">
-		output.set[=value.fieldName?cap_first](1D);
+		output.set[=key?cap_first](1D);
 		<#elseif value.fieldType?lower_case == "boolean">
-		output.set[=value.fieldName?cap_first](true);
+		output.set[=key?cap_first](true);
 		<#elseif value.fieldType?lower_case == "date">
-		output.set[=value.fieldName?cap_first](new Date());
+		output.set[=key?cap_first](new Date());
 		<#elseif value.fieldType?lower_case == "string">
-  		output.set[=value.fieldName?cap_first]("1");
+  		output.set[=key?cap_first]("1");
 		</#if> 
 		</#if> 
 		</#if>
@@ -442,7 +418,7 @@ public class [=ClassName]ControllerTest {
        
         org.assertj.core.api.Assertions.assertThatThrownBy(() -> mvc.perform(post("/[=ClassName?uncap_first]")
         		.contentType(MediaType.APPLICATION_JSON).content(json))
-         .andExpect(status().isOk())).hasCause(new EntityExistsException("There already exists a [=ClassName?uncap_first] with [=authValue.fieldName?cap_first]=" + [=ClassName?uncap_first].get[=authValue.fieldName?cap_first]()));
+         .andExpect(status().isOk())).hasCause(new EntityExistsException("There already exists a [=ClassName?uncap_first] with [=authValue.fieldName?cap_first] =" + [=ClassName?uncap_first].get[=authValue.fieldName?cap_first]()));
 	    <#break>
 	    </#if> 
 	    </#list>
@@ -454,8 +430,13 @@ public class [=ClassName]ControllerTest {
 		<#list Relationship as relationKey,relationValue>
 		<#if relationValue.relation == "ManyToOne" || relationValue.relation == "OneToOne">
 		<#if relationValue.isParent==false>
+		<#assign count =1>
+		<#assign relationEntity = relationValue.eName>
 	  	<#list relationValue.joinDetails as joinDetails>
-        <#if joinDetails.joinEntityName == relationValue.eName>
+        <#if joinDetails.joinEntityName == relationValue.eName && count==1>
+        <#if relationEntity == joinDetails.joinEntityName>
+        <#assign count = count + 1>
+        </#if>
         <#if joinDetails.joinColumn??>
 		<#if joinDetails.isJoinColumnOptional==false>
 		[=relationValue.eName?cap_first]Entity [=relationValue.eName?uncap_first] = new [=relationValue.eName?cap_first]Entity();
@@ -565,7 +546,7 @@ public class [=ClassName]ControllerTest {
 		<#if relationValue.isParent==false>
 		[=relationValue.eName?cap_first]Entity [=relationValue.eName?uncap_first] = new [=relationValue.eName?cap_first]Entity();
   		<#list relationValue.fDetails as value>
-		<#if value.isPrimaryKey==true && value.fieldType?lower_case == "long">
+		<#if value.fieldType?lower_case == "long">
 		[=relationValue.eName?uncap_first].set[=value.fieldName?cap_first](3L);
 		<#elseif value.fieldType?lower_case == "integer">
 		[=relationValue.eName?uncap_first].set[=value.fieldName?cap_first](3);
@@ -582,16 +563,17 @@ public class [=ClassName]ControllerTest {
 		</#if> 
 		</#list>
 		[=relationValue.eName?uncap_first]=[=relationValue.eName?uncap_first]Repository.save([=relationValue.eName?uncap_first]);
-		</#if> 
+		
 		<#list relationValue.joinDetails as joinDetails>
 		<#list Fields as key,value>
-		<#if value.isPrimaryKey==true && value.fieldName==joinDetails.referenceColumn>
+		<#if value.fieldName== joinDetails.joinColumn>
 		entity.set[=joinDetails.joinColumn?cap_first]([=relationValue.eName?uncap_first].get[=joinDetails.referenceColumn?cap_first]());
 		</#if>
 		</#list>
 		</#list>
 		entity.set[=relationValue.eName?cap_first]([=relationValue.eName?uncap_first]);
-		</#if> 
+		</#if>
+		</#if>  
 		</#list>
 		
 		entity = [=ClassName?uncap_first]_repository.save(entity);
@@ -599,22 +581,16 @@ public class [=ClassName]ControllerTest {
 		Find[=ClassName]ByIdOutput output= new Find[=ClassName]ByIdOutput();
 		<#list Fields as key,value>
 		<#if value.isNullable==false>
-		<#if !(AuthenticationFields?? && AuthenticationFields.Password.fieldName == value.fieldName)>
+		<#if !(AuthenticationFields?? && AuthenticationFields.Password.fieldName == key)>
 		<#if value.fieldType?lower_case == "long" || value.fieldType?lower_case == "integer" || value.fieldType?lower_case == "short" || value.fieldType?lower_case == "double" || value.fieldType?lower_case == "boolean" || value.fieldType?lower_case == "date" || value.fieldType?lower_case == "string">
-  		output.set[=value.fieldName?cap_first](entity.get[=value.fieldName?cap_first]());
+  		output.set[=key?cap_first](entity.get[=key?cap_first]());
 		</#if> 
 		</#if>
 		</#if> 
 		</#list>
-		<#if AuthenticationType != "none" && ClassName == AuthenticationTable>
-        <#if Flowable!false>
-	    ActIdUserEntity actIdUser = actIdUserMapper.createUsersEntityToActIdUserEntity(createNewEntity());
-		idmIdentityService.createUser(createNewEntity(), actIdUser);
-		</#if>
-		</#if>
 	    <#if CompositeKeyClasses?seq_contains(ClassName)>
 	    Mockito.when([=ClassName?uncap_first]AppService.FindById(new [=ClassName]Id(<#list PrimaryKeys as key,value><#if value?lower_case == "long" || value?lower_case == "integer" || value?lower_case == "short" || value?lower_case == "double" || value?lower_case == "string">entity.get[=key?cap_first]()</#if><#sep>, </#list>))).thenReturn(output);
-       
+   
         <#else>
         Mockito.when([=ClassName?uncap_first]AppService.FindById(<#list PrimaryKeys as key,value><#if value?lower_case == "long" || value?lower_case == "integer" || value?lower_case == "short" || value?lower_case == "double" || value?lower_case == "string">entity.get[=key?cap_first]()</#if></#list>)).thenReturn(output);
         
@@ -637,7 +613,7 @@ public class [=ClassName]ControllerTest {
 		Update[=ClassName]Input [=ClassName?uncap_first] = new Update[=ClassName]Input();
 		<#list Fields as key,value>
 		<#if value.isNullable==false>
-		<#if !(AuthenticationFields?? && AuthenticationFields.Password.fieldName == value.fieldName)>
+		<#if !(AuthenticationFields?? && AuthenticationFields.Password.fieldName == key)>
 		<#if value.fieldType?lower_case == "long">
 		[=ClassName?uncap_first].set[=value.fieldName?cap_first](111L);
 		<#elseif value.fieldType?lower_case == "integer">
@@ -689,15 +665,15 @@ public class [=ClassName]ControllerTest {
 		</#if> 
 		</#list>
 		[=relationValue.eName?uncap_first]=[=relationValue.eName?uncap_first]Repository.save([=relationValue.eName?uncap_first]);
-		</#if> 
 		<#list relationValue.joinDetails as joinDetails>
 		<#list Fields as key,value>
-		<#if value.isPrimaryKey==true && value.fieldName==joinDetails.referenceColumn>
+		<#if value.isPrimaryKey==true && value.fieldName==joinDetails.joinColumn>
 		entity.set[=joinDetails.joinColumn?cap_first]([=relationValue.eName?uncap_first].get[=joinDetails.referenceColumn?cap_first]());
 		</#if>
 		</#list>
 		</#list>
 		entity.set[=relationValue.eName?cap_first]([=relationValue.eName?uncap_first]);
+		</#if> 
 		</#if> 
 		</#list>
 		entity = [=ClassName?uncap_first]_repository.save(entity);
@@ -709,17 +685,11 @@ public class [=ClassName]ControllerTest {
 		<#list Fields as key,value>
 		<#if value.isNullable==false>
 		<#if value.fieldType?lower_case == "long" || value.fieldType?lower_case == "integer" || value.fieldType?lower_case == "short" || value.fieldType?lower_case == "double" || value.fieldType?lower_case == "boolean" || value.fieldType?lower_case == "date" || value.fieldType?lower_case == "string">
-  		output.set[=value.fieldName?cap_first](entity.get[=value.fieldName?cap_first]());
+  		output.set[=key?cap_first](entity.get[=value.fieldName?cap_first]());
 		</#if> 
 		</#if> 
 		</#list>
 
-        <#if AuthenticationType != "none" && ClassName == AuthenticationTable>
-        <#if Flowable!false>
-	    ActIdUserEntity actIdUser = actIdUserMapper.createUsersEntityToActIdUserEntity(createNewEntity());
-		idmIdentityService.createUser(createNewEntity(), actIdUser);
-		</#if>
-		</#if>
 		<#if CompositeKeyClasses?seq_contains(ClassName)>
 		<#if AuthenticationType != "none" && ClassName == AuthenticationTable>
 		Mockito.when([=ClassName?uncap_first]AppService.FindWithAllFieldsById(new [=ClassName]Id(<#list PrimaryKeys as key,value><#if value?lower_case == "long" || value?lower_case == "integer" || value?lower_case == "short" || value?lower_case == "double" || value?lower_case == "string">entity.get[=key?cap_first]()</#if><#sep>, </#list>))).thenReturn(output);
@@ -739,7 +709,7 @@ public class [=ClassName]ControllerTest {
 		<#list Fields as key,value>
 		<#if value.isNullable==false>
 		<#if value.fieldType?lower_case == "long" || value.fieldType?lower_case == "integer" || value.fieldType?lower_case == "short" || value.fieldType?lower_case == "double" || value.fieldType?lower_case == "boolean" || value.fieldType?lower_case == "date" || value.fieldType?lower_case == "string">
-  		[=ClassName?uncap_first].set[=value.fieldName?cap_first](entity.get[=value.fieldName?cap_first]());
+  		[=ClassName?uncap_first].set[=value.fieldName?cap_first](entity.get[=key?cap_first]());
 		</#if> 
 		</#if> 
 		</#list>

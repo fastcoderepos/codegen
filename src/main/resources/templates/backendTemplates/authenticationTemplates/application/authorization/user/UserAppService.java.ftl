@@ -9,11 +9,6 @@ import [=PackageName].domain.model.JwtEntity;
 import [=PackageName].domain.authorization.user.IUserManager;
 import [=PackageName].domain.model.UserEntity;
 import [=PackageName].domain.model.QUserEntity;
-<#if Flowable!false>
-import [=PackageName].domain.Flowable.Users.ActIdUserEntity;
-import [=PackageName].application.Flowable.ActIdUserMapper;
-import [=PackageName].application.Flowable.FlowableIdentityService;
-</#if>
 import com.querydsl.core.BooleanBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -42,14 +37,6 @@ public class UserAppService implements IUserAppService {
 	@Autowired
 	private UserMapper mapper;
 	
-	<#if Flowable!false>
-	@Autowired
-	private ActIdUserMapper actIdUserMapper;
-	
-    @Autowired
-	private FlowableIdentityService idmIdentityService;
-	
-    </#if>
     @Autowired
  	private IJwtRepository _jwtRepository;
 
@@ -59,11 +46,6 @@ public class UserAppService implements IUserAppService {
 		UserEntity user = mapper.CreateUserInputToUserEntity(input);		
 		UserEntity createdUser = _userManager.Create(user);
 		
-		<#if Flowable!false>
-		//Map and create flowable user
-		ActIdUserEntity actIdUser = actIdUserMapper.createUsersEntityToActIdUserEntity(createdUser);
-		idmIdentityService.createUser(createdUser, actIdUser);
-		</#if>
 		return mapper.UserEntityToCreateUserOutput(createdUser);
 	}
 
@@ -75,10 +57,6 @@ public class UserAppService implements IUserAppService {
 
 		UserEntity user = mapper.UpdateUserInputToUserEntity(input);
 		UserEntity updatedUser = _userManager.Update(user);
-		<#if Flowable!false>
-		ActIdUserEntity actIdUser = actIdUserMapper.createUsersEntityToActIdUserEntity(updatedUser);
-		idmIdentityService.updateUser(updatedUser, actIdUser);
-		</#if>
 		return mapper.UserEntityToUpdateUserOutput(updatedUser);
 	}
 	
@@ -90,12 +68,9 @@ public class UserAppService implements IUserAppService {
 
 		UserEntity existing = _userManager.FindById(userId) ; 
 		_userManager.Delete(existing);
-		<#if Flowable!false>
-		idmIdentityService.deleteUser(existing.getUserName());
-		</#if>
+	
 	}
-<#if Flowable!false>
-</#if>
+
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	<#if Cache!false>
 	@Cacheable(value = "User", key = "#p0")

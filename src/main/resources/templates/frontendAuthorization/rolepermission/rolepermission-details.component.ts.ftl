@@ -43,14 +43,15 @@ export class RolepermissionDetailsComponent extends BaseDetailsComponent<IRolepe
 		super.ngOnInit();
     this.setForm();
     this.getItem();
+    this.setPickerSearchListener();
   }
   
   setForm(){
     this.itemForm = this.formBuilder.group({
       permissionId: ['', Validators.required],
       roleId: ['', Validators.required],
-      permissionDescriptiveField : [{ value: '', disabled: true }],
-      roleDescriptiveField : [{ value: '', disabled: true }],
+      permissionDescriptiveField : [''],
+      roleDescriptiveField : [''],
     });
   }
   

@@ -24,11 +24,6 @@ import [=PackageName].domain.model.[=relationValue.eName]Id;
 <#if AuthenticationType != "none"  && ClassName == AuthenticationTable>
 import [=PackageName].domain.irepository.IJwtRepository;
 import [=PackageName].domain.model.JwtEntity;
-<#if Flowable!false>
-import [=PackageName].domain.Flowable.Users.ActIdUserEntity;
-import [=PackageName].application.Flowable.ActIdUserMapper;
-import [=PackageName].application.Flowable.FlowableIdentityService;
-</#if>
 </#if>
 import [=CommonModulePackage].search.*;
 import [=CommonModulePackage].logging.LoggingHelper;
@@ -72,15 +67,7 @@ public class [=ClassName]AppService implements I[=ClassName]AppService {
 	<#if AuthenticationType != "none" && ClassName == AuthenticationTable>
 	@Autowired
  	private IJwtRepository _jwtRepository;
-    
-    <#if Flowable!false>
-	@Autowired
-	private FlowableIdentityService idmIdentityService;
-		
-	@Autowired
-	private ActIdUserMapper actIdUserMapper;
-		
-	</#if>
+
     </#if>
     <#list Relationship as relationKey,relationValue>
     <#if ClassName != relationValue.eName && relationValue.relation !="OneToMany">
@@ -148,14 +135,6 @@ public class [=ClassName]AppService implements I[=ClassName]AppService {
         </#if>
 		</#list>
 		[=EntityClassName] created[=ClassName] = _[=ClassName?uncap_first]Manager.Create([=ClassName?uncap_first]);
-		<#if AuthenticationType != "none" && ClassName == AuthenticationTable>
-		<#if Flowable!false>
-		
-		//Map and create flowable user
-		ActIdUserEntity actIdUser = actIdUserMapper.createUsersEntityToActIdUserEntity(created[=ClassName]);
-		idmIdentityService.createUser(created[=ClassName], actIdUser);
-	    </#if>
-		</#if>
 		return mapper.[=EntityClassName]ToCreate[=ClassName]Output(created[=ClassName]);
 	}
 	
@@ -216,13 +195,6 @@ public class [=ClassName]AppService implements I[=ClassName]AppService {
 		</#list>
 		
 		[=EntityClassName] updated[=ClassName] = _[=ClassName?uncap_first]Manager.Update([=ClassName?uncap_first]);
-		
-		<#if AuthenticationType != "none"  && ClassName == AuthenticationTable>
-		<#if Flowable!false>
-		ActIdUserEntity actIdUser = actIdUserMapper.createUsersEntityToActIdUserEntity(updated[=ClassName]);
-		idmIdentityService.updateUser(updated[=ClassName], actIdUser);
-	    </#if>
-		</#if>
 		return mapper.[=EntityClassName]ToUpdate[=ClassName]Output(updated[=ClassName]);
 	}
 	
@@ -234,17 +206,7 @@ public class [=ClassName]AppService implements I[=ClassName]AppService {
 
 		[=EntityClassName] existing = _[=ClassName?uncap_first]Manager.FindById([=IdClass?uncap_first]) ; 
 		_[=ClassName?uncap_first]Manager.Delete(existing);
-		<#if AuthenticationType != "none"  && ClassName == AuthenticationTable>
-		<#if Flowable!false>
-		<#if AuthenticationFields??>
-		<#list AuthenticationFields as authKey,authValue>
-		<#if authKey == "UserName">
-		idmIdentityService.deleteUser(existing.get[=authValue.fieldName?cap_first]());
-		</#if>
-		</#list>
-		</#if>
-		</#if>
-		</#if>
+
 	}
 	
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)

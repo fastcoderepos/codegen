@@ -11,6 +11,7 @@ import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { HomeComponent } from './home/index';
+import { ErrorPageComponent  } from './error-page/error-page.component';
 <#if AuthenticationType != "none">
 import { LoginComponent } from './login/index';
 
@@ -82,6 +83,7 @@ export class CustomHandlingStrategy implements UrlHandlingStrategy {
 </#if>
 @NgModule({
   declarations: [
+    ErrorPageComponent,
   	HomeComponent,
   	DashboardComponent,
   	<#if AuthenticationType != "none">

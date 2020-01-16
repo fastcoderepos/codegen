@@ -64,7 +64,8 @@ public class [=ClassName]ManagerTest {
 	<#if CompositeKeyClasses?seq_contains(ClassName)>
 	@Mock
 	private [=IdClass] [=IdClass?uncap_first];
-	<#else><#list Fields as key,value>
+	<#else>
+	<#list Fields as key,value>
 	<#if value.isPrimaryKey!false>
 	<#if value.fieldType?lower_case == "long">
 	private static [=value.fieldType?cap_first] ID=15L;

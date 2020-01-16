@@ -31,9 +31,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-<#if Flowable!false>
-import [=PackageName].application.Flowable.FlowableIdentityService;
-</#if>
 <#if CompositeKeyClasses?? && CompositeKeyClasses?seq_contains(AuthenticationTable)>
 import [=PackageName].domain.model.[=AuthenticationTable]Id;
 </#if>
@@ -76,11 +73,6 @@ public class [=AuthenticationTable]permissionAppServiceTest {
 	@Mock
 	private LoggingHelper logHelper;
 
-    <#if Flowable!false>
-	@Mock
-	private FlowableIdentityService idmIdentityService;
-    </#if>
-	
 	@Mock
 	private [=AuthenticationTable]permissionId [=AuthenticationTable?uncap_first]PermissionId;
 	
@@ -123,15 +115,11 @@ public class [=AuthenticationTable]permissionAppServiceTest {
 		Mockito.when(_[=AuthenticationTable?uncap_first]Manager.FindById(<#if (AuthenticationType!="none" && !UserInput??)>any(Long.class)<#elseif AuthenticationType!="none" && UserInput??><#if CompositeKeyClasses?? && CompositeKeyClasses?seq_contains(ClassName)>any([=AuthenticationTable]Id.class)<#else><#list PrimaryKeys as key,value><#if value?lower_case == "long">anyLong()<#elseif value?lower_case == "integer">any(Integer.class)<#elseif value?lower_case == "short">any(Short.class)<#elseif value?lower_case == "double">any(Double.class)<#elseif value?lower_case == "string">anyString()</#if></#list></#if></#if>)).thenReturn([=AuthenticationTable?uncap_first]Entity);
 		Mockito.when(_permissionManager.FindById(anyLong())).thenReturn(permissionEntity);
         Mockito.when(_mapper.Create[=AuthenticationTable]permissionInputTo[=AuthenticationTable]permissionEntity(any(Create[=AuthenticationTable]permissionInput.class))).thenReturn([=AuthenticationTable?uncap_first]permissionEntity); 
-        <#if Flowable!false>
-        doNothing().when(idmIdentityService).addUserPrivilegeMapping(anyString(),anyString());
-        </#if>
+       
         Mockito.when(_[=AuthenticationTable?uncap_first]permissionManager.Create(any([=AuthenticationTable]permissionEntity.class))).thenReturn([=AuthenticationTable?uncap_first]permissionEntity); 
         
         Assertions.assertThat(_appService.Create([=AuthenticationTable?uncap_first]permission)).isEqualTo(_mapper.[=AuthenticationTable]permissionEntityToCreate[=AuthenticationTable]permissionOutput([=AuthenticationTable?uncap_first]permissionEntity)); 
-    
     } 
-
 
     @Test 
 	public void create[=AuthenticationTable]permission_[=AuthenticationTable]permissionInputIsNotNullAnd[=AuthenticationTable]IdOrPermssionIdIsNotNullAndPermissionIsAlreadyAssigned_Store[=AuthenticationTable]permission() { 
@@ -148,10 +136,7 @@ public class [=AuthenticationTable]permissionAppServiceTest {
 		Mockito.when(_[=AuthenticationTable?uncap_first]Manager.FindById(<#if (AuthenticationType!="none" && !UserInput??)>any(Long.class)<#elseif AuthenticationType!="none" && UserInput??><#if CompositeKeyClasses?? && CompositeKeyClasses?seq_contains(ClassName)>any([=AuthenticationTable]Id.class)<#else><#list PrimaryKeys as key,value><#if value?lower_case == "long">anyLong()<#elseif value?lower_case == "integer">any(Integer.class)<#elseif value?lower_case == "short">any(Short.class)<#elseif value?lower_case == "double">any(Double.class)<#elseif value?lower_case == "string">anyString()</#if></#list></#if></#if>)).thenReturn([=AuthenticationTable?uncap_first]Entity);
 		Mockito.when(_permissionManager.FindById(anyLong())).thenReturn(permissionEntity);
 		Mockito.when(_[=AuthenticationTable?uncap_first]permissionManager.Create(any([=AuthenticationTable]permissionEntity.class))).thenReturn([=AuthenticationTable?uncap_first]permissionEntity); 
-		<#if Flowable!false>
-		doNothing().when(idmIdentityService).addUserPrivilegeMapping(anyString(),anyString());
-        </#if>
-        
+		
 		Assertions.assertThat(_appService.Create([=AuthenticationTable?uncap_first]permission)).isEqualTo(_mapper.[=AuthenticationTable]permissionEntityToCreate[=AuthenticationTable]permissionOutput(null)); 
 	} 
 
@@ -206,13 +191,9 @@ public class [=AuthenticationTable]permissionAppServiceTest {
 		Mockito.when(_mapper.Update[=AuthenticationTable]permissionInputTo[=AuthenticationTable]permissionEntity(any(Update[=AuthenticationTable]permissionInput.class))).thenReturn([=AuthenticationTable?uncap_first]permissionEntity);
 		Mockito.when(_[=AuthenticationTable?uncap_first]Manager.FindById(<#if (AuthenticationType!="none" && !UserInput??)>any(Long.class)<#elseif AuthenticationType!="none" && UserInput??><#if CompositeKeyClasses?? && CompositeKeyClasses?seq_contains(ClassName)>any([=AuthenticationTable]Id.class)<#else><#list PrimaryKeys as key,value><#if value?lower_case == "long">anyLong()<#elseif value?lower_case == "integer">any(Integer.class)<#elseif value?lower_case == "short">any(Short.class)<#elseif value?lower_case == "double">any(Double.class)<#elseif value?lower_case == "string">anyString()</#if></#list></#if></#if>)).thenReturn([=AuthenticationTable?uncap_first]Entity);
 		Mockito.when(_permissionManager.FindById(anyLong())).thenReturn(permissionEntity); 
-		<#if Flowable!false>
-		doNothing().when(idmIdentityService).updateUserPrivilegeMapping(anyString(),anyString());
-		</#if>
 		Mockito.when(_[=AuthenticationTable?uncap_first]permissionManager.Update(any([=AuthenticationTable]permissionEntity.class))).thenReturn([=AuthenticationTable?uncap_first]permissionEntity);
 
 		Assertions.assertThat(_appService.Update([=AuthenticationTable?uncap_first]PermissionId,[=AuthenticationTable?uncap_first]permission)).isEqualTo(_mapper.[=AuthenticationTable]permissionEntityToUpdate[=AuthenticationTable]permissionOutput([=AuthenticationTable?uncap_first]permissionEntity));
-
 	}
     
     @Test 
@@ -246,20 +227,10 @@ public class [=AuthenticationTable]permissionAppServiceTest {
 
 		[=AuthenticationTable]permissionEntity [=AuthenticationTable?uncap_first]permission= mock([=AuthenticationTable]permissionEntity.class);
 		 Mockito.when(_[=AuthenticationTable?uncap_first]permissionManager.FindById(any([=AuthenticationTable]permissionId.class))).thenReturn([=AuthenticationTable?uncap_first]permission);
-		
-        <#if Flowable!false>
-        PermissionEntity permissionEntity= mock(PermissionEntity.class);
-		[=AuthenticationTable]Entity [=AuthenticationTable?uncap_first]Entity = mock ([=AuthenticationTable]Entity.class);
-       
-		Mockito.when(_[=AuthenticationTable?uncap_first]Manager.FindById(<#if (AuthenticationType!="none" && !UserInput??)>any(Long.class)<#elseif AuthenticationType!="none" && UserInput??><#if CompositeKeyClasses?? && CompositeKeyClasses?seq_contains(ClassName)>any([=AuthenticationTable]Id.class)<#else><#list PrimaryKeys as key,value><#if value?lower_case == "long">anyLong()<#elseif value?lower_case == "integer">any(Integer.class)<#elseif value?lower_case == "short">any(Short.class)<#elseif value?lower_case == "double">any(Double.class)<#elseif value?lower_case == "string">anyString()</#if></#list></#if></#if>)).thenReturn([=AuthenticationTable?uncap_first]Entity);
-		Mockito.when(_permissionManager.FindById(anyLong())).thenReturn(permissionEntity); 
-		doNothing().when(idmIdentityService).updateUserPrivilegeMapping(anyString(),anyString());
-        </#if>
+
 		_appService.Delete([=AuthenticationTable?uncap_first]PermissionId); 
 		verify(_[=AuthenticationTable?uncap_first]permissionManager).Delete([=AuthenticationTable?uncap_first]permission);
 	}
-	
-
 	
 	@Test
 	public void Find_ListIsEmpty_ReturnList() throws Exception {
@@ -466,7 +437,7 @@ public class [=AuthenticationTable]permissionAppServiceTest {
 		<#elseif value?lower_case == "long" >
 		[=AuthenticationTable?uncap_first]permissionId.set[=AuthenticationTable][=key?cap_first](Long.valueOf(ID));
 		<#elseif value?lower_case == "integer">
-		[=AuthenticationTable?uncap_first]permissionId.set[=AuthenticationTable][=key?cap_first](Integer.valueOf(ID));
+		[=AuthenticationTable?uncap_first]permissionId.set[=AuthenticationTable][=key?cap_first](Integer.valueOf(ID.intValue()));
         <#elseif value?lower_case == "short">
         [=AuthenticationTable?uncap_first]permissionId.set[=AuthenticationTable][=key?cap_first](Short.valueOf(ID));
 		<#elseif value?lower_case == "double">

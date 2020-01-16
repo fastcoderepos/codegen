@@ -64,6 +64,7 @@ export class [=ClassName]DetailsComponent extends BaseDetailsComponent<[=IEntity
 		super.ngOnInit();
 		this.setForm();
     this.getItem();
+    this.setPickerSearchListener();
   }
   
   setForm(){
@@ -111,14 +112,10 @@ export class [=ClassName]DetailsComponent extends BaseDetailsComponent<[=IEntity
             </#if>
             </#list>
             <#if DescriptiveField[relationValue.eName]?? && DescriptiveField[relationValue.eName].description??>
-      [=DescriptiveField[relationValue.eName].description?uncap_first] : [{ value: '', disabled: true }],
+      [=DescriptiveField[relationValue.eName].description?uncap_first] : [''],
       </#if>
             </#if>
       </#list>
-      </#if>
-      <#if AuthenticationType != "none" && ClassName == AuthenticationTable>
-      roleId: [''],
-      roleDescriptiveField : [{ value: '', disabled: true }],
       </#if>
       
     });
@@ -162,18 +159,18 @@ export class [=ClassName]DetailsComponent extends BaseDetailsComponent<[=IEntity
 				service: this.[=relationValue.eName?uncap_first]Service,
 				<#if DescriptiveField[relationValue.eName]?? && DescriptiveField[relationValue.eName].description??>
 				descriptiveField: '[=DescriptiveField[relationValue.eName].description?uncap_first]',
-			    referencedDescriptiveField: '[=DescriptiveField[relationValue.eName].fieldName]',
-			    </#if>
-			    <#elseif relationValue.relation == "OneToOne" && relationValue.isParent == true>
-			    associatedPrimaryKeys: [<#list relationValue.fDetails as value><#if value.isPrimaryKey == true> '[=value.fieldName]', </#if></#list>]
-                </#if>
+		    referencedDescriptiveField: '[=DescriptiveField[relationValue.eName].fieldName]',
+		    </#if>
+		    <#elseif relationValue.relation == "OneToOne" && relationValue.isParent == true>
+		    associatedPrimaryKeys: [<#list relationValue.fDetails as value><#if value.isPrimaryKey == true> '[=value.fieldName]', </#if></#list>]
+        </#if>
 			},
 		</#list>
 		</#if>
 		<#if AuthenticationType != "none" && ClassName == AuthenticationTable>
 			{
 				column: [
-				    <#list PrimaryKeys as key,value>
+				  <#list PrimaryKeys as key,value>
 					{
 						key: '[=AuthenticationTable?uncap_first + key?cap_first]',
 						value: undefined,
@@ -186,20 +183,19 @@ export class [=ClassName]DetailsComponent extends BaseDetailsComponent<[=IEntity
 				type: 'OneToMany',
 			},
 			{
-				column: [
-					{
-						key: 'roleId',
-						value: undefined,
-						referencedkey: 'id'
-					},
-				],
-				isParent: false,
-				table: 'role',
-				type: 'ManyToOne',
-				service: this.roleService,
-				descriptiveField: 'roleDescriptiveField',
-				referencedDescriptiveField: 'name',
-			},
+        column: [
+          <#list PrimaryKeys as key,value>
+          {
+            key: '[=AuthenticationTable?uncap_first + key?cap_first]',
+            value: undefined,
+            referencedkey: '[=key?uncap_first]'
+          },
+          </#list>
+        ],
+        isParent: true,
+        table: '[=AuthenticationTable?lower_case]role',
+        type: 'OneToMany',
+      },
 		</#if>
 		];
 		

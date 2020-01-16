@@ -31,9 +31,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import [=PackageName].domain.authorization.rolepermission.*;
 import [=CommonModulePackage].search.*;
 import [=PackageName].application.authorization.rolepermission.dto.*;
-<#if Flowable!false>
-import [=PackageName].application.Flowable.FlowableIdentityService;
-</#if>
 import [=PackageName].domain.model.RolepermissionId;
 import [=PackageName].domain.model.QRolepermissionEntity;
 import [=PackageName].domain.model.RolepermissionEntity;
@@ -71,12 +68,7 @@ public class RolepermissionAppServiceTest {
 
 	@Mock
 	private LoggingHelper logHelper;
-    <#if Flowable!false>
     
-	@Mock
-	private FlowableIdentityService idmIdentityService;
-	
-    </#if>
 	private static long ID=15;
 	@Before
 	public void setUp() throws Exception {
@@ -117,9 +109,7 @@ public class RolepermissionAppServiceTest {
 		Mockito.when(_roleManager.FindById(anyLong())).thenReturn(roleEntity);
 		Mockito.when(_permissionManager.FindById(anyLong())).thenReturn(permissionEntity);
 		Mockito.when(_rolepermissionManager.Create(any(RolepermissionEntity.class))).thenReturn(rolepermissionEntity); 
-		<#if Flowable!false>
-		doNothing().when(idmIdentityService).addGroupPrivilegeMapping(anyString(),anyString());
-        </#if>
+		
 		Assertions.assertThat(_appService.Create(rolepermission)).isEqualTo(_mapper.RolepermissionEntityToCreateRolepermissionOutput(rolepermissionEntity)); 
 	} 
 
@@ -173,9 +163,7 @@ public class RolepermissionAppServiceTest {
 		Mockito.when(_mapper.UpdateRolepermissionInputToRolepermissionEntity(any(UpdateRolepermissionInput.class))).thenReturn(rolepermissionEntity);
 		Mockito.when(_roleManager.FindById(anyLong())).thenReturn(roleEntity);
 		Mockito.when(_permissionManager.FindById(anyLong())).thenReturn(permissionEntity); 
-		<#if Flowable!false>
-		doNothing().when(idmIdentityService).updateGroupPrivilegeMapping(anyString(),anyString());
-		</#if>
+		
 		Mockito.when(_rolepermissionManager.Update(any(RolepermissionEntity.class))).thenReturn(rolepermissionEntity);
 
 		Assertions.assertThat(_appService.Update(rolePermissionId,rolepermission)).isEqualTo(_mapper.RolepermissionEntityToUpdateRolepermissionOutput(rolepermissionEntity));
@@ -186,16 +174,8 @@ public class RolepermissionAppServiceTest {
 	public void deleteRolepermission_RolepermissionIsNotNullAndRolepermissionExists_RolepermissionRemoved() {
 
 		RolepermissionEntity rolepermission= mock(RolepermissionEntity.class);
-		
 		Mockito.when(_rolepermissionManager.FindById(any(RolepermissionId.class))).thenReturn(rolepermission);
-		<#if Flowable!false>
-		PermissionEntity permissionEntity= mock(PermissionEntity.class);
-		RoleEntity roleEntity = mock (RoleEntity.class);
-
-		Mockito.when(_roleManager.FindById(anyLong())).thenReturn(roleEntity);
-		Mockito.when(_permissionManager.FindById(anyLong())).thenReturn(permissionEntity); 
-		doNothing().when(idmIdentityService).updateGroupPrivilegeMapping(anyString(),anyString());
-        </#if>
+		
 		_appService.Delete(rolePermissionId); 
 		verify(_rolepermissionManager).Delete(rolepermission);
 	}

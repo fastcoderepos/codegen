@@ -23,6 +23,7 @@ import { ConfirmDialogComponent } from './common/components/confirm-dialog/confi
 import { AddFilterFieldComponent } from './common/components/list-filters/add-filter-field/add-filter-field.component';
 import { ListFiltersComponent } from './common/components/list-filters/list-filters.component';
 import { VirtualScrollDirective } from './common/directives/virtualScroll/virtual-scroll.directive';
+import { OptionsScrollDirective } from './common/directives/options-scroll.directive';
 
 import { BaseDetailsComponent } from './common/base/base-details.component';
 import { BaseListComponent } from './common/base/base-list.component';
@@ -90,6 +91,7 @@ export function HttpLoaderFactory(httpClient: HttpClient) {
     AddFilterFieldComponent,
     ListFiltersComponent,
     VirtualScrollDirective,
+    OptionsScrollDirective,
     BaseDetailsComponent,
     BaseListComponent,
     BaseNewComponent,
@@ -102,6 +104,7 @@ export function HttpLoaderFactory(httpClient: HttpClient) {
     ListFiltersComponent,
     AddFilterFieldComponent,
     VirtualScrollDirective,
+    OptionsScrollDirective,
     BaseDetailsComponent,
     BaseListComponent,
     BaseNewComponent,

@@ -39,6 +39,7 @@ export class PermissionDetailsComponent extends BaseDetailsComponent<IPermission
 		super.ngOnInit();
 		this.setForm();
 		this.getItem();
+    this.setPickerSearchListener();
 	}
 	
 	setForm(){

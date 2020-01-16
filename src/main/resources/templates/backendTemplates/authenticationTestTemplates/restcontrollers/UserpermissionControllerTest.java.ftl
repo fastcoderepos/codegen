@@ -101,17 +101,8 @@ public class [=AuthenticationTable]permissionControllerTest {
 	private [=AuthenticationTable]permissionEntity [=AuthenticationTable?uncap_first]permission;
 	
 	private MockMvc mvc;
-	<#if Flowable!false>
-
-	@Autowired
-	private FlowableIdentityService idmIdentityService;
-
-	@Autowired
-	private ActIdUserMapper actIdUserMapper;
-    </#if>
 	
 	<#if Cache !false>
-	
 	@Autowired 
 	private CacheManager cacheManager; 
 	
@@ -139,11 +130,6 @@ public class [=AuthenticationTable]permissionControllerTest {
 		em.createNativeQuery("drop table [=SchemaName?lower_case].[=AuthenticationTable?uncap_first]permission CASCADE").executeUpdate();
 		em.createNativeQuery("drop table [=SchemaName?lower_case].permission CASCADE").executeUpdate();
 		em.createNativeQuery("drop table [=SchemaName?lower_case].[=AuthenticationTable?uncap_first] CASCADE").executeUpdate();
-		<#if Flowable!false>
-		em.createNativeQuery("drop table [=SchemaName?lower_case].act_id_priv_mapping CASCADE").executeUpdate();
-		em.createNativeQuery("drop table [=SchemaName?lower_case].act_id_priv CASCADE").executeUpdate();
-		em.createNativeQuery("drop table [=SchemaName?lower_case].act_id_user CASCADE").executeUpdate();
-		</#if>
 		em.getTransaction().commit();
 	}
     
@@ -153,18 +139,11 @@ public class [=AuthenticationTable]permissionControllerTest {
 		
 		if([=AuthenticationTable?uncap_first]Repository.findAll().isEmpty())
 		{
-		<#if Flowable!false>
-			ActIdUserEntity actIdUser = actIdUserMapper.createUsersEntityToActIdUserEntity([=AuthenticationTable?uncap_first]);
-			idmIdentityService.createUser([=AuthenticationTable?uncap_first], actIdUser);
-		</#if>
 			[=AuthenticationTable?uncap_first]=[=AuthenticationTable?uncap_first]Repository.save([=AuthenticationTable?uncap_first]);
 		}
 
 		if(permissionRepository.findAll().isEmpty())
 		{
-			<#if Flowable!false>
-			idmIdentityService.createPrivilege(permission.getName());
-			</#if>
 			permission=permissionRepository.save(permission);
 		}
 		
@@ -193,7 +172,7 @@ public class [=AuthenticationTable]permissionControllerTest {
 		[=AuthenticationTable?uncap_first]permission.setPermissionId(3L);
 		<#if (AuthenticationType!="none" && !UserInput??)>
 		[=AuthenticationTable?uncap_first]permission.set[=AuthenticationTable]Id(3L);
-		<#elseif AuthenticationType!="none" && UserInput??>
+		<#else>
 		<#if PrimaryKeys??>
   		<#list PrimaryKeys as key,value>
 		<#if value?lower_case == "long">
@@ -486,9 +465,6 @@ public class [=AuthenticationTable]permissionControllerTest {
 		System.out.println(list);
 	    if(list.isEmpty()){
 	    	[=AuthenticationTable?uncap_first]permissionRepository.save([=AuthenticationTable?uncap_first]permission);
-	    	<#if Flowable!false>
-			idmIdentityService.addUserPrivilegeMapping([=AuthenticationTable?uncap_first]permission.get[=AuthenticationTable]().get<#if AuthenticationType!= "none"><#if AuthenticationFields??><#list AuthenticationFields as authKey,authValue><#if authKey== "UserName">[=authValue.fieldName?cap_first]</#if></#list><#else>UserName</#if></#if>(), [=AuthenticationTable?uncap_first]permission.getPermission().getName());
-            </#if>
 		}
 	}
 	
@@ -578,11 +554,7 @@ public class [=AuthenticationTable]permissionControllerTest {
 	    permission.setName("P3");
 	    
 	    permission=permissionRepository.save(permission);
-		<#if Flowable!false>
-		ActIdUserEntity actIdUser = actIdUserMapper.createUsersEntityToActIdUserEntity([=AuthenticationTable?uncap_first]);
-		idmIdentityService.createUser([=AuthenticationTable?uncap_first], actIdUser);
-		idmIdentityService.createPrivilege(permission.getName());
-        </#if>
+
 		Create[=AuthenticationTable]permissionInput [=AuthenticationTable?uncap_first]permission = create[=AuthenticationTable]permissionInput();
 		[=AuthenticationTable?uncap_first]permission.setPermissionId(permission.getId());
 		[=AuthenticationTable?uncap_first]permission.setRevoked(false);
@@ -630,11 +602,7 @@ public class [=AuthenticationTable]permissionControllerTest {
 	public void Delete_IdIsValid_ReturnStatusNoContent() throws Exception {
 		
 		[=AuthenticationTable]permissionEntity up = [=AuthenticationTable?uncap_first]permissionRepository.save(createNewEntityForDelete());
-		<#if Flowable!false>
-		ActIdUserEntity actIdUser = actIdUserMapper.createUsersEntityToActIdUserEntity(up.get[=AuthenticationTable]());
-		idmIdentityService.createUser(up.get[=AuthenticationTable](), actIdUser);
-		idmIdentityService.addUserPrivilegeMapping(up.get[=AuthenticationTable]().get<#if AuthenticationType!= "none"><#if AuthenticationFields??><#list AuthenticationFields as authKey,authValue><#if authKey== "UserName">[=authValue.fieldName?cap_first]</#if></#list><#else>UserName</#if></#if>(), up.getPermission().getName());
-        </#if>
+	
 		Find[=AuthenticationTable]permissionByIdOutput output= new Find[=AuthenticationTable]permissionByIdOutput();
 	    output.setPermissionId(up.getPermissionId());
 	    <#if (AuthenticationType!="none" && !UserInput??)>
@@ -725,11 +693,7 @@ public class [=AuthenticationTable]permissionControllerTest {
 	public void Update[=AuthenticationTable]permission_[=AuthenticationTable]permissionExists_ReturnStatusOk() throws Exception {
 		
 		[=AuthenticationTable]permissionEntity up = [=AuthenticationTable?uncap_first]permissionRepository.save(createNewEntityForUpdate());
-		<#if Flowable!false>
-		ActIdUserEntity actIdUser = actIdUserMapper.createUsersEntityToActIdUserEntity(up.get[=AuthenticationTable]());
-		idmIdentityService.createUser(up.get[=AuthenticationTable](), actIdUser);
-		idmIdentityService.addUserPrivilegeMapping(up.get[=AuthenticationTable]().get<#if AuthenticationType!= "none"><#if AuthenticationFields??><#list AuthenticationFields as authKey,authValue><#if authKey== "UserName">[=authValue.fieldName?cap_first]</#if></#list><#else>UserName</#if></#if>(), up.getPermission().getName());
-        </#if>
+		
 		Find[=AuthenticationTable]permissionByIdOutput output= new Find[=AuthenticationTable]permissionByIdOutput();
 	    <#if (AuthenticationType!="none" && !UserInput??)>
 		output.set[=AuthenticationTable]Id(up.get[=AuthenticationTable]Id());
@@ -783,9 +747,7 @@ public class [=AuthenticationTable]permissionControllerTest {
 		</#if>
         entity.setPermissionId(up.getPermissionId());
         [=AuthenticationTable?uncap_first]permissionRepository.delete(entity);
-        <#if Flowable!false>
-		idmIdentityService.deleteUserPrivilegeMapping(up.get[=AuthenticationTable]().get<#if AuthenticationType!= "none"><#if AuthenticationFields??><#list AuthenticationFields as authKey,authValue><#if authKey== "UserName">[=authValue.fieldName?cap_first]</#if></#list><#else>UserName</#if></#if>(), up.getPermission().getName());
-	    </#if>
+       
 	}    
 	
 	@Test

@@ -9,10 +9,8 @@ import { GenericApiService } from '../core/generic-api.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Globals } from '../../globals';
 import { IListColumn, listColumnType } from '../../common/ilistColumn';
-//import { ComponentType } from '@angular/cdk/overlay';
-import { ComponentType } from '@angular/cdk/portal';
 import { IAssociationEntry } from '../core/iassociationentry';
-import { PickerDialogService, IFCDialogConfig } from '../../common/components/picker/picker-dialog.service';
+import { PickerDialogService } from '../../common/components/picker/picker-dialog.service';
 
 import { merge, of as observableOf, Observable, SubscriptionLike } from 'rxjs';
 import { catchError, map, startWith, switchMap } from 'rxjs/operators';
@@ -21,8 +19,9 @@ import { IGlobalPermissionService } from '../core/iglobal-permission.service';
 //import { IPermission } from '../core/ipermission';
 import { ErrorService } from '../core/error.service';
 import { ServiceUtils } from '../utils/serviceUtils';
+import { ConfirmDialogComponent } from '../components/confirm-dialog/confirm-dialog.component';
 
-enum listProcessingType {
+export enum listProcessingType {
   Replace = "Replace",
   Append = "Append"
 }
@@ -61,6 +60,7 @@ export class BaseListComponent<E> implements OnInit {
 
   isMediumDeviceOrLess: boolean;
   dialogRef: MatDialogRef<any>;
+  deleteDialogRef: MatDialogRef<ConfirmDialogComponent>;
   mediumDeviceOrLessDialogSize: string = "100%";
   largerDeviceDialogWidthSize: string = "85%";
   largerDeviceDialogHeightSize: string = "85%";
@@ -235,7 +235,7 @@ export class BaseListComponent<E> implements OnInit {
 
   }
 
-  applyFilter(filterCritaria): void {
+  applyFilter(filterCritaria: ISearchField[]): void {
     this.searchValue = filterCritaria;
     this.isLoadingResults = true;
     this.initializePageInfo();
@@ -283,8 +283,8 @@ export class BaseListComponent<E> implements OnInit {
     })
   }
 
-  delete(item: E) {
-    var id = ServiceUtils.encodeIdByObject(item, this.primaryKeys);
+  deleteItem(item: E) {
+    let id = ServiceUtils.encodeIdByObject(item, this.primaryKeys);
     this.dataService.delete(id).subscribe(result => {
       let r = result;
       const index: number = this.items.findIndex(x => ServiceUtils.encodeIdByObject(x, this.primaryKeys) == id);
@@ -292,6 +292,21 @@ export class BaseListComponent<E> implements OnInit {
         this.items.splice(index, 1);
         this.items = [...this.items];
         this.changeDetectorRefs.detectChanges();
+      }
+    });
+  }
+
+  delete(item: E): void {
+    this.deleteDialogRef = this.dialog.open(ConfirmDialogComponent, {
+      disableClose: true,
+      data: {
+        confirmationType: "delete"
+      }
+    });
+    
+    this.deleteDialogRef.afterClosed().subscribe(action => {
+      if (action) {
+        this.deleteItem(item);
       }
     });
   }
@@ -306,7 +321,7 @@ export class BaseListComponent<E> implements OnInit {
     this.router.navigate([`/${this.selectedAssociation.table.toLowerCase()}/${paramString}`]);
   }
   
-  isLoadingResults = true;
+  isLoadingResults = false;
 
   currentPage: number;
   pageSize: number;
@@ -367,6 +382,7 @@ export class BaseListComponent<E> implements OnInit {
         this.updatePageInfo(items);
       },
       error => {
+        this.isLoadingResults = false;
         this.errorMessage = <any>error
         this.errorService.showError("An error occured while fetching results");
       }
@@ -374,6 +390,7 @@ export class BaseListComponent<E> implements OnInit {
   }
 
   getFieldLabel(field: string) {
+    field = field.charAt(0).toUpperCase() + field.slice(1);
     return field.replace(/([a-z])([A-Z])/g, '$1 $2');
   }
   

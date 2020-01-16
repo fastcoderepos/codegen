@@ -1,5 +1,6 @@
 import { Component, OnInit, Inject, HostListener } from '@angular/core';
 import { MatDialogRef, MatDialog, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { GenericApiService } from '../core/generic-api.service';
@@ -22,236 +23,208 @@ import { CanDeactivateGuard } from '../core/can-deactivate.guard';
 import { ErrorService } from '../core/error.service';
 @Component({
 
-	template: ''
+  template: ''
 
 })
 export class BaseNewComponent<E> implements OnInit, CanDeactivateGuard {
 
-	// @HostListener allows us to also guard against browser refresh, close, etc.
-	@HostListener('window:beforeunload')
-	canDeactivate(): Observable<boolean> | boolean {
-		// returning true will navigate without confirmation
-		// returning false will show a confirm dialog before navigating away
-		if (this.itemForm.touched) {
-			return false
-		}
-		return true;
-	}
+  // @HostListener allows us to also guard against browser refresh, close, etc.
+  @HostListener('window:beforeunload')
+  canDeactivate(): Observable<boolean> | boolean {
+    // returning true will navigate without confirmation
+    // returning false will show a confirm dialog before navigating away
+    if (this.itemForm.touched) {
+      return false
+    }
+    return true;
+  }
 
-	itemForm: FormGroup;
-	loading = false;
-	submitted = false;
-	title: string = "title";
+  itemForm: FormGroup;
+  loading = false;
+  submitted = false;
+  title: string = "title";
 
-	pickerDialogRef: MatDialogRef<any>;
+  pickerDialogRef: MatDialogRef<any>;
 
-	associations: IAssociationEntry[];
-	parentAssociations: IAssociationEntry[];
+  associations: IAssociationEntry[];
+  parentAssociations: IAssociationEntry[];
 
-	entityName: string = "";
-	IsReadPermission: Boolean = false;
-	IsCreatePermission: Boolean = false;
-	IsUpdatePermission: Boolean = false;
-	IsDeletePermission: Boolean = false;
-	globalPermissionService: IGlobalPermissionService;
+  entityName: string = "";
+  IsReadPermission: Boolean = false;
+  IsCreatePermission: Boolean = false;
+  IsUpdatePermission: Boolean = false;
+  IsDeletePermission: Boolean = false;
+  globalPermissionService: IGlobalPermissionService;
 
-	isMediumDeviceOrLess: boolean;
-	mediumDeviceOrLessDialogSize: string = "100%";
-	largerDeviceDialogWidthSize: string = "65%";
-	largerDeviceDialogHeightSize: string = "75%";
+  isMediumDeviceOrLess: boolean;
+  mediumDeviceOrLessDialogSize: string = "100%";
+  largerDeviceDialogWidthSize: string = "65%";
+  largerDeviceDialogHeightSize: string = "75%";
 
-	errorMessage = '';
+  errorMessage = '';
 
-	constructor(
-		public formBuilder: FormBuilder,
-		public router: Router,
-		public route: ActivatedRoute,
-		public dialog: MatDialog,
-		public dialogRef: MatDialogRef<any>,
-		@Inject(MAT_DIALOG_DATA) public data: any,
-		public global: Globals,
-		public pickerDialogService: PickerDialogService,
-		public dataService: GenericApiService<E>,
-		public errorService: ErrorService
-	) { }
+  constructor(
+    public formBuilder: FormBuilder,
+    public router: Router,
+    public route: ActivatedRoute,
+    public dialog: MatDialog,
+    public dialogRef: MatDialogRef<any>,
+    @Inject(MAT_DIALOG_DATA) public data: any,
+    public global: Globals,
+    public pickerDialogService: PickerDialogService,
+    public dataService: GenericApiService<E>,
+    public errorService: ErrorService
+  ) { }
 
-	setPermissions = () => {
+  setPermissions = () => {
 
-		if (this.globalPermissionService) {
-			let entityName = this.entityName.startsWith("I") ? this.entityName.substr(1) : this.entityName;
-			this.IsCreatePermission = this.globalPermissionService.hasPermissionOnEntity(entityName, "CREATE");
-			if (this.IsCreatePermission) {
-				this.IsReadPermission = true;
-				this.IsDeletePermission = true;
-				this.IsUpdatePermission = true;
-			} else {
-				this.IsDeletePermission = this.globalPermissionService.hasPermissionOnEntity(entityName, "DELETE");
-				this.IsUpdatePermission = this.globalPermissionService.hasPermissionOnEntity(entityName, "UPDATE");
-				this.IsReadPermission = (this.IsDeletePermission || this.IsUpdatePermission) ? true : this.globalPermissionService.hasPermissionOnEntity(entityName, "READ");
-			}
-		}
-		//});
-	}
-	ngOnInit() {
-		this.setPermissions();
-		this.manageScreenResizing();
-	}
+    if (this.globalPermissionService) {
+      let entityName = this.entityName.startsWith("I") ? this.entityName.substr(1) : this.entityName;
+      this.IsCreatePermission = this.globalPermissionService.hasPermissionOnEntity(entityName, "CREATE");
+      if (this.IsCreatePermission) {
+        this.IsReadPermission = true;
+        this.IsDeletePermission = true;
+        this.IsUpdatePermission = true;
+      } else {
+        this.IsDeletePermission = this.globalPermissionService.hasPermissionOnEntity(entityName, "DELETE");
+        this.IsUpdatePermission = this.globalPermissionService.hasPermissionOnEntity(entityName, "UPDATE");
+        this.IsReadPermission = (this.IsDeletePermission || this.IsUpdatePermission) ? true : this.globalPermissionService.hasPermissionOnEntity(entityName, "READ");
+      }
+    }
+    //});
+  }
+  ngOnInit() {
+    this.setPermissions();
+    this.manageScreenResizing();
+  }
 
-	manageScreenResizing() {
-		this.global.isMediumDeviceOrLess$.subscribe(value => {
-			this.isMediumDeviceOrLess = value;
-			if (this.dialogRef)
-				this.dialogRef.updateSize(value ? this.mediumDeviceOrLessDialogSize : this.largerDeviceDialogWidthSize,
-					value ? this.mediumDeviceOrLessDialogSize : this.largerDeviceDialogHeightSize);
-		});
-	}
+  manageScreenResizing() {
+    this.global.isMediumDeviceOrLess$.subscribe(value => {
+      this.isMediumDeviceOrLess = value;
+      if (this.dialogRef)
+        this.dialogRef.updateSize(value ? this.mediumDeviceOrLessDialogSize : this.largerDeviceDialogWidthSize,
+          value ? this.mediumDeviceOrLessDialogSize : this.largerDeviceDialogHeightSize);
+    });
+  }
 
-	onSubmit() {
-		this.submitted = true;
-		// stop here if form is invalid
-		if (this.itemForm.invalid) {
-			return;
-		}
+  onSubmit() {
+    // stop here if form is invalid
+    if (this.itemForm.invalid) {
+      return;
+    }
 
-		this.loading = true;
-		this.dataService.create(this.itemForm.getRawValue())
-			.pipe(first())
-			.subscribe(
-				data => {
-					// this.alertService.success('Registration successful', true);
-					// this.router.navigate(['/users']);
-					this.dialogRef.close(data);
-				},
-				error => {
-					this.errorService.showError("Error Occured while updating");
-					this.loading = false;
-					this.dialogRef.close(null)
+    this.submitted = true;
+    this.loading = true;
+    this.dataService.create(this.itemForm.getRawValue())
+      .pipe(first())
+      .subscribe(
+        data => {
+          // this.alertService.success('Registration successful', true);
+          // this.router.navigate(['/users']);
+          this.dialogRef.close(data);
+        },
+        error => {
+          this.errorService.showError("Error Occured while updating");
+          this.loading = false;
+          this.dialogRef.close(null)
 
-				});
-	}
-	onCancel(): void {
-		this.dialogRef.close(null);
-	}
+        });
+  }
+  onCancel(): void {
+    this.dialogRef.close(null);
+  }
 
-	selectAssociation(association) {
+  selectAssociation(association: IAssociationEntry) {
+    this.initializePickerPageInfo();
+    association.data = [];
+    association.service.getAll(association.searchValue, this.currentPickerPage * this.pickerPageSize, this.pickerPageSize).subscribe(items => {
+      this.initializePickerPageInfo(); // resetting the picker page info in case callback order is messed up
+      this.isLoadingPickerResults = false;
+      association.data = items;
+      this.updatePickerPageInfo(items);
+    },
+      error => {
+        this.errorMessage = <any>error;
+        this.errorService.showError("An error occured while fetching results");
+      }
+    );
+  }
+  isLoadingPickerResults = true;
 
-		let dialogConfig: IFCDialogConfig = <IFCDialogConfig>{
-			Title: association.table,
-			IsSingleSelection: true,
-			DisplayField: association.referencedDescriptiveField
-		};
+  currentPickerPage: number;
+  pickerPageSize: number;
+  lastProcessedOffsetPicker: number;
+  hasMoreRecordsPicker: boolean;
 
-		this.pickerDialogRef = this.pickerDialogService.open(dialogConfig);
+  searchValuePicker: ISearchField[] = [];
+  pickerItemsObservable: Observable<any>;
 
-		this.initializePickerPageInfo();
-		association.service.getAll(this.searchValuePicker, this.currentPickerPage * this.pickerPageSize, this.pickerPageSize).subscribe(items => {
-			this.isLoadingPickerResults = false;
-			this.pickerDialogRef.componentInstance.items = items;
-			this.updatePickerPageInfo(items);
-		},
-			error => {
-				this.errorMessage = <any>error;
-				this.pickerDialogRef.close();
-				this.errorService.showError("An error occured while fetching results");
-			}
-		);
+  initializePickerPageInfo() {
+    this.hasMoreRecordsPicker = true;
+    this.pickerPageSize = 30;
+    this.lastProcessedOffsetPicker = -1;
+    this.currentPickerPage = 0;
+  }
 
-		this.pickerDialogRef.componentInstance.onScroll.subscribe(data => {
-			this.onPickerScroll();
-		})
+  //manage pages for virtual scrolling
+  updatePickerPageInfo(data) {
+    if (data.length > 0) {
+      this.currentPickerPage++;
+      this.lastProcessedOffsetPicker += data.length;
+    }
+    else {
+      this.hasMoreRecordsPicker = false;
+    }
+  }
 
-		this.pickerDialogRef.componentInstance.onSearch.subscribe(data => {
-			this.onPickerSearch(data);
-		})
+  onPickerScroll(association: IAssociationEntry) {
+    if (!this.isLoadingPickerResults && this.hasMoreRecordsPicker && this.lastProcessedOffsetPicker < association.data.length) {
+      this.isLoadingPickerResults = true;
+      association.service.getAll(association.searchValue, this.currentPickerPage * this.pickerPageSize, this.pickerPageSize).subscribe(
+        items => {
+          this.isLoadingPickerResults = false;
+          association.data = association.data.concat(items);
+          this.updatePickerPageInfo(items);
+        },
+        error => {
+          this.errorMessage = <any>error;
+          this.errorService.showError("An error occured while fetching more results");
+        }
+      );
+    }
+  }
 
-		this.pickerDialogRef.afterClosed().subscribe(associatedItem => {
-			if (associatedItem) {
-				association.column.forEach(col => {
-					this.itemForm.get(col.key).setValue(associatedItem[col.referencedkey]);
-				});
-				this.itemForm.get(association.descriptiveField).setValue(associatedItem[association.referencedDescriptiveField]);
-			}
-		});
-	}
+  onPickerSearch(searchValue: string, association: IAssociationEntry) {
 
-	isLoadingPickerResults = true;
+    let searchField: ISearchField = {
+      fieldName: association.referencedDescriptiveField,
+      operator: operatorType.Contains,
+      searchValue: searchValue ? searchValue : ""
+    }
+    association.searchValue = [searchField];
+    this.selectAssociation(association);
+  }
 
-	currentPickerPage: number;
-	pickerPageSize: number;
-	lastProcessedOffsetPicker: number;
-	hasMoreRecordsPicker: boolean;
+  setPickerSearchListener() {
+    this.associations.forEach(association => {
+      if (!association.isParent) {
+        this.itemForm.get(association.descriptiveField).valueChanges.subscribe(value => this.onPickerSearch(value, association));
+      }
+    })
+  }
 
-	searchValuePicker: ISearchField[] = [];
-	pickerItemsObservable: Observable<any>;
+  onAssociationOptionSelected(event: MatAutocompleteSelectedEvent, association: IAssociationEntry) {
+    let selectedOption = event.option.value;
+    association.column.forEach(col => {
+      this.itemForm.get(col.key).setValue(selectedOption[col.referencedkey]);
+    });
+    this.itemForm.get(association.descriptiveField).setValue(selectedOption[association.referencedDescriptiveField]);
+  }
 
-	initializePickerPageInfo() {
-		this.hasMoreRecordsPicker = true;
-		this.pickerPageSize = 20;
-		this.lastProcessedOffsetPicker = -1;
-		this.currentPickerPage = 0;
-	}
 
-	//manage pages for virtual scrolling
-	updatePickerPageInfo(data) {
-		if (data.length > 0) {
-			this.currentPickerPage++;
-			this.lastProcessedOffsetPicker += data.length;
-		}
-		else {
-			this.hasMoreRecordsPicker = false;
-		}
-	}
-
-	onPickerScroll() {
-		if (!this.isLoadingPickerResults && this.hasMoreRecordsPicker && this.lastProcessedOffsetPicker < this.pickerDialogRef.componentInstance.items.length) {
-			this.isLoadingPickerResults = true;
-			let selectedAssociation: IAssociationEntry = this.associations.find(association => association.table === this.pickerDialogRef.componentInstance.title);
-
-			selectedAssociation.service.getAll(this.searchValuePicker, this.currentPickerPage * this.pickerPageSize, this.pickerPageSize).subscribe(
-				items => {
-					this.isLoadingPickerResults = false;
-					this.pickerDialogRef.componentInstance.items = this.pickerDialogRef.componentInstance.items.concat(items);
-					this.updatePickerPageInfo(items);
-				},
-				error => {
-					this.errorMessage = <any>error;
-					this.errorService.showError("An error occured while fetching more results");
-				}
-			);
-
-		}
-	}
-
-	onPickerSearch(searchValue: string) {
-		if (searchValue) {
-			let searchField: ISearchField = {
-				fieldName: this.pickerDialogRef.componentInstance.displayField,
-				operator: operatorType.Contains,
-				searchValue: searchValue
-			}
-			this.searchValuePicker = [searchField];
-		}
-
-		this.initializePickerPageInfo();
-
-		let selectedAssociation: IAssociationEntry = this.associations.find(association => association.table === this.pickerDialogRef.componentInstance.title);
-
-		selectedAssociation.service.getAll(this.searchValuePicker, this.currentPickerPage * this.pickerPageSize, this.pickerPageSize).subscribe(
-			items => {
-				this.isLoadingPickerResults = false;
-				this.pickerDialogRef.componentInstance.items = items;
-				this.updatePickerPageInfo(items);
-			},
-			error => {
-				this.errorMessage = <any>error
-				this.errorService.showError("An error occured while fetching results");
-			}
-		);
-	}
-
-	checkPassedData() {
-		if (this.data) {
-			this.itemForm.patchValue(this.data);
-		}
-	}
+  checkPassedData() {
+    if (this.data) {
+      this.itemForm.patchValue(this.data);
+    }
+  }
 }
