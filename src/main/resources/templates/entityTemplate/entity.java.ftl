@@ -21,19 +21,19 @@ public class [=ClassName]Entity implements Serializable {
 
 <#list Fields as key,value>
  <#if value.fieldType?lower_case == "long">
-  private Long [=key?uncap_first];
+  private Long [=value.fieldName];
  <#elseif value.fieldType?lower_case == "integer" >
-  private Integer [=key?uncap_first];
+  private Integer [=value.fieldName];
  <#elseif value.fieldType?lower_case == "short" >
-  private Short [=key?uncap_first];
+  private Short [=value.fieldName];
  <#elseif value.fieldType?lower_case == "double" >
-  private Double [=key?uncap_first];
+  private Double [=value.fieldName];
  <#elseif value.fieldType?lower_case == "boolean">
-  private Boolean [=key?uncap_first];
+  private Boolean [=value.fieldName];
  <#elseif value.fieldType?lower_case == "date">
-  private Date [=key?uncap_first];
+  private Date [=value.fieldName];
  <#elseif value.fieldType?lower_case == "string">
-  private String [=key?uncap_first];
+  private String [=value.fieldName];
  </#if> 
 </#list>
  
@@ -51,8 +51,8 @@ public class [=ClassName]Entity implements Serializable {
   @Basic
   </#if>
   @Column(name = "[=key]", nullable = [=value.isNullable?string('true','false')])
-  public Long get[=key?cap_first]() {
-  return [=key?uncap_first];
+  public Long get[=value.fieldName?cap_first]() {
+  return [=value.fieldName];
   }
 
   public void set[=value.fieldName?cap_first](Long [=value.fieldName]){
@@ -69,12 +69,12 @@ public class [=ClassName]Entity implements Serializable {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   </#if>
   @Column(name = "[=key]", nullable = [=value.isNullable?string('true','false')])
-  public Integer get[=key?cap_first]() {
-  return [=key?uncap_first];
+  public Integer get[=value.fieldName?cap_first]() {
+  return [=value.fieldName];
   }
 
-  public void set[=key?cap_first](Integer [=key?uncap_first]){
-  this.[=key?uncap_first] = [=key?uncap_first];
+  public void set[=value.fieldName?cap_first](Integer [=value.fieldName]){
+  this.[=value.fieldName] = [=value.fieldName];
   } 
   
   <#elseif value.fieldType?lower_case == "short">

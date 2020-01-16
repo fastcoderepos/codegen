@@ -10,14 +10,14 @@
 
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.nfinity</groupId>
+	<groupId>com.fastcode</groupId>
 	<artifactId>codegen</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>codegen</name>
 	<description>Code Gen Project</description>
 
 	<properties>
-		<start-class>com.nfinity.CodegenApplication</start-class>
+		<start-class>com.fastcode.CodegenApplication</start-class>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
@@ -79,6 +79,10 @@
 			<artifactId>guava</artifactId>
 			<version>27.0-jre</version>
 		</dependency>
+		<dependency>
+   <groupId>org.springframework.boot</groupId>
+   <artifactId>spring-boot-starter-jdbc</artifactId>
+</dependency>
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>

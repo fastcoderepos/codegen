@@ -10,13 +10,13 @@ public class Find[=ClassName]ByIdOutput {
   	<#list AuthenticationFields as authKey,authValue>
   	<#if authKey== "Password">
   	<#if value.fieldName != authValue.fieldName>
-  private [=value.fieldType] [=key?uncap_first];
+  private [=value.fieldType] [=value.fieldName];
     </#if>
     </#if>
     </#list>
     </#if>
     <#else>
-  private [=value.fieldType] [=key?uncap_first];
+  private [=value.fieldType] [=value.fieldName];
     </#if> 
  </#if> 
 </#list>
@@ -111,12 +111,12 @@ public class Find[=ClassName]ByIdOutput {
   <#list AuthenticationFields as authKey,authValue>
   <#if authKey== "Password">
   <#if value.fieldName != authValue.fieldName>
-  public [=value.fieldType?cap_first] get[=key?cap_first]() {
-  	return [=key?uncap_first];
+  public [=value.fieldType?cap_first] get[=value.fieldName?cap_first]() {
+  	return [=value.fieldName];
   }
 
-  public void set[=key?cap_first]([=value.fieldType?cap_first] [=key?uncap_first]){
-  	this.[=key?uncap_first] = [=key?uncap_first];
+  public void set[=value.fieldName?cap_first]([=value.fieldType?cap_first] [=value.fieldName]){
+  	this.[=value.fieldName] = [=value.fieldName];
   }
   
   </#if>
@@ -124,12 +124,12 @@ public class Find[=ClassName]ByIdOutput {
   </#list>
   </#if>
   <#else>
-  public [=value.fieldType?cap_first] get[=key?cap_first]() {
-  	return [=key?uncap_first];
+  public [=value.fieldType?cap_first] get[=value.fieldName?cap_first]() {
+  	return [=value.fieldName];
   }
 
-  public void set[=key?cap_first]([=value.fieldType?cap_first] [=key?uncap_first]){
-  	this.[=key?uncap_first] = [=key?uncap_first];
+  public void set[=value.fieldName?cap_first]([=value.fieldType?cap_first] [=value.fieldName]){
+  	this.[=value.fieldName] = [=value.fieldName];
   }
   
   </#if> 

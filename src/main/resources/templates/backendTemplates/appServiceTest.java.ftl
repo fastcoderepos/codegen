@@ -20,6 +20,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.slf4j.Logger;
@@ -60,6 +61,7 @@ import com.querydsl.core.types.Predicate;
 public class [=ClassName]AppServiceTest {
 
 	@InjectMocks
+	@Spy
 	[=ClassName]AppService _appService;
 
 	@Mock
@@ -109,7 +111,7 @@ public class [=ClassName]AppServiceTest {
     </#if>
     </#list>
     </#if>
-	
+	 
 	@Before
 	public void setUp() throws Exception {
 
@@ -710,6 +712,9 @@ public class [=ClassName]AppServiceTest {
 		</#if> 
 		</#if> 
         </#list>
+        Mockito.doNothing().when(_appService).checkProperties(any(List.class));
+		Mockito.doReturn(builder).when(_appService).searchSpecificProperty(any(Q[=EntityClassName].class), any(List.class), anyString(),anyString());
+		
 		Assertions.assertThat(_appService.Search(search)).isEqualTo(builder);
 	}
 	
@@ -745,6 +750,9 @@ public class [=ClassName]AppServiceTest {
 		</#if> 
 		</#if> 
         </#list>
+        Mockito.doNothing().when(_appService).checkProperties(any(List.class));
+		Mockito.doReturn(builder).when(_appService).searchKeyValuePair(any(Q[=EntityClassName].class), any(HashMap.class), any(HashMap.class));
+        
 		Assertions.assertThat(_appService.Search(search)).isEqualTo(builder);
 	}
 	

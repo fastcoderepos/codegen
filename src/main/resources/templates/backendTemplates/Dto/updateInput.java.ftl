@@ -14,7 +14,7 @@ public class Update[=ClassName]Input {
   <#if authKey== "Password">
   <#if value.fieldName != authValue.fieldName>
   <#if value.isNullable==false>
-  @NotNull(message = "[=key?uncap_first] Should not be null")
+  @NotNull(message = "[=value.fieldName] Should not be null")
   </#if> 
   </#if>
   </#if>
@@ -22,15 +22,15 @@ public class Update[=ClassName]Input {
   </#if>
   <#else>
   <#if value.isNullable==false>
-  @NotNull(message = "[=key?uncap_first] Should not be null")
+  @NotNull(message = "[=value.fieldName] Should not be null")
   </#if> 
   </#if> 
   <#if value.fieldType?lower_case == "string"> 
   <#if value.length !=0>
-  @Length(max = <#if value.length !=0>[=value.length?c]<#else>255</#if>, message = "[=key?uncap_first] must be less than <#if value.length !=0>[=value.length?c]<#else>255</#if> characters")
+  @Length(max = <#if value.length !=0>[=value.length?c]<#else>255</#if>, message = "[=value.fieldName] must be less than <#if value.length !=0>[=value.length?c]<#else>255</#if> characters")
   </#if>
   </#if>
-  private [=value.fieldType] [=key?uncap_first];
+  private [=value.fieldType] [=value.fieldName];
   </#if>
 </#list>
 <#list Relationship as relationKey,relationValue>
@@ -100,12 +100,12 @@ public class Update[=ClassName]Input {
 <#list Fields as key,value>
   <#if value.fieldType?lower_case == "long" || value.fieldType?lower_case == "integer" || value.fieldType?lower_case == "short" || value.fieldType?lower_case == "double" || value.fieldType?lower_case == "boolean"|| value.fieldType?lower_case == "date"|| value.fieldType?lower_case == "string" >
  
-  public [=value.fieldType?cap_first] get[=key?cap_first]() {
-  	return [=key?uncap_first];
+  public [=value.fieldType?cap_first] get[=value.fieldName?cap_first]() {
+  	return [=value.fieldName];
   }
 
-  public void set[=key?cap_first]([=value.fieldType?cap_first] [=key?uncap_first]){
-  	this.[=key?uncap_first] = [=key?uncap_first];
+  public void set[=value.fieldName?cap_first]([=value.fieldType?cap_first] [=value.fieldName]){
+  	this.[=value.fieldName] = [=value.fieldName];
   }
  </#if> 
 </#list>

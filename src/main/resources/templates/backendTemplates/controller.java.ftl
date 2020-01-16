@@ -124,9 +124,9 @@ public class [=ClassName]Controller {
 		Find[=ClassName]By[=authValue.fieldName?cap_first]Output found[=ClassName] = _[=ClassName?uncap_first]AppService.FindBy[=authValue.fieldName?cap_first]([=ClassName?uncap_first].get[=authValue.fieldName?cap_first]());
 
 	        if (found[=ClassName] != null) {
-	            logHelper.getLogger().error("There already exists a [=ClassName] with a [=authValue.fieldName?cap_first]=%s", [=ClassName?uncap_first].get[=authValue.fieldName?cap_first]());
+	            logHelper.getLogger().error("There already exists a [=ClassName?uncap_first] with a [=authValue.fieldName?cap_first]=%s", [=ClassName?uncap_first].get[=authValue.fieldName?cap_first]());
 	            throw new EntityExistsException(
-	                    String.format("There already exists a [=ClassName] with [=authValue.fieldName?cap_first] =%s", [=ClassName?uncap_first].get[=authValue.fieldName?cap_first]()));
+	                    String.format("There already exists a [=ClassName?uncap_first] with [=authValue.fieldName?cap_first] =%s", [=ClassName?uncap_first].get[=authValue.fieldName?cap_first]()));
 	        }
 	    </#if> 
         <#if authKey == "Password">
