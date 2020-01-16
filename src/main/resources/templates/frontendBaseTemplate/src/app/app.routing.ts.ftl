@@ -4,6 +4,7 @@ import { ModuleWithProviders } from "@angular/core";
 import { CanDeactivateGuard } from 'projects/fast-code-core/src/public_api';
 import { HomeComponent } from './home/home.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
+import { ErrorPageComponent  } from './error-page/error-page.component';
 <#if AuthenticationType != "none">
 import { LoginComponent } from './login/index';
 import { AuthGuard } from './core/auth-guard';
@@ -28,19 +29,19 @@ const routes: Routes = [
 	{ path: 'login/:returnUrl', component: LoginComponent },
 	{ path: 'callback', component: CallbackComponent },
 	</#if>
-    <#if FlowableModule!false>
-
-    { path: 'task-app', children: TaskAppRoutes <#if AuthenticationType != "none">,canActivate: [ AuthGuard ]</#if>},
-    </#if>
-    <#if SchedulerModule!false>
-    {path: 'scheduler', children: SchedulerRoutes},
-    </#if>
-    <#if EmailModule!false>
-    {path: 'email', children: EmailRoutes<#if AuthenticationType != "none">,canActivate: [ AuthGuard ]</#if> },
-
-    </#if>
-    { path: '', component: HomeComponent },
-	{ path: '', redirectTo: '/', pathMatch: 'full' }, 
+  <#if FlowableModule!false>
+  { path: 'task-app', children: TaskAppRoutes <#if AuthenticationType != "none">,canActivate: [ AuthGuard ]</#if>},
+  </#if>
+  <#if SchedulerModule!false>
+  {path: 'scheduler', children: SchedulerRoutes},
+  </#if>
+  <#if EmailModule!false>
+  {path: 'email', children: EmailRoutes<#if AuthenticationType != "none">,canActivate: [ AuthGuard ]</#if> },
+  </#if>
+  { path: '', component: HomeComponent },
+  //{ path: '', redirectTo: '/', pathMatch: 'full' },
+  { path: '**', component:ErrorPageComponent},
+	
 ];
 
 export const routingModule: ModuleWithProviders = RouterModule.forRoot(routes<#if FlowableModule!false>, { useHash: true, enableTracing: true }</#if>);

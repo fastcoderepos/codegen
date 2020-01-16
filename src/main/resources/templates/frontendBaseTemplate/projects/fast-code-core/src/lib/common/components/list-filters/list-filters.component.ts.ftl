@@ -2,12 +2,7 @@ import { Component, OnInit, Output, EventEmitter, Input, ElementRef, ViewChild }
 import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 import { IListColumn, listColumnType } from '../../ilistColumn';
 import { MatDialog, MatDialogRef } from '@angular/material';
-import { AddFilterFieldComponent } from './add-filter-field/add-filter-field.component';
-
-import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { MatAutocompleteSelectedEvent, MatChipInputEvent, MatAutocomplete } from '@angular/material';
-import { Observable } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
 import { ISearchField, operatorType } from './ISearchCriteria';
 import { TranslateService } from '@ngx-translate/core';
 
@@ -19,16 +14,15 @@ import { TranslateService } from '@ngx-translate/core';
 export class ListFiltersComponent implements OnInit {
   @Input('matChipInputAddOnBlur')
   addOnBlur: boolean
-  
+
   @Input('matChipInputSeparatorKeyCodes')
   separatorKeysCodes: number[]
-  
+
   @Output() onSearch: EventEmitter<any> = new EventEmitter();
   @Input() columnsList: IListColumn[];
   filterFields: IListColumn[] = [];
   selectedFilterFields: ISearchField[] = [];
   selectedDisplayFilterFields: any[] = [];
-
   noFilterableFields: boolean = true;
 
   basicFilterForm: FormGroup;
@@ -38,8 +32,8 @@ export class ListFiltersComponent implements OnInit {
 
   filterCtrl = new FormControl();
 
-  @ViewChild('filterInput',{ read: ElementRef, static: false }) filterInput: ElementRef<HTMLInputElement>;
-  @ViewChild('auto',{ read: MatAutocomplete, static: false }) matAutocomplete: MatAutocomplete;
+  @ViewChild('filterInput', { read: ElementRef, static: false }) filterInput: ElementRef<HTMLInputElement>;
+  @ViewChild('auto', { read: MatAutocomplete, static: false }) matAutocomplete: MatAutocomplete;
 
 
   addFieldDialogRef: MatDialogRef<any>;
@@ -47,7 +41,7 @@ export class ListFiltersComponent implements OnInit {
   constructor(
     private formBuilder: FormBuilder,
     public dialog: MatDialog,
-    private translate: TranslateService
+    private translate: TranslateService,
   ) { }
 
   ngOnInit() {
@@ -56,6 +50,11 @@ export class ListFiltersComponent implements OnInit {
 
   initializeFilterForms(): void {
     this.basicFilterForm = this.formBuilder.group({
+      fieldName: [''],
+      searchValue: [''],
+      startingValue: [''],
+      endingValue: [''],
+      operator: ['', Validators.required],
     });
     this.basicFilterForm.addControl("searchText", new FormControl(''));
     this.basicFilterForm.addControl("addFilter", new FormControl(''));
@@ -69,24 +68,58 @@ export class ListFiltersComponent implements OnInit {
   }
 
   search(): void {
-    this.onSearch.emit(this.selectedFilterFields);
-  }
+    let result = this.basicFilterForm.value;
+    let searchValue = result.searchValue;
+    let startingValue = result.startingValue;
+    let endingValue = result.endingValue;
 
-  addFilter(field): void {
-    console.log(field);
-    this.addFieldDialogRef = this.dialog.open(AddFilterFieldComponent, {
-      disableClose: true,
-      data: field
-    });
-    this.addFieldDialogRef.afterClosed().subscribe(result => {
-      console.log(result)
-    });
-    this.basicFilterForm.get("addFilter").setValue(this.basicFilterForm.get("addFilter").value + " " + field.label);
-    this.filterFields.forEach((filterField, index) => {
-      if (filterField.column == field.column) {
-        this.filterFields.splice(index, 1)
+    if (this.field.type == listColumnType.Date) {
+      if (searchValue) {
+        searchValue = new Date(searchValue.toString()).toLocaleDateString();
+        result.searchValue = this.parseDateToDefaultStringFormat(new Date(searchValue));
       }
-    });
+      if (startingValue) {
+        startingValue = new Date(startingValue.toString()).toLocaleDateString();
+        result.startingValue = this.parseDateToDefaultStringFormat(new Date(startingValue));
+      }
+      if (endingValue) {
+        endingValue = new Date(endingValue.toString()).toLocaleDateString();
+        result.endingValue = this.parseDateToDefaultStringFormat(new Date(endingValue));
+      }
+    }
+
+    this.selectedFilterFields.push(result);  
+    switch (this.basicFilterForm.controls['operator'].value) {
+      case operatorType.Contains:
+        this.selectedDisplayFilterFields.push(result.fieldName + ": " + this.translate.instant('LIST-FILTERS.FIELD-CRITERIA-DISPLAY.CONTAINS') + " \"" + result.searchValue + "\"");
+        break;
+      case operatorType.Equals:
+        this.selectedDisplayFilterFields.push(result.fieldName + ": " + this.translate.instant('LIST-FILTERS.FIELD-CRITERIA-DISPLAY.EQUALS') + " \"" + result.searchValue + "\"");
+        break;
+      case operatorType.NotEqual:
+        this.selectedDisplayFilterFields.push(result.fieldName + ": " + this.translate.instant('LIST-FILTERS.FIELD-CRITERIA-DISPLAY.NOT-EQUAL') + " \"" + result.searchValue + "\"");
+        break;
+      case operatorType.Range:
+        let displayField = result.fieldName + ":";
+
+        if (this.basicFilterForm.controls['startingValue'].value) {
+          displayField = displayField + " " + this.translate.instant('LIST-FILTERS.FIELD-CRITERIA-DISPLAY.FROM') + " \"" + result.startingValue + "\"";
+        }
+
+        if (this.basicFilterForm.controls['endingValue'].value) {
+          displayField = displayField + " " + this.translate.instant('LIST-FILTERS.FIELD-CRITERIA-DISPLAY.TO') + " \"" + result.endingValue + "\"";
+        }
+        this.selectedDisplayFilterFields.push(displayField);
+        break;
+    }
+    this.filterFields.splice(this.filterFields.findIndex(filterField => filterField === this.field), 1);
+    // this.filterInput.nativeElement.value = '';
+    this.filterCtrl.setValue(null);
+    //removing selected field from filter field options
+    console.log("Filter Data here :",this.selectedFilterFields);
+    this.onSearch.emit(this.selectedFilterFields);
+    this.basicFilterForm.reset();
+    this.mySelector= false;
   }
 
   add(event: MatChipInputEvent): void {
@@ -124,74 +157,19 @@ export class ListFiltersComponent implements OnInit {
 
     return datestring;
   }
-
+  mySelector: Boolean = false;
+  field:IListColumn;
   selected(event: MatAutocompleteSelectedEvent): void {
-
+    console.log("Selct Value Event :",event);
     //getting Icolumnfield object for selected field
-    let field: IListColumn = this.filterFields.find(x => x.label == event.option.viewValue);
-
-    this.addFieldDialogRef = this.dialog.open(AddFilterFieldComponent, {
-      disableClose: true,
-      data: field
-    });
-    this.addFieldDialogRef.afterClosed().subscribe((result: ISearchField) => {
-      if (result != null) {
-
-        let searchValue = result.searchValue;
-        let startingValue = result.startingValue;
-        let endingValue = result.endingValue;
-
-        if (field.type == listColumnType.Date) {
-          if (searchValue) {
-            searchValue = new Date(searchValue.toString()).toLocaleDateString();
-            result.searchValue = this.parseDateToDefaultStringFormat(new Date(searchValue));
-          }
-          if (startingValue) {
-            startingValue = new Date(startingValue.toString()).toLocaleDateString();
-            result.startingValue = this.parseDateToDefaultStringFormat(new Date(startingValue));
-          }
-          if (endingValue) {
-            endingValue = new Date(endingValue.toString()).toLocaleDateString();
-            result.endingValue = this.parseDateToDefaultStringFormat(new Date(endingValue));
-          }
-        }
-
-        this.selectedFilterFields.push(result);
-
-        switch (result.operator) {
-          case operatorType.Contains:
-            this.selectedDisplayFilterFields.push(event.option.viewValue + ": " + this.translate.instant('LIST-FILTERS.FIELD-CRITERIA-DISPLAY.CONTAINS') + " \"" + searchValue + "\"");
-            break;
-          case operatorType.Equals:
-            this.selectedDisplayFilterFields.push(event.option.viewValue + ": " + this.translate.instant('LIST-FILTERS.FIELD-CRITERIA-DISPLAY.EQUALS') + " \"" + searchValue + "\"");
-            break;
-          case operatorType.NotEqual:
-            this.selectedDisplayFilterFields.push(event.option.viewValue + ": " + this.translate.instant('LIST-FILTERS.FIELD-CRITERIA-DISPLAY.NOT-EQUAL') + " \"" + searchValue + "\"");
-            break;
-          case operatorType.Range:
-            let displayField = event.option.viewValue + ":";
-
-            if (startingValue) {
-              displayField = displayField + " " + this.translate.instant('LIST-FILTERS.FIELD-CRITERIA-DISPLAY.FROM') +" \"" + startingValue + "\"";
-            }
-
-            if (endingValue) {
-              displayField = displayField + " " + this.translate.instant('LIST-FILTERS.FIELD-CRITERIA-DISPLAY.TO') +" \"" + endingValue + "\"";
-            }
-            this.selectedDisplayFilterFields.push(displayField);
-            break;
-        }
-        this.filterInput.nativeElement.value = '';
-        this.filterCtrl.setValue(null);
-
-        //removing selected field from filter field options
-        this.filterFields.splice(this.filterFields.findIndex(filterField => filterField === field), 1);
-      }
-    });
+    this.field = this.filterFields.find(x => x.label == event.option.viewValue);
+    this.basicFilterForm.controls['fieldName'].setValue(this.field.column);
+    this.compareValue(this.field);
+    this.mySelector = true;
   }
 
   remove(field: string, index: number): void {
-    // const index = this.selectedDisplayFilterFields.indexOf(field);
+      // const index = this.selectedDisplayFilterFields.indexOf(field);
 
     // get listcolumn object from filter field
     let filterField = this.columnsList.find(x => {
@@ -203,7 +181,26 @@ export class ListFiltersComponent implements OnInit {
 
     this.selectedDisplayFilterFields.splice(index, 1);
     this.selectedFilterFields.splice(index, 1);
-
+    this.onSearch.emit(this.selectedFilterFields);
   }
 
+  // campare value controller
+  // field: IListColumn;
+  filterFieldForm: FormGroup;
+  operators: any;
+  booleanOptions: string[] = ['True', 'False'];
+  compareValue(val) {
+    this.field = val;
+    this.operators = Object.keys(operatorType).map(k => operatorType[k as any]);
+    if (this.field.type == listColumnType.String) {
+      this.operators.splice(this.operators.indexOf(operatorType.Range), 1);
+    }
+    else if (this.field.type == listColumnType.Boolean) {
+      this.operators.splice(this.operators.indexOf(operatorType.Contains), 1);
+      this.operators.splice(this.operators.indexOf(operatorType.Range), 1);
+    }
+    else {
+      this.operators.splice(this.operators.indexOf(operatorType.Contains), 1);
+    }
+  }
 }

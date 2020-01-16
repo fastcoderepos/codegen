@@ -1,6 +1,19 @@
-<h1 mat-dialog-title>{{'CONFIRM-DIALOG-TITLE' | translate}}</h1>
-<div mat-dialog-content>{{confirmMessage}}</div>
-<div mat-dialog-actions>
-  <button mat-button (click)="dialogRef.close(true)">{{'FASTCODE-CORE-GENERAL.ACTIONS.CONFIRM' | translate}}</button>
-  <button mat-button (click)="dialogRef.close(false)">{{'FASTCODE-CORE-GENERAL.ACTIONS.CANCEL' | translate}}</button>
+<div class="template-dialog">
+  <div class="dialog-header">
+    <h2 class="dialog-header-title" style="margin:0;">{{title}}
+      <button mat-icon-button color="basic" (click)="dialogRef.close(false)">
+        <mat-icon>close</mat-icon>
+      </button>&nbsp;
+    </h2>
+  </div>
+  <div class="dialog-content">
+    <br>
+    <h4 class="error-msg ">
+      <mat-icon style="margin:0;">error</mat-icon>&nbsp; {{confirmMessage}}
+    </h4>
+    <br>
+  </div>
+  <div mat-dialog-actions class="fb-text-right">
+    <button mat-raised-button color="warn" (click)="dialogRef.close(true)">{{action}}</button>
+  </div>
 </div>

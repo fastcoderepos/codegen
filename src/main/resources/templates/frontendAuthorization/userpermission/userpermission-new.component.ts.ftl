@@ -44,16 +44,17 @@ export class [=AuthenticationTable]permissionNewComponent extends BaseNewCompone
 		super.ngOnInit();
     this.setForm();
 		this.checkPassedData();
+    this.setPickerSearchListener();
   }
   
   setForm() {
     this.itemForm = this.formBuilder.group({
       revoked : [{ value: false }],
       permissionId: ['', Validators.required],
-      permissionDescriptiveField : [{ value: '', disabled: true }],
+      permissionDescriptiveField : [''],
       <#if !UserInput??>
       [=AuthenticationTable?uncap_first]Id: ['', Validators.required],
-      [=AuthenticationTable?uncap_first]DescriptiveField : [{ value: '', disabled: true }],
+      [=AuthenticationTable?uncap_first]DescriptiveField : [''],
       <#elseif UserInput??>
       <#if PrimaryKeys??>
       <#list PrimaryKeys as key,value>
@@ -64,13 +65,13 @@ export class [=AuthenticationTable]permissionNewComponent extends BaseNewCompone
       </#if>
       
       <#if DescriptiveField?? && DescriptiveField[AuthenticationTable]?? && DescriptiveField[AuthenticationTable].description??>
-      [=DescriptiveField[AuthenticationTable].description?uncap_first] : [{ value: '', disabled: true }],
+      [=DescriptiveField[AuthenticationTable].description?uncap_first] : [''],
             <#else>
       <#if AuthenticationFields??>
         <#list AuthenticationFields as authKey,authValue>
         <#if authKey== "UserName">
         <#if !PrimaryKeys[authValue.fieldName]??>
-        [=AuthenticationTable?uncap_first + authValue.fieldName?cap_first]: [{ value: '', disabled: true }],
+        [=AuthenticationTable?uncap_first + authValue.fieldName?cap_first]: [''],
         </#if>
         </#if>
         </#list>

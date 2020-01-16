@@ -1,5 +1,6 @@
 import { Component, OnInit, Inject } from '@angular/core';
-import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-confirm-dialog',
@@ -7,11 +8,27 @@ import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
   styleUrls: ['./confirm-dialog.component.css']
 })
 export class ConfirmDialogComponent implements OnInit {
-  constructor(@Inject(MAT_DIALOG_DATA) public data: any,public dialogRef: MatDialogRef<ConfirmDialogComponent>) {}
+  constructor(
+    @Inject(MAT_DIALOG_DATA) public data: any,
+    public dialogRef: MatDialogRef<ConfirmDialogComponent>,
+    public translate: TranslateService,
+  ){}
 
   public confirmMessage:string;
+  public title:string;
+  public action:string;
+
   ngOnInit() {
-    this.confirmMessage = this.data.message;
+    if(this.data.confirmationType == "delete"){
+      this.confirmMessage = this.translate.instant('CONFIRM-DIALOG.DELETE.MESSAGE');
+      this.title = this.translate.instant('CONFIRM-DIALOG.DELETE.TITLE');
+      this.action = this.translate.instant('FASTCODE-CORE-GENERAL.ACTIONS.DELETE');
+    }
+    else{
+      this.confirmMessage = this.data.message? this.data.message: this.translate.instant('CONFIRM-DIALOG.MESSAGE');
+      this.title = this.data.title? this.data.title: this.translate.instant('CONFIRM-DIALOG.TITLE');
+      this.action = this.data.action? this.data.action: this.translate.instant('FASTCODE-CORE-GENERAL.ACTIONS.CONFIRM');
+    }
   }
 }
 

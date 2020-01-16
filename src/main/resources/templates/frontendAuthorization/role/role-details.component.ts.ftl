@@ -38,7 +38,8 @@ export class RoleDetailsComponent extends BaseDetailsComponent<IRole> implements
 		this.setAssociations();
 		super.ngOnInit();
 		this.setForm();
-		this.getItem();
+    this.getItem();
+    this.setPickerSearchListener();
   }
   
   setForm(){
