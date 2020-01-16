@@ -40,6 +40,7 @@ export class PermissionNewComponent extends BaseNewComponent<IPermission> implem
 		super.ngOnInit();
 		this.setForm();
 		this.checkPassedData();
+    this.setPickerSearchListener();
   }
   
   setForm(){

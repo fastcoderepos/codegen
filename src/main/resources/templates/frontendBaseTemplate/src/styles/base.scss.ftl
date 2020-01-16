@@ -1,10 +1,6 @@
 /* You can add global styles to this file, and also import other style files */
-//@import '~@angular/material/theming'; //uncomment for prod
 @import './node_modules/@angular/material/_theming.scss'; //for testing purpose
-//@import 'lightgreen-amber.scss';
-//@import 'light-indigo.scss';
-@import 'light-purple-teal.scss';
-//@import 'green-lime.scss';
+@import 'theme1.scss';
 $fc-margin:8px;
 $fc-margin-half:4px;
 $fc-margin2:16px;
@@ -34,7 +30,7 @@ $fc-accent-color: mat-color($fc-theme-accent);
         padding-left: 24px;
         padding-right: 24px;
     }
-    
+
     mat-cell{
         padding: 2px;
         word-break: break-all;
@@ -53,26 +49,6 @@ $fc-accent-color: mat-color($fc-theme-accent);
     }
 }
 
-@media (max-width: 1024px) {
-    .mobile-label {
-        width: 120px;
-        margin: 5px;
-        display: inline-block !important;
-        font-weight: bold;
-        word-break: keep-all !important;
-    }
-
-    .mat-header-row {
-        display: none;
-    }
-
-    .mat-row {
-        flex-direction: column;
-        align-items: start;
-        padding: 8px 8px;
-    }
-}
-
 .mobile-label {
     display: none;
 }
@@ -81,8 +57,3 @@ $fc-accent-color: mat-color($fc-theme-accent);
     margin:$fc-margin3;
     height: 100%;
 }
-
-.details-container{
-    height: 100%;
-}
-

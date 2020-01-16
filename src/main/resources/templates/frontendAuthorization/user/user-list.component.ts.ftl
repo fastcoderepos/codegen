@@ -46,55 +46,54 @@ export class UserListComponent extends BaseListComponent<IUser> implements OnIni
 		];
 	}
   
-  	setColumns(){
-  		this.columns = [
-			
-			{
-				column: 'firstName',
-				label: 'firstName',
-				sort: true,
-				filter: true,
-				type: listColumnType.String
-			},
-			{
-				column: 'lastName',
-				label: 'lastName',
-				sort: true,
-				filter: true,
-				type: listColumnType.String
-			},
-			{
-				column: 'userName',
-				label: 'userName',
-				sort: true,
-				filter: true,
-				type: listColumnType.String
-			},
-			{
-				column: 'emailAddress',
-				label: 'emailAddress',
-				sort: true,
-				filter: true,
-				type: listColumnType.String
-			},
-			{
-				column: 'isActive',
-				label: 'isActive',
-				sort: true,
-				filter: true,
-				type: listColumnType.Boolean
-			},
-		  	{
-				column: 'actions',
-				label: 'Actions',
-				sort: false,
-				filter: false,
-				type: listColumnType.String
-			}
-		];
-		this.selectedColumns = this.columns;
-		this.displayedColumns = this.columns.map((obj) => { return obj.column });
-  	}
+	setColumns(){
+		this.columns = [
+  		{
+  			column: 'firstName',
+  			label: 'firstName',
+  			sort: true,
+  			filter: true,
+  			type: listColumnType.String
+  		},
+  		{
+  			column: 'lastName',
+  			label: 'lastName',
+  			sort: true,
+  			filter: true,
+  			type: listColumnType.String
+  		},
+  		{
+  			column: 'userName',
+  			label: 'userName',
+  			sort: true,
+  			filter: true,
+  			type: listColumnType.String
+  		},
+  		{
+  			column: 'emailAddress',
+  			label: 'emailAddress',
+  			sort: true,
+  			filter: true,
+  			type: listColumnType.String
+  		},
+  		{
+  			column: 'isActive',
+  			label: 'isActive',
+  			sort: true,
+  			filter: true,
+  			type: listColumnType.Boolean
+  		},
+  	  	{
+  			column: 'actions',
+  			label: 'Actions',
+  			sort: false,
+  			filter: false,
+  			type: listColumnType.String
+  		}
+  	];
+  	this.selectedColumns = this.columns;
+  	this.displayedColumns = this.columns.map((obj) => { return obj.column });
+	}
   
 	addNew() {
 		super.addNew(UserNewComponent);

@@ -1,243 +1,121 @@
-<mat-sidenav-container class="sidenav-container"> 
-  <mat-sidenav #drawer class="sidenav" fixedInViewport="true" [attr.role]="(isSmallDevice$ | async) ? 'dialog' : 'navigation'" 
-    [mode]="(isSmallDevice$ | async) ? 'over' : 'side'" 
-    [opened]="!(isSmallDevice$ | async) && !isCurrentRootRoute <#if AuthenticationType != "none">&&  Auth.token</#if>"> 
- 
-    <mat-toolbar color="primary">Menu</mat-toolbar> 
-    <mat-nav-list class="nav-list"> 
-      <a mat-list-item class="sidenav-list-item" routerLink="/">{{'MainNav.Home' | translate }}</a>
-      
-      <mat-expansion-panel class="expansion-panel"> 
-        <mat-expansion-panel-header class="subnav-header"> 
-          {{'MainNav.Language' | translate}} 
-        </mat-expansion-panel-header> 
- 
-        <mat-nav-list class="subnav"> 
-          <mat-radio-group class="radio-group" [(ngModel)]="selectedLanguage"> 
-            <mat-radio-button class="radio-button" *ngFor="let lang of translate.getLangs()" (click)="switchLanguage(lang)" 
-              [value]="lang"> 
-              {{lang | translate}} 
-            </mat-radio-button> 
-          </mat-radio-group> 
- 
-        </mat-nav-list> 
-      </mat-expansion-panel>
-      
-      <mat-expansion-panel class="expansion-panel"> 
-        <mat-expansion-panel-header class="subnav-header"> 
-          {{'MainNav.Entities' | translate }} 
-        </mat-expansion-panel-header> 
- 
-        <mat-nav-list class="subnav"> 
- 
-          <ng-container *ngFor="let entity of entityList"> 
-            <a <#if AuthenticationType != "none">*ngIf="isMenuVisible(entity)"</#if> mat-list-item class="mat-sub-list-item" [routerLink]="[entity]"> 
-              {{entity}} 
-            </a> 
-          </ng-container> 
- 
-        </mat-nav-list> 
-      </mat-expansion-panel>
-      
-      <#if AuthenticationType != "none">
-      <#if FlowableModule!false>
-      <a mat-list-item class="sidenav-list-item" routerLink="/task-app/tasks">{{'MainNav.Task.Tasks' | translate }}</a>
-      
-      </#if>
-      </#if>
+<mat-sidenav-container class="sidenav-container">
+  <mat-sidenav #drawer class="sidenav" fixedInViewport="true"
+    [attr.role]="(isSmallDevice$ | async) ? 'dialog' : 'navigation'" [mode]="(isSmallDevice$ | async) ? 'over' : 'side'"
+    [opened]="!(isSmallDevice$ | async) && !isCurrentRootRoute <#if AuthenticationType != "none">&&  Auth.token</#if>">
+
+    <mat-toolbar color="primary">
+      <figure class="loggo">
+        <img src="../../../../assets/images/logo.png" alt="logo" />
+      </figure>
+  
+    </mat-toolbar>
+    <mat-nav-list class="nav-list">
+      <a mat-list-item class="sidenav-list-item" routerLink="/"><i class="material-icons">home</i> &nbsp;{{'MainNav.Home' | translate }}</a>
+
       <mat-expansion-panel class="expansion-panel">
         <mat-expansion-panel-header class="subnav-header">
-          {{'MainNav.Tools' | translate }}
+          <i class="material-icons">
+            g_translate
+            </i> &nbsp;{{'MainNav.Language' | translate}}
         </mat-expansion-panel-header>
 
         <mat-nav-list class="subnav">
-          
-          <#if EmailModule!false>
-          <mat-expansion-panel class="expansion-panel">
-            <mat-expansion-panel-header class="subnav-header">
-              {{'MainNav.Email.Title' | translate }}
-            </mat-expansion-panel-header>
+          <mat-radio-group class="radio-group" [(ngModel)]="selectedLanguage">
+            <mat-radio-button class="radio-button" *ngFor="let lang of translate.getLangs()"
+              (click)="switchLanguage(lang)" [value]="lang">
+             {{lang | translate}}
+            </mat-radio-button>
+          </mat-radio-group>
 
-            <mat-nav-list class="subnav">
-
-              <a mat-list-item class="mat-sub-list-item" *ngIf="isMenuVisible('email')"
-                routerLink="email/emailtemplates">{{'MainNav.Email.EmailTemplate' | translate }}
-              </a>
-              <a mat-list-item class="mat-sub-list-item" *ngIf="isMenuVisible('emailvariable')"
-                routerLink="email/emailvariables">{{'MainNav.Email.EmailVariables' | translate }}
-              </a>
-
-            </mat-nav-list>
-          </mat-expansion-panel>
-          
-          </#if>
-          <#if SchedulerModule!false>
-          <mat-expansion-panel class="expansion-panel">
-            <mat-expansion-panel-header class="subnav-header">
-              {{'MainNav.JobScheduling.Title' | translate }}
-            </mat-expansion-panel-header>
-
-            <mat-nav-list class="subnav">
-
-              <a mat-list-item class="mat-sub-list-item" routerLink="jobs">{{'MainNav.JobScheduling.Jobs' | translate }}
-              </a>
-              <a mat-list-item class="mat-sub-list-item" routerLink="executingJobs">{{'MainNav.JobScheduling.ExecutingJobs' 
-                | translate }} </a>
-              <a mat-list-item class="mat-sub-list-item" routerLink="triggers">{{'MainNav.JobScheduling.Triggers' | 
-                translate }} </a>
-              <a mat-list-item class="mat-sub-list-item" routerLink="executionHistory">{{'MainNav.JobScheduling.ExecutionHistory' 
-                | translate }} </a>
-
-            </mat-nav-list>
-          </mat-expansion-panel>
-          
-          </#if>
-          <#if FlowableModule!false>
-          <a mat-list-item class="sidenav-list-item" target="_blank" routerLink="/modeler/">{{'MainNav.BPMModeler' | translate }}</a>
-          
-          </#if>
         </mat-nav-list>
       </mat-expansion-panel>
-      
+
       <mat-expansion-panel class="expansion-panel">
         <mat-expansion-panel-header class="subnav-header">
-          {{'MainNav.Administration' | translate }}
+          <i class="material-icons">
+            dvr
+            </i> &nbsp;{{'MainNav.Entities' | translate }}
         </mat-expansion-panel-header>
-        
-        <#if AuthenticationType != "none"> 
-        <mat-expansion-panel class="expansion-panel"> 
-	        <mat-expansion-panel-header class="subnav-header"> 
-	          {{'MainNav.AccessMgmt' | translate }} 
-	        </mat-expansion-panel-header> 
-	 
-	        <mat-nav-list class="subnav"> 
-	 
-	          <#if !UserInput??> 
-	          <a mat-list-item class="mat-sub-list-item" *ngIf="isMenuVisible('user')" routerLink="user">Users </a>
-            <a mat-list-item class="mat-sub-list-item" *ngIf="isMenuVisible('userpermission')" routerLink="userpermission">User Permissions </a>
-            <a mat-list-item class="mat-sub-list-item" *ngIf="isMenuVisible('userrole')" routerLink="userrole">User Roles </a>
-	          <#elseif UserInput??> 
-	          <a mat-list-item class="mat-sub-list-item" *ngIf="isMenuVisible('[=AuthenticationTable?lower_case]')" routerLink="[=AuthenticationTable?lower_case]">[=AuthenticationTable] </a> 
-	          <a mat-list-item class="mat-sub-list-item" *ngIf="isMenuVisible('[=AuthenticationTable?lower_case]permission')" routerLink="[=AuthenticationTable?lower_case]permission">[=AuthenticationTable] Permissions </a> 
-	          <a mat-list-item class="mat-sub-list-item" *ngIf="isMenuVisible('[=AuthenticationTable?lower_case]role')" routerLink="[=AuthenticationTable?lower_case]role">[=AuthenticationTable] Roles </a> 
-	          </#if>
-	          <a mat-list-item class="mat-sub-list-item" *ngIf="isMenuVisible('role')" routerLink="role">Roles</a> 
-	          <a mat-list-item class="mat-sub-list-item" *ngIf="isMenuVisible('permission')" routerLink="permission">Permissions</a> 
-	          <a mat-list-item class="mat-sub-list-item" *ngIf="isMenuVisible('rolepermission')" routerLink="rolepermission">Roles Permissions</a> 
-	 
-	        </mat-nav-list> 
-	      </mat-expansion-panel>
-	      
-	    <#if History!false>
-        <a mat-list-item class="sidenav-list-item" routerLink="entityHistory">{{'MainNav.EntityHistory' | translate }} 
-        </a>
-        
-        </#if>
-        <#if FlowableModule!false>
-        <mat-expansion-panel class="expansion-panel" *ngIf="isFlowableMenuVisible('access-admin')">
-          <mat-expansion-panel-header class="subnav-header">
-            {{'MainNav.ProcessAdmin.Title' | translate }}
-          </mat-expansion-panel-header>
 
-          <a mat-list-item class="mat-sub-list-item"
-            href="/#/flowable-admin/engine">{{'MainNav.ProcessAdmin.ConfigurationEngine' | translate }} </a>
-          <!-- Process Engine -->
-          <mat-expansion-panel class="expansion-panel">
+        <mat-nav-list class="subnav">
 
-            <mat-expansion-panel-header class="subnav-header">
-              {{'MainNav.ProcessAdmin.ProcessEngine' | translate }}
-            </mat-expansion-panel-header>
+          <ng-container *ngFor="let entity of entityList">
+            <a <#if AuthenticationType != "none">*ngIf="isMenuVisible(entity)"</#if> mat-list-item class="mat-sub-list-item" [routerLink]="[entity]">
+             {{entity}}
+            </a>
+          </ng-container>
 
-            <mat-nav-list class="subnav">
-              <a mat-list-item class="mat-sub-list-item"
-                href="/#/flowable-admin/deployments">{{'MainNav.ProcessAdmin.Deployments'|translate }} </a>
-              <a mat-list-item class="mat-sub-list-item"
-                href="/#/flowable-admin/process-definitions">{{'MainNav.ProcessAdmin.Definitions'|translate }} </a>
-              <a mat-list-item class="mat-sub-list-item"
-                href="/#/flowable-admin/process-instances">{{'MainNav.ProcessAdmin.Instances'|translate }} </a>
-              <a mat-list-item class="mat-sub-list-item"
-                href="/#/flowable-admin/tasks">{{'MainNav.ProcessAdmin.Tasks' |translate }} </a>
-              <a mat-list-item class="mat-sub-list-item"
-                href="/#/flowable-admin/jobs">{{'MainNav.ProcessAdmin.Jobs' |translate }} </a>
-              <a mat-list-item class="mat-sub-list-item"
-                href="/#/flowable-admin/event-subscriptions">{{'MainNav.ProcessAdmin.EventSubscriptions'|translate }}
-              </a>
-            </mat-nav-list>
-
-          </mat-expansion-panel>
-    
-          <!-- App engine -->
-          <mat-expansion-panel class="expansion-panel">
-
-            <mat-expansion-panel-header class="subnav-header">
-              {{'MainNav.ProcessAdmin.AppEngine' | translate }}
-            </mat-expansion-panel-header>
-
-            <mat-nav-list class="subnav">
-              <a mat-list-item class="mat-sub-list-item"
-                href="/#/flowable-admin/app-deployments">{{'MainNav.ProcessAdmin.Deployments'|translate }} </a>
-              <a mat-list-item class="mat-sub-list-item"
-                href="/#/flowable-admin/app-definitions">{{'MainNav.ProcessAdmin.Definitions'|translate }} </a>
-            </mat-nav-list>
-
-          </mat-expansion-panel>
-
-          <!-- Form engine -->
-          <mat-expansion-panel class="expansion-panel">
-
-            <mat-expansion-panel-header class="subnav-header">
-              {{'MainNav.ProcessAdmin.FormEngine' | translate }}
-            </mat-expansion-panel-header>
-
-            <mat-nav-list class="subnav">
-              <a mat-list-item class="mat-sub-list-item"
-                href="/#/flowable-admin/form-deployments">{{'MainNav.ProcessAdmin.Deployments'|translate }} </a>
-              <a mat-list-item class="mat-sub-list-item"
-                href="/#/flowable-admin/form-definitions">{{'MainNav.ProcessAdmin.Definitions'|translate }} </a>
-              <a mat-list-item class="mat-sub-list-item"
-                href="/#/flowable-admin/form-instances">{{'MainNav.ProcessAdmin.Instances'|translate }} </a>
-            </mat-nav-list>
-
-          </mat-expansion-panel>
-
-        </mat-expansion-panel>
-        
-	      </#if>
-	      
-	      </#if>
-        <a mat-list-item class="sidenav-list-item" target="_blank" routerLink="/api/swagger-ui.html">{{'MainNav.API' | translate }}</a>
+        </mat-nav-list>
       </mat-expansion-panel>
 
-      <a mat-list-item class="sidenav-list-item">{{'MainNav.About' | translate }}</a>
-    </mat-nav-list> 
-  </mat-sidenav> 
-  <mat-sidenav-content #navContent class="fc-sidenav-content"> 
-    <mat-toolbar class="fc-tool-bar" color="primary" *ngIf="!(Global.isSmallDevice$ | async)"> 
- 
-      <i class="material-icons"> 
-        account_balance 
-      </i> 
- 
-      <span>{{appName}}</span>
-      
+      <mat-expansion-panel class="expansion-panel">
+        <mat-expansion-panel-header class="subnav-header">
+          <i class="material-icons">
+            account_box
+            </i> &nbsp;{{'MainNav.Administration' | translate }}
+        </mat-expansion-panel-header>
+
+        <#if AuthenticationType != "none">
+        <mat-expansion-panel class="expansion-panel">
+          <mat-expansion-panel-header class="subnav-header">
+            {{'MainNav.AccessMgmt' | translate }}
+          </mat-expansion-panel-header>
+
+          <mat-nav-list class="subnav">
+            <#if !UserInput??> 
+            <a mat-list-item class="mat-sub-list-item" *ngIf="isMenuVisible('user')" routerLink="user">Users </a>
+            <a mat-list-item class="mat-sub-list-item" *ngIf="isMenuVisible('userpermission')" routerLink="userpermission">User Permissions </a>
+            <a mat-list-item class="mat-sub-list-item" *ngIf="isMenuVisible('userrole')" routerLink="userrole">User Roles </a>
+            <#elseif UserInput??> 
+            <a mat-list-item class="mat-sub-list-item" *ngIf="isMenuVisible('[=AuthenticationTable?lower_case]')" routerLink="[=AuthenticationTable?lower_case]">[=AuthenticationTable] </a> 
+            <a mat-list-item class="mat-sub-list-item" *ngIf="isMenuVisible('[=AuthenticationTable?lower_case]permission')" routerLink="[=AuthenticationTable?lower_case]permission">[=AuthenticationTable] Permissions </a> 
+            <a mat-list-item class="mat-sub-list-item" *ngIf="isMenuVisible('[=AuthenticationTable?lower_case]role')" routerLink="[=AuthenticationTable?lower_case]role">[=AuthenticationTable] Roles </a> 
+            </#if>
+            <a mat-list-item class="mat-sub-list-item" *ngIf="isMenuVisible('role')" routerLink="role">Roles</a> 
+            <a mat-list-item class="mat-sub-list-item" *ngIf="isMenuVisible('permission')" routerLink="permission">Permissions</a> 
+            <a mat-list-item class="mat-sub-list-item" *ngIf="isMenuVisible('rolepermission')" routerLink="rolepermission">Roles Permissions</a>
+          </mat-nav-list>
+        </mat-expansion-panel>
+        </#if>
+        <a mat-list-item class="sidenav-list-item" href="api/swagger-ui.html" target="_blank">{{'MainNav.API' | translate }}</a>
+      </mat-expansion-panel>
+
+      <a mat-list-item class="sidenav-list-item"><i class="material-icons">
+        ac_unit
+        </i> &nbsp;{{'MainNav.About' | translate }}</a>
+    </mat-nav-list>
+  </mat-sidenav>
+  <mat-sidenav-content #navContent class="fc-sidenav-content">
+    <mat-toolbar class="fc-tool-bar" color="primary" [ngClass]="!Auth.token?'no-header':''" *ngIf="Auth.token">
+      <figure class="loggo mob-logo">
+        <img src="../../../../assets/images/logo.png" alt="logo"/>
+      </figure>
+      <span></span>
       <span>
-	      <button mat-button [matMenuTriggerFor]="notification"><mat-icon>account_box</mat-icon></button>
-	      <#if AuthenticationType != "none">
-	      <mat-menu #notification="matMenu">
-	        <button mat-menu-item *ngIf="!Auth.token" (click)="login()">Login</button>
-	        <button mat-menu-item *ngIf="Auth.token" (click)="logout()">Logout</button>
-	      </mat-menu>
-	      </#if>
+        <#if AuthenticationType != "none">
+        <button mat-button *ngIf="!Auth.token" (click)="login()">Login</button>
+        
+        <button mat-button [matMenuTriggerFor]="menu" *ngIf="Auth.token"><i class="material-icons">
+            account_circle
+          </i></button>
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item><i class="material-icons" style="position: relative;top: 7px;color: skyblue;">face</i>&nbsp; <label  style="line-height: 0;    position: relative;
+            top: -6px;">Admin<small style="    opacity: 0.5;
+            display: block;
+            line-height: 0;
+            position: relative;
+            top: 12px;">admin@gmail.com</small></label></button>
+          <button mat-menu-item (click)="logout()"><i class="material-icons" style="position: relative;top: 7px;color: red;">power_settings_new</i>&nbsp; Logout</button>
+        </mat-menu>
+        </#if>
       </span>
-      
-    </mat-toolbar> 
-    <#if FlowableModule!false> 
-    <div ng-view style="height: 100%;overflow: auto"></div> 
-    </#if> 
-     
-    <router-outlet></router-outlet> 
-    <bottom-tab-nav (onNavMenuClicked)="drawer.toggle()" *ngIf=" (Global.isSmallDevice$ | async)" class="fc-bottom-nav"> 
- 
-    </bottom-tab-nav> 
-  </mat-sidenav-content> 
+
+    </mat-toolbar>
+    <!-- main content container start  -->
+    <router-outlet></router-outlet>
+    <!-- main content container Ends -->
+    <bottom-tab-nav (onNavMenuClicked)="drawer.toggle()" *ngIf="(Global.isSmallDevice$ | async)" class="fc-bottom-nav">
+
+    </bottom-tab-nav>
+  </mat-sidenav-content>
 </mat-sidenav-container>

@@ -46,8 +46,22 @@ export class PermissionListComponent extends BaseListComponent<IPermission> impl
 		];
 	}
   
-  	setColumns(){
-  		this.columns = [
+	setColumns(){
+		this.columns = [
+      {
+        column: 'id',
+        label: 'id',
+        sort: true,
+        filter: true,
+        type: listColumnType.Number
+      },
+      {
+        column: 'name',
+        label: 'name',
+        sort: true,
+        filter: true,
+        type: listColumnType.String
+      },
 			{
 				column: 'displayName',
 				label: 'displayName',
@@ -55,21 +69,7 @@ export class PermissionListComponent extends BaseListComponent<IPermission> impl
 				filter: true,
 				type: listColumnType.String
 			},
-			{
-				column: 'id',
-				label: 'id',
-				sort: true,
-				filter: true,
-				type: listColumnType.Number
-			},
-			{
-				column: 'name',
-				label: 'name',
-				sort: true,
-				filter: true,
-				type: listColumnType.String
-			},
-		  	{
+		  {
 				column: 'actions',
 				label: 'Actions',
 				sort: false,
@@ -79,7 +79,7 @@ export class PermissionListComponent extends BaseListComponent<IPermission> impl
 		];
 		this.selectedColumns = this.columns;
 		this.displayedColumns = this.columns.map((obj) => { return obj.column });
-  	}
+  }
   
 	addNew() {
 		super.addNew(PermissionNewComponent);

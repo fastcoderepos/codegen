@@ -116,23 +116,30 @@ export class [=AuthenticationTable]permissionListComponent extends BaseListCompo
 		];
 	}
   
-  	setColumns(){
-  		this.columns = [
+	setColumns(){
+		this.columns = [
 			{
-	  			column: '[=AuthenticationTable]',
+	  		column: '[=AuthenticationTable]',
 				label: '[=AuthenticationTable]',
 				sort: false,
 				filter: false,
 				type: listColumnType.Boolean
-	  		},
+	  	},
 			{
-	  			column: 'Permission',
+	  		column: 'Permission',
 				label: 'Permission',
 				sort: false,
 				filter: false,
 				type: listColumnType.Boolean
-	  		},
-		  	{
+	  	},
+	  	{
+        column: 'revoked',
+        label: 'revoked',
+        sort: true,
+        filter: true,
+        type: listColumnType.Boolean
+      },
+		  {
 				column: 'actions',
 				label: 'Actions',
 				sort: false,
@@ -142,7 +149,7 @@ export class [=AuthenticationTable]permissionListComponent extends BaseListCompo
 		];
 		this.selectedColumns = this.columns;
 		this.displayedColumns = this.columns.map((obj) => { return obj.column });
-  	}
+	}
   
 	addNew() {
 		super.addNew([=AuthenticationTable]permissionNewComponent);

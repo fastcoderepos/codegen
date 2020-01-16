@@ -83,33 +83,33 @@ export class RolepermissionListComponent extends BaseListComponent<IRolepermissi
 		];
 	}
   
-  	setColumns(){
-  		this.columns = [
-			{
-	  			column: 'Permission',
-				label: 'Permission',
-				sort: false,
-				filter: false,
-				type: listColumnType.Boolean
-	  		},
-			{
-	  			column: 'Role',
-				label: 'Role',
-				sort: false,
-				filter: false,
-				type: listColumnType.Boolean
-	  		},
-		  	{
-				column: 'actions',
-				label: 'Actions',
-				sort: false,
-				filter: false,
-				type: listColumnType.String
-			}
-		];
-		this.selectedColumns = this.columns;
-		this.displayedColumns = this.columns.map((obj) => { return obj.column });
-  	}
+	setColumns(){
+		this.columns = [
+      {
+        column: 'Permission',
+  			label: 'Permission',
+  			sort: false,
+  			filter: false,
+  			type: listColumnType.Boolean
+    		},
+  		{
+    		column: 'Role',
+  			label: 'Role',
+  			sort: false,
+  			filter: false,
+  			type: listColumnType.Boolean
+    	},
+  	  {
+  			column: 'actions',
+  			label: 'Actions',
+  			sort: false,
+  			filter: false,
+  			type: listColumnType.String
+  		}
+    ];
+    this.selectedColumns = this.columns;
+    this.displayedColumns = this.columns.map((obj) => { return obj.column });
+  }
   
 	addNew() {
 		super.addNew(RolepermissionNewComponent);

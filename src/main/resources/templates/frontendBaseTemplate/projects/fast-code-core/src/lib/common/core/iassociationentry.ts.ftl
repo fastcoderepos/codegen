@@ -1,4 +1,5 @@
-import { AssociationColumn } from './association-column.interface'
+import { AssociationColumn } from './association-column.interface';
+import { ISearchField } from '../components/list-filters/ISearchCriteria';
 export interface IAssociationEntry {
   column: AssociationColumn[],
   table: string,
@@ -9,5 +10,6 @@ export interface IAssociationEntry {
   descriptiveField?: string,
   referencedDescriptiveField?: string,
   associatedObj?: any,
-  associatedPrimaryKeys?: string[]
+  associatedPrimaryKeys?: string[],
+  searchValue?: ISearchField[]
 }

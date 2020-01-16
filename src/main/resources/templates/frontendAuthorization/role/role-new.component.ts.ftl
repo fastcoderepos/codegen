@@ -40,6 +40,7 @@ export class RoleNewComponent extends BaseNewComponent<IRole> implements OnInit 
 		super.ngOnInit();
 		this.setForm();
 		this.checkPassedData();
+    this.setPickerSearchListener();
   }
     
   setForm(){

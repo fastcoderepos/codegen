@@ -1,30 +1,29 @@
 {
   "GENERAL": {
-        "ACTIONS": {
-            "SAVE": "Save",
-            "CANCEL": "Cancel",
-            "OK": "OK",
-            "DELETE": "Delete",
-            "CONFIRM": "Confirm",
-            "SELECT": "Select",
-            "PAUSE": "Pause",
-            "BACK": "Back",
-            "ACTIONS": "Actions",
-			"DE-LINK": "De-link",
-            "ADD": "Add"
-        },
-        "ERRORS": {
-            "REQUIRED": "Field is required.",
-            "LENGTH-EXCEEDING": "Length cannot be greater than {{length}}.",
-            "LENGTH-SHORT": "Length cannot be less than {{length}}.",
-            "INVALID-FORMAT": "Invalid format."
-
-        }
+    "ACTIONS": {
+      "SAVE": "Save",
+      "CANCEL": "Cancel",
+      "OK": "OK",
+      "DELETE": "Delete",
+      "CONFIRM": "Confirm",
+      "SELECT": "Select",
+      "PAUSE": "Pause",
+      "BACK": "Back",
+      "ACTIONS": "Actions",
+      "DE-LINK": "De-link",
+      "ADD": "Add"
     },
+    "ERRORS": {
+      "REQUIRED": "Field is required.",
+      "LENGTH-EXCEEDING": "Length cannot be greater than {{length}}.",
+      "LENGTH-SHORT": "Length cannot be less than {{length}}.",
+      "INVALID-FORMAT": "Invalid format.",
+      "PASSWORD-MISMATCH": "Password do not match."
+    }
+  },
   "en": "English",
   "fr": "French",
   "MainNav": {
-    
     "Home": "Home",
     "Admin": "Admin",
     "Entities": "Entities",
@@ -36,7 +35,6 @@
       "Title":"Visual Email Template Builder",
       "EmailTemplate":"Email Templates",
       "EmailVariables":"Email Merge Fields"
-      
     },
     "JobScheduling": {
       "Title":"Jobs Scheduler",
@@ -52,7 +50,7 @@
     "Administration": "Administration",
     "About": "About",
     "API": "API"<#if FlowableModule!false>,
-	"BPMModeler":"BPM Modeler",
+    "BPMModeler":"BPM Modeler",
     "ProcessAdmin": {
       "Title": "Business Process Management",
       "ProcessEngine": "Process Engine",
@@ -78,6 +76,6 @@
       "Tasks": "Tasks",
       "Processes": "Processes"
     }
-    </#if>
+  </#if>
   }
 }
