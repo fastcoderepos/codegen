@@ -53,7 +53,7 @@ public class PomFileModifierTest {
 	
 	private File destPath;
 	
-	@Before
+	@Before 
 	public void setUp() throws Exception {
 		MockitoAnnotations.initMocks(pomFileModifier);
 		destPath = folder.newFolder("tempFolder");

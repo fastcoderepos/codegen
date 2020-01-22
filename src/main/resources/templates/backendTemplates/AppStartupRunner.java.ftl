@@ -3,8 +3,10 @@ package [=PackageName];
 import [=PackageName].domain.model.*;
 import [=PackageName].domain.authorization.permission.IPermissionManager;
 import [=PackageName].domain.authorization.rolepermission.IRolepermissionManager;
+<#if (AuthenticationType == "database" || UsersOnly == "true")>
 import [=PackageName].domain.authorization.[=AuthenticationTable?lower_case]role.I[=AuthenticationTable]roleManager;
 import [=PackageName].domain.authorization.[=AuthenticationTable?lower_case].I[=AuthenticationTable]Manager;
+</#if>
 import [=PackageName].domain.authorization.role.IRoleManager;
 import [=PackageName].commonmodule.logging.LoggingHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,18 +26,20 @@ public class AppStartupRunner implements ApplicationRunner {
 
     @Autowired
     private IPermissionManager permissionManager;
-
+    
     @Autowired
     private IRoleManager roleManager;
-    
+
+<#if (AuthenticationType == "database" || UsersOnly == "true")> 
     @Autowired
     private I[=AuthenticationTable]Manager userManager;
     
-	@Autowired
-    private IRolepermissionManager rolepermissionManager;
-    
     @Autowired
     private I[=AuthenticationTable]roleManager userroleManager;
+    
+</#if>    
+	@Autowired
+    private IRolepermissionManager rolepermissionManager;
     
     @Autowired
     private LoggingHelper loggingHelper;
@@ -57,18 +61,20 @@ public class AppStartupRunner implements ApplicationRunner {
         RoleEntity role = new RoleEntity();
         role.setName("ROLE_Admin");
         role = roleManager.Create(role);
+        <#if (AuthenticationType == "database" || UsersOnly == "true")>
         addDefaultUser(role);
+        </#if>
         
 		List<String> entityList = new ArrayList<String>();
         entityList.add("role");
         entityList.add("permission");
         entityList.add("rolepermission");
 
-        <#if !UserInput??>
+        <#if (AuthenticationType == "database" || UsersOnly == "true") && !UserInput??>
 		entityList.add("user");
 		entityList.add("userpermission");
 		entityList.add("userrole");
-		<#else>
+		<#elseif (AuthenticationType == "database" || UsersOnly == "true") && UserInput??>
 		entityList.add("[=AuthenticationTable?lower_case]permission");
 		entityList.add("[=AuthenticationTable?lower_case]role");
         </#if>
@@ -107,9 +113,10 @@ public class AppStartupRunner implements ApplicationRunner {
         rolepermissionManager.Create(pe4RP);
     }
     
+    <#if (AuthenticationType == "database" || UsersOnly == "true")>
     private void addDefaultUser(RoleEntity role) {
     	[=AuthenticationTable]Entity admin = new [=AuthenticationTable]Entity();
-        <#if AuthenticationType != "none" && ClassName?? && ClassName == AuthenticationTable>  
+        <#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName?? && ClassName == AuthenticationTable>  
         <#if AuthenticationFields??>
   	    <#list AuthenticationFields as authKey,authValue>
   	    <#list Fields as key,value>
@@ -136,15 +143,17 @@ public class AppStartupRunner implements ApplicationRunner {
     	admin.setLastName("admin");
     	admin.setUserName("admin");
     	admin.setEmailAddress("admin@demo.com");
+    	<#if AuthenticationType == "database">
     	admin.setPassword(pEncoder.encode("secret"));
+    	</#if>
     	admin.setIsActive(true);
         </#if> 
     	admin = userManager.Create(admin);
     	[=AuthenticationTable]roleEntity urole = new [=AuthenticationTable]roleEntity();
     	urole.setRoleId(role.getId());
-    	<#if (AuthenticationType!="none" && !UserInput??)>
+    	<#if !UserInput??>
     	urole.set[=AuthenticationTable]Id(admin.getId());
-        <#elseif AuthenticationType!="none" && UserInput??>
+        <#elseif UserInput??>
         <#if PrimaryKeys??>
         <#list PrimaryKeys as key,value>
         <#if value?lower_case == "long" || value?lower_case == "integer" || value?lower_case == "short" || value?lower_case == "double" || value?lower_case == "boolean" || value?lower_case == "date" || value?lower_case == "string">
@@ -155,4 +164,5 @@ public class AppStartupRunner implements ApplicationRunner {
         </#if>
 		urole=userroleManager.Create(urole);
     }
+    </#if>
 }

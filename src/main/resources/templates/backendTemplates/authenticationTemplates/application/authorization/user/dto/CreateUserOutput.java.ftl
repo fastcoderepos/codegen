@@ -15,10 +15,12 @@ public class CreateUserOutput {
     private Date lastLoginTime;
     private Date lockoutEndDateUtc;
     private String firstName;
+    <#if AuthenticationType =="database">
     private String passwordResetCode;
+    private Boolean shouldChangePasswordOnNextLogin;
+    </#if>
     private String phoneNumber;
     private Long profilePictureId;
-    private Boolean shouldChangePasswordOnNextLogin;
     private String signInToken;
     private Date signInTokenExpireTimeUtc;
     private String lastName;
@@ -114,7 +116,7 @@ public class CreateUserOutput {
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
-
+<#if AuthenticationType =="database">
     public String getPasswordResetCode() {
         return passwordResetCode;
     }
@@ -122,7 +124,15 @@ public class CreateUserOutput {
     public void setPasswordResetCode(String passwordResetCode) {
         this.passwordResetCode = passwordResetCode;
     }
+    
+    public Boolean isShouldChangePasswordOnNextLogin() {
+        return shouldChangePasswordOnNextLogin;
+    }
 
+    public void setShouldChangePasswordOnNextLogin(Boolean shouldChangePasswordOnNextLogin) {
+        this.shouldChangePasswordOnNextLogin = shouldChangePasswordOnNextLogin;
+    }
+</#if>
     public String getPhoneNumber() {
         return phoneNumber;
     }
@@ -137,14 +147,6 @@ public class CreateUserOutput {
 
     public void setProfilePictureId(Long profilePictureId) {
         this.profilePictureId = profilePictureId;
-    }
-
-    public Boolean isShouldChangePasswordOnNextLogin() {
-        return shouldChangePasswordOnNextLogin;
-    }
-
-    public void setShouldChangePasswordOnNextLogin(Boolean shouldChangePasswordOnNextLogin) {
-        this.shouldChangePasswordOnNextLogin = shouldChangePasswordOnNextLogin;
     }
 
     public String getSignInToken() {

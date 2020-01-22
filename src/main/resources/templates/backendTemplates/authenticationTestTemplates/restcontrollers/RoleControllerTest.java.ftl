@@ -13,7 +13,6 @@ import static org.mockito.Mockito.doReturn;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManagerFactory;
@@ -52,7 +51,9 @@ import [=PackageName].application.authorization.role.dto.FindRoleByIdOutput;
 import [=PackageName].application.authorization.role.dto.FindRoleByNameOutput;
 import [=PackageName].application.authorization.role.dto.UpdateRoleInput;
 import [=PackageName].application.authorization.rolepermission.RolepermissionAppService;
+<#if (AuthenticationType == "database" || UsersOnly == "true")>
 import [=PackageName].application.authorization.[=AuthenticationTable?lower_case]role.[=AuthenticationTable]roleAppService;
+</#if>
 import [=PackageName].domain.irepository.IRoleRepository;
 import [=PackageName].domain.model.RoleEntity;
 
@@ -72,9 +73,11 @@ public class RoleControllerTest {
 
 	@SpyBean
 	private RoleAppService roleAppService;
+	<#if (AuthenticationType == "database" || UsersOnly == "true")>
 	
 	@SpyBean
 	private [=AuthenticationTable]roleAppService [=AuthenticationTable?uncap_first]roleAppService;
+	</#if>
 	
 	@SpyBean
 	private RolepermissionAppService rolepermissionAppService;
@@ -151,7 +154,7 @@ public class RoleControllerTest {
         <#if Cache !false>
         evictAllCaches();
         </#if>
-        final RoleController roleController = new RoleController(roleAppService,logHelper,[=AuthenticationTable?uncap_first]roleAppService,rolepermissionAppService);
+        final RoleController roleController = new RoleController(roleAppService,logHelper,<#if (AuthenticationType == "database" || UsersOnly == "true")>[=AuthenticationTable?uncap_first]roleAppService,</#if>rolepermissionAppService);
         
         when(logHelper.getLogger()).thenReturn(loggerMock);
 		doNothing().when(loggerMock).error(anyString());
@@ -373,5 +376,5 @@ public class RoleControllerTest {
 				.contentType(MediaType.APPLICATION_JSON))
 	    		  .andExpect(status().isNotFound());
 	}    
-	
+
 }

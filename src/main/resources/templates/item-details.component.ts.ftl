@@ -72,7 +72,7 @@ export class [=ClassName]DetailsComponent extends BaseDetailsComponent<[=IEntity
       <#list Fields as key,value>
       <#-- to exclude the password field in case of user provided "User" table -->
       <#assign isPasswordField = false>
-      <#if AuthenticationType != "none" && ClassName == AuthenticationTable>  
+      <#if AuthenticationType == "database" && ClassName == AuthenticationTable>  
         <#if AuthenticationFields?? && AuthenticationFields.Password.fieldName == value.fieldName>
       <#assign isPasswordField = true>
       </#if>

@@ -1,4 +1,4 @@
-package [=PackageName].application<#if AuthenticationType != "none" && ClassName == AuthenticationTable>.authorization</#if>.[=ClassName?lower_case];
+package [=PackageName].application<#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>.authorization</#if>.[=ClassName?lower_case];
 
 import org.mapstruct.Mapper;
 <#list Relationship as relationKey, relationValue>
@@ -13,7 +13,7 @@ import org.mapstruct.Mappings;
 import [=PackageName].domain.model.[=relationValue.eName]Entity;
 </#if>
 </#list>
-import [=PackageName].application<#if AuthenticationType != "none" && ClassName == AuthenticationTable>.authorization</#if>.[=ClassName?lower_case].dto.*;
+import [=PackageName].application<#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>.authorization</#if>.[=ClassName?lower_case].dto.*;
 import [=PackageName].domain.model.[=ClassName]Entity;
 
 @Mapper(componentModel = "spring")
@@ -143,7 +143,7 @@ public interface [=ClassName]Mapper {
    </#list> 
    Find[=ClassName]ByIdOutput [=ClassName]EntityToFind[=ClassName]ByIdOutput([=ClassName]Entity entity);
 
-<#if AuthenticationType != "none" && ClassName == AuthenticationTable>
+<#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>
    Find[=ClassName]WithAllFieldsByIdOutput [=ClassName]EntityToFind[=ClassName]WithAllFieldsByIdOutput([=ClassName]Entity entity);
 
 <#if AuthenticationFields??>

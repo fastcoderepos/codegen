@@ -28,23 +28,7 @@ logging.level.org.hibernate.type.descriptor.sql=TRACE
 logging.file=src/main/java/[=packageName]/logging/spring-boot-logging.txt
 logging.file.max-history=2
 logging.file.max-size=2000KB
-<#if EmailModule!false>
-spring.mail.default-encoding=UTF-8
-spring.mail.host=smtp.gmail.com
-spring.mail.username=info@righthire.com
-spring.mail.password=KavitaKavya001
-spring.mail.port=587
-spring.mail.protocol=smtp
-spring.mail.test-connection=false
-spring.mail.properties.mail.smtp.auth=true
-spring.mail.properties.mail.smtp.starttls.enable=true
-spring.mail.properties.mail.smtp.connectiontimeout=5000
-spring.mail.properties.mail.smtp.timeout=5000
-spring.mail.properties.mail.smtp.writetimeout=5000
 
-mjmlFile.base.dir= [=MjmlTempPath]
-mjmlFile.path=${mjmlFile.base.dir}%s.mjml
-</#if>
 # Enable SSL
 
 # The format used for the keystore for openid testing
@@ -58,7 +42,13 @@ server.ssl.key-alias=tomcat
 
 <#if AuthenticationType != "none">
 fastCode.auth.method=[=AuthenticationType]
-
+<#if AuthenticationSchema??>
+fastCode.usertable.name = [=AuthenticationSchema?replace("[A-Z]", "_$0", 'r')?lower_case?substring(1)]
+<#else>
+fastCode.usertable.name = null
+</#if>
+</#if>
+<#if AuthenticationType == "ldap">
 # LDAP Server Setup - /login
 fastCode.ldap.contextsourceurl=ldap://localhost:10389/dc=nfinityllc,dc=com
 fastCode.ldap.manager.dn=uid=admin,ou=system
@@ -68,8 +58,11 @@ fastCode.ldap.usersearchfilter=(uid={0})
 fastCode.ldap.roleprefix=
 fastCode.ldap.groupsearchbase=ou=groups
 fastCode.ldap.groupsearchfilter=(member={0})
+<#if LogonName??>
+fastCode.ldap.logon.name = [=LogonName]
+</#if>
 #fastCode.ldap.ldiffilename=C:/Program Files/Apache Directory Studio/users.ldif
-
+<#elseif AuthenticationType == "oidc">
 spring.security.oauth2.client.registration.oidc.client-id=0oa1dpe6xa5SKvHR0357
 spring.security.oauth2.client.provider.oidc.issuer-uri=https://nfinityllc-usman.okta.com/oauth2/default
 #spring.security.oauth2.client.registration.oidc.client-secret=tS23X8Cipe9G7XmfZk-VesHqdXzJRiGmz4DtXP5a
@@ -77,9 +70,6 @@ spring.security.oauth2.client.provider.oidc.issuer-uri=https://nfinityllc-usman.
 
 spring.main.allow-bean-definition-overriding=true
 
-<#if Scheduler !false>
-fastCode.jobs.default=[=packagePath].Scheduler.jobs
-</#if>
 fastCode.offset.default=0
 fastCode.limit.default=10
 fastCode.sort.direction.default=ASC

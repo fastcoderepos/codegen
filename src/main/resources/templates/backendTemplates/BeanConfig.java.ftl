@@ -16,6 +16,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 <#if AuthenticationType != "none">
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+</#if>
+<#if AuthenticationType == "database">
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 </#if>
@@ -40,7 +42,7 @@ public class BeanConfig {
     @Autowired 
     private Environment environment; 
 
-<#if AuthenticationType != "none">
+<#if AuthenticationType == "database">
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -69,13 +71,15 @@ public class BeanConfig {
         SimpleCacheManager cacheManager = new SimpleCacheManager();
 
         List<Cache> caches = new ArrayList<>();
-        <#if (AuthenticationType!="none" && !UserInput??) >
+        <#if (AuthenticationType =="database" || UsersOnly=="true") && !UserInput?? >
         caches.add(new ConcurrentMapCache("[=AuthenticationTable]"));
         </#if>
-        <#if AuthenticationType != "none">
+        <#if AuthenticationType == "database" || UsersOnly=="false">
         caches.add(new ConcurrentMapCache("Role"));
         caches.add(new ConcurrentMapCache("Permission"));
         caches.add(new ConcurrentMapCache("Rolepermission"));
+        </#if>
+        <#if AuthenticationType == "database" || UsersOnly=="true">
         caches.add(new ConcurrentMapCache("[=AuthenticationTable]role"));
         caches.add(new ConcurrentMapCache("[=AuthenticationTable]permission"));
         </#if>

@@ -43,12 +43,12 @@ public class CreateUserInput {
   
   <#if AuthenticationType =="database">
   @NotNull(message = "password Should not be null")
-  </#if>
   @Length(max = 128, message = "password must be less than 128 characters")
   private String password;
   
   @Length(max = 328, message = "passwordResetCode must be less than 328 characters")
   private String passwordResetCode;
+  </#if>
   
   @Length(max = 32, message = "phoneNumber must be less than 32 characters")
   private String phoneNumber;
@@ -156,7 +156,7 @@ public class CreateUserInput {
   public void setLockoutEndDateUtc(Date lockoutEndDateUtc){
   this.lockoutEndDateUtc = lockoutEndDateUtc;
   }
-  
+  <#if AuthenticationType =="database">
   public String getPassword() {
   return password;
   }
@@ -172,6 +172,7 @@ public class CreateUserInput {
   public void setPasswordResetCode(String passwordResetCode){
   this.passwordResetCode = passwordResetCode;
   }
+  </#if>
   
   public String getPhoneNumber() {
   return phoneNumber;

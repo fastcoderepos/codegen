@@ -1,4 +1,4 @@
-package [=PackageName].domain<#if AuthenticationType != "none" && ClassName == AuthenticationTable>.authorization</#if>.[=ClassName?lower_case];
+package [=PackageName].domain<#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>.authorization</#if>.[=ClassName?lower_case];
 
 import com.querydsl.core.types.Predicate;
 import org.springframework.data.domain.Page;
@@ -23,7 +23,7 @@ public interface I[=ClassName]Manager {
     [=EntityClassName] Update([=EntityClassName] [=InstanceName]);
 
     [=EntityClassName] FindById(<#if CompositeKeyClasses?seq_contains(ClassName)>[=IdClass] [=IdClass?uncap_first]<#else><#list Fields as key,value><#if value.isPrimaryKey!false><#if value.fieldType?lower_case == "long">Long<#elseif value.fieldType?lower_case == "integer">Integer<#elseif value.fieldType?lower_case == "short">Short<#elseif value.fieldType?lower_case == "double">Double<#elseif value.fieldType?lower_case == "string">String</#if></#if></#list> id</#if>);
-    <#if AuthenticationType != "none" && ClassName == AuthenticationTable>
+    <#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>
     <#if AuthenticationFields??>
     <#list AuthenticationFields as authKey,authValue>
 	<#if authKey== "UserName">
@@ -41,5 +41,5 @@ public interface I[=ClassName]Manager {
     //[=relationValue.eName]
     public [=relationValue.eName]Entity Get[=relationValue.eName](<#if CompositeKeyClasses?seq_contains(ClassName)>[=IdClass] [=IdClass?uncap_first]<#else><#list Fields as key,value><#if value.isPrimaryKey!false><#if value.fieldType?lower_case == "long">Long<#elseif value.fieldType?lower_case == "integer">Integer<#elseif value.fieldType?lower_case == "short">Short<#elseif value.fieldType?lower_case == "double">Double<#elseif value.fieldType?lower_case == "string">String</#if></#if></#list> [=InstanceName]Id</#if>);
    </#if>
-  </#list>
+   </#list>
 }

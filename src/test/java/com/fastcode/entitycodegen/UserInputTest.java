@@ -115,13 +115,12 @@ public class UserInputTest {
 		
 		UserInput userInputDto = new UserInput();
 		userInputDto.setAuthenticationSchema("testValue");
-		userInputDto.setGenerationType("all");
 		userInputDto.setCache(false);
 		userInputDto.setGroupArtifactId("com.nfin");
 		userInputDto.setConnectionStr("testValue");
 		userInputDto.setDestinationPath("testValue");
 		
-		Mockito.doReturn(userInputDto.getConnectionStr(),userInputDto.getSchemaName(),userInputDto.getDestinationPath(),userInputDto.getGroupArtifactId(),userInputDto.getGenerationType()).when(userInput).getInput(any(Scanner.class), anyString());
+		Mockito.doReturn(userInputDto.getConnectionStr(),userInputDto.getSchemaName(),userInputDto.getDestinationPath(),userInputDto.getGroupArtifactId()).when(userInput).getInput(any(Scanner.class), anyString());
 		Mockito.doReturn(userInputDto).when(userInput).getAuthenticationInput(any(UserInput.class),any(Scanner.class));
 		
 		Assertions.assertThat(userInput.composeInput(root)).isEqualTo(userInputDto);
@@ -141,8 +140,6 @@ public class UserInputTest {
 		
 		UserInput userInputDto = new UserInput();
 		userInputDto.setAuthenticationSchema("testValue");
-		//userInputDto.setAuthenticationType("none");
-		userInputDto.setGenerationType("all");
 		userInputDto.setCache(false);
 		userInputDto.setGroupArtifactId("com.nfin");
 		userInputDto.setConnectionStr("testValue");
@@ -176,64 +173,13 @@ public class UserInputTest {
 		UserInput userInputDto = new UserInput();
 		userInputDto.setAuthenticationSchema("User");
 		userInputDto.setAuthenticationType("database");
-		userInputDto.setGenerationType("all");
 		userInputDto.setCache(false);
 		userInputDto.setGroupArtifactId("com.nfin");
 		userInputDto.setConnectionStr("testValue");
 		userInputDto.setDestinationPath("testValue");
-		
-	 //  Mockito.doReturn(userInputDto).when(userInput).getAuthenticationInput(any(UserInput.class),any(Scanner.class));
 	
-		
 		Assertions.assertThat(userInput.getAuthenticationInput(userInputDto, scanner)).isEqualTo(userInputDto);
 	}
-	
 
-//		System.out.print("\nSelect Authentication and Authorization method :");
-//		System.out.print("\n1. none");
-//		System.out.print("\n2. database");
-//		System.out.print("\n3. ldap");
-//		System.out.print("\n4. oidc");
-//		System.out.print("\nEnter 1,2,3 or 4 : ");
-//		
-//		int value = scanner.nextInt();
-//		while (value < 1 || value > 4) {
-// 
-//			System.out.println("\nInvalid Input \nEnter again :");
-//			value = scanner.nextInt();
-//		}
-//		if (value == 1) {
-//			input.setAuthenticationType("none");
-//			input.setFlowable(false);
-//		} 
-//		else if (value>1) {
-//			scanner.nextLine();
-//			
-//			System.out.print("\nDo you have your own user table? (y/n)");
-//			String str= scanner.nextLine();
-//			if(str.equalsIgnoreCase("y") || str.equalsIgnoreCase("yes"))
-//			{
-//				System.out.print("\nEnter table name :");
-//				str= scanner.nextLine();
-//				if(str.contains("_"))
-//				{
-//					str=CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, str);
-//				}
-//				input.setAuthenticationSchema(str.substring(0, 1).toUpperCase() + str.substring(1));
-//			}
-//
-//			if (value == 2) {
-//				input.setAuthenticationType("database");
-//			}
-//			else if (value == 3) {
-//				input.setAuthenticationType("ldap");
-//			}
-//			else if (value == 4) {
-//				input.setAuthenticationType("oidc");
-//			}
-//		}
-//
-//		return input;
-//	}
 	
 }

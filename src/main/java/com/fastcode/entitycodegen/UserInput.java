@@ -2,6 +2,7 @@ package com.fastcode.entitycodegen;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -19,7 +20,6 @@ public class UserInput {
 	
 	String packageName;
 	String groupArtifactId;
-	String generationType;
 	String destinationPath;
 	String schemaName;
 	String connectionStr;
@@ -28,7 +28,29 @@ public class UserInput {
 	String authenticationType=null;
 	String authenticationSchema=null;
 	Boolean doUpgrade=false;
+	Boolean usersOnly = false;
+	String logonName;
+	Map<String, String> authenticationMap = new HashMap<String, String>();
 
+	
+	public Map<String, String> getAuthenticationMap() {
+		return authenticationMap;
+	}
+	public void setAuthenticationMap(Map<String, String> authenticationMap) {
+		this.authenticationMap = authenticationMap;
+	}
+	public String getLogonName() {
+		return logonName;
+	}
+	public void setLogonName(String logonName) {
+		this.logonName = logonName;
+	}
+	public Boolean getUsersOnly() {
+		return usersOnly;
+	}
+	public void setUsersOnly(Boolean usersOnly) {
+		this.usersOnly = usersOnly;
+	}
 	public Boolean getCache() {
 		return cache;
 	}
@@ -47,13 +69,6 @@ public class UserInput {
 	public void setGroupArtifactId(String groupArtifactId) {
 		this.groupArtifactId = groupArtifactId;
 	}
-	public String getGenerationType() {
-		return generationType;
-	}
-	public void setGenerationType(String generationType) {
-		this.generationType = generationType;
-	}
-	
 	public String getPackageName() {
 		return packageName;
 	}
@@ -168,8 +183,6 @@ public class UserInput {
 			input.setGroupArtifactId(getInput(scanner, "groupArtifactId"));
 		}
 		
-		input.setGenerationType(
-				root.get("t") == null ? getInput(scanner, "generation type") : root.get("t"));
 		input.setCache(root.get("c") == null ? (getInput(scanner, "cache").toLowerCase().equals("true") ? true : false)
 		       : (root.get("c").toLowerCase().equals("true") ? true : false));
 
@@ -180,6 +193,7 @@ public class UserInput {
 	
 	public UserInput getAuthenticationInput(UserInput input,Scanner scanner)
 	{
+		Map<String, String> authMap = new HashMap<String, String>();
 		System.out.print("\nSelect Authentication and Authorization method :");
 		System.out.print("\n1. none");
 		System.out.print("\n2. database");
@@ -193,37 +207,62 @@ public class UserInput {
 			value = scanner.nextInt();
 		}
 		if (value == 1) {
-			input.setAuthenticationType("none");
+			//input.setAuthenticationType("none");
+			authenticationMap.put("authenticationType", "none");
 		} 
 		else if (value>1) {
 			scanner.nextLine();
+			authMap.put(AuthenticationConstants.AUTHENTICATION_TYPE, value == 2 ? "database" : value==3 ? "ldap" : "oidc");
+//			if (value == 2) {
+//				//input.setAuthenticationType("database");
+//			}
+//			else if (value == 3) {
+//				//input.setAuthenticationType("ldap");
+//			}
+//			else if (value == 4) {
+//				//input.setAuthenticationType("oidc");
+//			}
 			
-			System.out.print("\nDo you have your own user table? (y/n)");
+			if (value == 3 || value == 4) {
+				
+				System.out.print("\nWhich one of the following do you store in LDAP for your application?");
+				System.out.print("\n1. User Information");
+				System.out.print("\n2. User and Group Information");
+				System.out.print("\nEnter 1 or 2 : ");
+				int choice = scanner.nextInt();
+				while (choice < 1 || choice > 2) {
+					System.out.println("\nInvalid Input \nEnter again :");
+					choice = scanner.nextInt();
+				}
+				
+				authMap.put(AuthenticationConstants.USERS_ONLY, choice == 1 ? "true" : "false");
+				scanner.nextLine();
+				if(value == 3 && choice == 2)
+				{
+					System.out.print("\nWhat is the User Logon Name you are using? ");
+					String logonName = scanner.nextLine();
+					authMap.put(AuthenticationConstants.LOGON_NAME, logonName);
+				//	input.setLogonName(logonName);
+				}
+			}
+	
+			System.out.print("\nDo you have a User table in your data model? (y/n)");
 			String str= scanner.nextLine();
 			if(str.equalsIgnoreCase("y") || str.equalsIgnoreCase("yes"))
 			{
 				System.out.print("\nEnter table name :");
 				str= scanner.nextLine();
-				if(str.contains("_"))
-				{
-					str=CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, str);
-				}
-				input.setAuthenticationSchema(str.substring(0, 1).toUpperCase() + str.substring(1));
-			}
-
-			if (value == 2) {
-				input.setAuthenticationType("database");
-			}
-			else if (value == 3) {
-				input.setAuthenticationType("ldap");
-			}
-			else if (value == 4) {
-				input.setAuthenticationType("oidc");
+				str = str.contains("_") ? CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, str) : str;
+//				if(str.contains("_"))
+//				{
+//					str=CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, str);
+//				}
+				authMap.put(AuthenticationConstants.AUTHENTICATION_SCHEMA, str.substring(0, 1).toUpperCase() + str.substring(1));
+//				input.setAuthenticationSchema(str.substring(0, 1).toUpperCase() + str.substring(1));
 			}
 		}
-		
+		input.setAuthenticationMap(authMap);
 		return input;
-
 	}
 }
 
