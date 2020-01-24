@@ -218,7 +218,7 @@ public class UserControllerTest {
 	    		  .andExpect(status().isNotFound());
 	
 	}    
-
+<#if AuthenticationType == "database">
 	@Test
 	public void CreateUser_UserDoesNotExist_ReturnStatusOk() throws Exception {
 	
@@ -344,7 +344,7 @@ public class UserControllerTest {
         e.setId(id);
         user_repository.delete(e);
 	}    
-	
+</#if>	
 	@Test
 	public void FindAll_SearchIsNotNullAndPropertyIsValid_ReturnStatusOk() throws Exception {
 		

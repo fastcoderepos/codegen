@@ -246,7 +246,7 @@ public class EntityGeneratorTest {
 		relationDetails.setRelation("OneToOne");
 
 		RelationDetails relationDetails1= new RelationDetails();
-		relationDetails1.seteName("entry");
+		relationDetails1.seteName("entry"); 
 		relationDetails1.setcName("tag");
 		relationDetails1.setRelation("ManyToOne");
 

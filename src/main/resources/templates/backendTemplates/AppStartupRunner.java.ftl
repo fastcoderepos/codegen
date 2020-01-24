@@ -24,6 +24,9 @@ import java.util.List;
 @Profile("bootstrap")
 public class AppStartupRunner implements ApplicationRunner {
 
+	@Autowired
+	private Environment environment;
+	 
     @Autowired
     private IPermissionManager permissionManager;
     
@@ -84,18 +87,35 @@ public class AppStartupRunner implements ApplicationRunner {
 		</#list>
 		
 		for(String entity: entityList) {
-        	addEntityPermissions(entity, role.getId());
+		<#if !UserInput??>
+		if(!environment.getProperty("fastCode.auth.method").equals("database") && (entity.equals("role") || entity.equals("user")))
+        <#elseif UserInput??>
+        if(!environment.getProperty("fastCode.auth.method").equals("database") && (entity.equals("role") || entity.equals("[=AuthenticationTable?lower_case]")))
+        </#if>
+        	addEntityPermissions(entity, role.getId(),true);
+			else
+			addEntityPermissions(entity, role.getId(),false);
         }
       
         loggingHelper.getLogger().info("Completed creating the data in the database");
 
     }
     
-    private void addEntityPermissions(String entity, long roleId) {
+    private void addEntityPermissions(String entity, long roleId,boolean readOnly) {
+    	if(readOnly)
+    	{
+    		PermissionEntity pe2 = new PermissionEntity(entity.toUpperCase() + "ENTITY_READ", "read " + entity);
+    		pe2 = permissionManager.Create(pe2);
+    		RolepermissionEntity pe2RP = new RolepermissionEntity(pe2.getId(), roleId);
+    		rolepermissionManager.Create(pe2RP);
+    	}
+    	else
+    	{
 		PermissionEntity pe1 = new PermissionEntity(entity.toUpperCase() + "ENTITY_CREATE", "create " + entity);
-        PermissionEntity pe2 = new PermissionEntity(entity.toUpperCase() + "ENTITY_READ", "read " + entity);
+    	PermissionEntity pe2 = new PermissionEntity(entity.toUpperCase() + "ENTITY_READ", "read " + entity);
         PermissionEntity pe3 = new PermissionEntity(entity.toUpperCase() + "ENTITY_DELETE", "delete " + entity);
         PermissionEntity pe4 = new PermissionEntity(entity.toUpperCase() + "ENTITY_UPDATE", "update " + entity);
+    	
 
         pe1 = permissionManager.Create(pe1);
         pe2 = permissionManager.Create(pe2);
@@ -111,6 +131,7 @@ public class AppStartupRunner implements ApplicationRunner {
         rolepermissionManager.Create(pe2RP);
         rolepermissionManager.Create(pe3RP);
         rolepermissionManager.Create(pe4RP);
+    	}
     }
     
     <#if (AuthenticationType == "database" || UsersOnly == "true")>

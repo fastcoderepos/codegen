@@ -45,7 +45,7 @@ public class CommandUtils {
         	logHelper.getLogger().error("Error Occured : ", e.getMessage());
             throw new InternalError(e);
         }
-    }
+    } 
 
     public String runProcess(String command, String path) {
         String[] builderCommand = getBuilderCommand(command);

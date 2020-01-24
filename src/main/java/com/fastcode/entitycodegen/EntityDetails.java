@@ -559,7 +559,7 @@ public class EntityDetails {
 			Map<String, RelationDetails> relationMap, List<Class<?>> classList) { 
 		for (Map.Entry<String, RelationDetails> entry : relationMap.entrySet()) { 
 			if (entry.getValue().getRelation() == "OneToOne" && entry.getValue().getIsParent()) { 
-				for (Class<?> currentClass : classList) { 
+	 			for (Class<?> currentClass : classList) { 
 					String entityName = currentClass.getName().substring(currentClass.getName().lastIndexOf(".") + 1); 
 					if (entityName.equals(entry.getValue().geteName())) {
 

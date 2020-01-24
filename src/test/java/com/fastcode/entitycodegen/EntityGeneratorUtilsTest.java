@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.assertj.core.api.Assertions;
 import org.junit.After;
@@ -43,7 +44,7 @@ public class EntityGeneratorUtilsTest {
 	@After
 	public void tearDown() throws Exception {
 
-	}
+	} 
 	
 	@Test
 	public void parseConnectionString_connectionStringIsvalid_returnMap()
@@ -55,6 +56,16 @@ public class EntityGeneratorUtilsTest {
 		connectionStringMap.put("password", "fastcode");
 		
 		Assertions.assertThat(entityGeneratorUtils.parseConnectionString(conn)).isEqualTo(connectionStringMap);
+	}
+	
+	@Test
+	public void findCompositePrimaryKeyClasses_listIsNotEmpty_returnFilteredList() throws ClassNotFoundException, IOException
+	{
+		EntityDetailsTest detailsTest = new EntityDetailsTest();
+		ArrayList<Class<?>> classes = detailsTest.loadClasses();
+		List<String> list = new ArrayList<String>();
+		list.add("Cust");
+		Assertions.assertThat(entityGeneratorUtils.findCompositePrimaryKeyClasses(classes)).isEqualTo(list);
 	}
 	
 	@Test

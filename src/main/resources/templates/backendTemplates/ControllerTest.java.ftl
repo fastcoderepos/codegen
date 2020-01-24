@@ -390,7 +390,7 @@ public class [=ClassName]ControllerTest {
 		 
 		 [=ClassName?uncap_first]_repository.delete(createNewEntity());
 	}  
-
+<#if AuthenticationType == "database">
 	@Test
 	public void Create[=ClassName]_[=ClassName]AlreadyExists_ThrowEntityExistsException() throws Exception {
 	    Find[=ClassName]By<#if AuthenticationFields??>[=AuthenticationFields["UserName"].fieldName?cap_first]</#if>Output output= new Find[=ClassName]By<#if AuthenticationFields??>[=AuthenticationFields["UserName"].fieldName?cap_first]</#if>Output();
@@ -734,7 +734,7 @@ public class [=ClassName]ControllerTest {
 		</#list>
 		[=ClassName?uncap_first]_repository.delete(de);
 	}    
-
+</#if>
 	@Test
 	public void FindAll_SearchIsNotNullAndPropertyIsValid_ReturnStatusOk() throws Exception {
 

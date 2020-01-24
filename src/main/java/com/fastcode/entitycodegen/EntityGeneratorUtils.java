@@ -93,7 +93,7 @@ public class EntityGeneratorUtils {
 	}
 
 	public List<String> findCompositePrimaryKeyClasses(ArrayList<Class<?>> entityClasses) {
-		List<String> compositeKeyEntities = new ArrayList<>(); 
+		List<String> compositeKeyEntities = new ArrayList<>();  
 		List<Class<?>> otherEntities = entityClasses.stream().filter((e) -> e.getName().endsWith("Id")) 
 				.collect(Collectors.toList()); 
 		List<Class<?>> relevantEntities = entityClasses.stream() 
@@ -110,7 +110,7 @@ public class EntityGeneratorUtils {
 		} 
 		return compositeKeyEntities; 
 	}
-	
+	 
 	public void deleteFile(String directory) {
 		File file = new File(directory);
 		if (file.exists()) {

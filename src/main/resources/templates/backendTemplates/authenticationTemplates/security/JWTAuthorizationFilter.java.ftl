@@ -20,11 +20,11 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 <#if AuthenticationType !="oidc">
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import java.util.stream.Collectors;
+import [=PackageName].domain.model.JwtEntity;
 </#if>
 import java.net.URL;
 import org.springframework.security.core.authority.AuthorityUtils;
 import [=PackageName].domain.irepository.IJwtRepository;
-import [=PackageName].domain.model.JwtEntity;
 <#if AuthenticationType =="oidc">
 import com.nimbusds.jose.*;
 import com.nimbusds.jwt.*;
@@ -38,6 +38,7 @@ import [=PackageName].domain.authorization.[=AuthenticationTable?lower_case].I[=
 <#else>
 import [=PackageName].domain.model.RoleEntity;
 import [=PackageName].domain.authorization.role.IRoleManager;
+import java.util.stream.Collectors;
 </#if>
 </#if>
 import java.util.*;
@@ -134,7 +135,7 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
          }
  
          // Check that the token is inactive in the JwtEntity table
- 
+        <#if AuthenticationType != "oidc">
          JwtEntity jwt = jwtRepo.findByToken(token);
          ApiError apiError = new ApiError(HttpStatus.UNAUTHORIZED);
  
@@ -145,7 +146,7 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
          if(!jwt.getIsActive()) {
              throw new JwtException("Token Inactive");
 	     }
-        
+        </#if>
         Claims claims;
         if(environment==null){
             ServletContext servletContext = request.getServletContext();
@@ -221,8 +222,8 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
             	<#else>
                 [=AuthenticationTable]Entity user = _userMgr.FindByUserName(userName);
             	</#if>    
-                if (applicationUser == null) {
-					throw new UsernameNotFoundException(username);
+                if (user == null) {
+					throw new UsernameNotFoundException(userName);
 				}
 
                 List<String> permissions = securityUtils.getAllPermissionsFromUserAndRole(user);
@@ -239,6 +240,7 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
    						permissionsList.addAll(permissions);
    					}
    				}
+   				permissionsList= permissionsList.stream().distinct().collect(Collectors.toList());
             	String[] groupsArray = new String[permissionsList.size()];
             	authorities = AuthorityUtils.createAuthorityList(permissionsList.toArray(groupsArray));
                 </#if>

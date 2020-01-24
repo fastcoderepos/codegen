@@ -44,7 +44,7 @@ public class ModulesGenerator {
 	@Autowired
 	private LoggingHelper logHelper;
 	
-	public void generateCode(UserInput input) throws IOException { 
+	public void generateCode(UserInput input) { 
 	
 		File dir = new File(input.getDestinationPath());
 		if(!dir.exists()) {

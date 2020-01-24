@@ -15,10 +15,10 @@ public class BeanConfig {
 		return new FreeMarkerConfiguration();
 	}
 	
-	@Bean
-	public static FolderContentReader getFolderContentReaderBean() {
-		return new FolderContentReader();
-	}
+//	@Bean
+//	public static FolderContentReader getFolderContentReaderBean() {
+//		return new FolderContentReader();
+//	}
 	
 //	@Bean
 //	public static CGenClassLoader getCGenClassLoaderBean() {

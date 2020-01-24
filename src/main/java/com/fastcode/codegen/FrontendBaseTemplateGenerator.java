@@ -32,14 +32,18 @@ public class FrontendBaseTemplateGenerator {
 	
 	@Autowired
 	private LoggingHelper logHelper;
+	
+	@Autowired
+	FolderContentReader contentReader;
 
 	public void generate(String destination, String appName, String authenticationType, String authenticationTable) {
-
+ 
 		String clientSubfolder = appName + "Client";
 		String command = "ng new " + clientSubfolder + " --skipInstall=true";
 		commandUtils.runProcess(command, destination);
 		editAngularJsonFile(destination + "/" + clientSubfolder + "/angular.json", clientSubfolder);
-
+	//	contentReader.copyDirectoryFromJar("frontend_static/assets", destination + "/"+ clientSubfolder + "/src/assets");
+		
 		Map<String, Object> root = buildRootMap(appName, authenticationType, authenticationTable);
 		codeGeneratorUtils.generateFiles(getTemplates(FRONTEND_BASE_TEMPLATE_FOLDER),root, destination + "/"+ clientSubfolder,FRONTEND_BASE_TEMPLATE_FOLDER);
 		
@@ -111,7 +115,6 @@ public class FrontendBaseTemplateGenerator {
 		}
 
 	}
-
 
 	public JSONObject getFastCodeCoreProjectNode() throws ParseException {
 		JSONParser parser = new JSONParser();

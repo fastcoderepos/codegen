@@ -22,7 +22,7 @@ import freemarker.template.Template;
 public class CodeGeneratorUtils {
 	
 	@Autowired 
-	FolderContentReader folderContentReader= BeanConfig.getFolderContentReaderBean();
+	FolderContentReader folderContentReader;
 
 	@Autowired
 	FreeMarkerConfiguration freeMarkerConfiguration = BeanConfig.getFreeMarkerConfigBean();
@@ -91,7 +91,7 @@ public class CodeGeneratorUtils {
 				};
 				
 				PrintWriter writer = new PrintWriter(fileName);
-				template.process(root, writer);
+				template.process(root, writer); 
 				writer.flush();
 				writer.close();
 

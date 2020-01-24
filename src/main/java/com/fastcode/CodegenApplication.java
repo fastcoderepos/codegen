@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
@@ -17,15 +18,16 @@ import org.springframework.context.ApplicationContext;
 public class CodegenApplication implements ApplicationRunner {
 	static Map<String, String> root = new HashMap<>();
 
-	public static void main(String[] args) throws ClassNotFoundException, IOException {
+	public static void main(String[] args) {
 	
 		ApplicationContext context = SpringApplication.run(CodegenApplication.class, args);
+		
 		UserInput userInput = context.getBean(UserInput.class);
 		ModulesGenerator generator = context.getBean(ModulesGenerator.class);
 		generator.generateCode(userInput.composeInput(root));
 	}
 
-	@Override
+	@Override 
 	public void run(ApplicationArguments args) throws Exception {
 		System.out.println("# NonOptionArgs: " + args.getNonOptionArgs().size());
 
@@ -34,7 +36,7 @@ public class CodegenApplication implements ApplicationRunner {
 
 		System.out.println("# OptionArgs: " + args.getOptionNames().size());
 		System.out.println("OptionArgs:");
-
+ 
 		args.getOptionNames().forEach(optionName -> {
 			root.put(optionName, args.getOptionValues(optionName).get(0));
 			System.out.println(optionName + "=" + args.getOptionValues(optionName));
