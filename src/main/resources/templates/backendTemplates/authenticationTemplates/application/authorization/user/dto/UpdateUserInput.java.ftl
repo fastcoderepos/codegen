@@ -43,18 +43,18 @@ public class UpdateUserInput {
   private String lastName;
   
   private Date lockoutEndDateUtc;
-  
+  <#if AuthenticationType =="database">
+  private String password;
+   
   @Length(max = 328, message = "passwordResetCode must be less than 328 characters")
   private String passwordResetCode;
-  
+  </#if>
   @Length(max = 32, message = "phoneNumber must be less than 32 characters")
   private String phoneNumber;
   
   private Long profilePictureId;
   
   private Boolean twoFactorEnabled;
-  
-  private String password;
   
   @NotNull(message = "userName Should not be null")
   @Length(max = 32, message = "userName must be less than 32 characters")
@@ -147,6 +147,7 @@ public class UpdateUserInput {
   public void setLastName(String lastName){
   this.lastName = lastName;
   }
+  <#if AuthenticationType =="database">
   
   public String getPassword() {
   return password;
@@ -156,20 +157,21 @@ public class UpdateUserInput {
   this.password = password;
   }
   
-  public Date getLockoutEndDateUtc() {
-  return lockoutEndDateUtc;
-  }
-
-  public void setLockoutEndDateUtc(Date lockoutEndDateUtc){
-  this.lockoutEndDateUtc = lockoutEndDateUtc;
-  }
-  
   public String getPasswordResetCode() {
   return passwordResetCode;
   }
 
   public void setPasswordResetCode(String passwordResetCode){
   this.passwordResetCode = passwordResetCode;
+  }
+  </#if>
+  
+  public Date getLockoutEndDateUtc() {
+  return lockoutEndDateUtc;
+  }
+
+  public void setLockoutEndDateUtc(Date lockoutEndDateUtc){
+  this.lockoutEndDateUtc = lockoutEndDateUtc;
   }
   
   public String getPhoneNumber() {

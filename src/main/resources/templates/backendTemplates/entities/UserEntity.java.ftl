@@ -20,7 +20,11 @@ public class  UserEntity implements Serializable {
     private String lastName;
     private String emailAddress;
     private String userName;
+    <#if AuthenticationType == "database">
     private String password;
+    private String passwordResetCode;
+    private Boolean shouldChangePasswordOnNextLogin;
+    </#if>
     private String phoneNumber;
     private Long profilePictureId;
     private Date lastLoginTime;
@@ -31,8 +35,6 @@ public class  UserEntity implements Serializable {
     private Boolean isActive;
     private Boolean isLockoutEnabled;
     private Date lockoutEndDateUtc;
-    private String passwordResetCode;
-    private Boolean shouldChangePasswordOnNextLogin;
     private String isPhoneNumberConfirmed;
     private Boolean isTwoFactorEnabled;
 
@@ -151,6 +153,7 @@ public class  UserEntity implements Serializable {
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
+<#if AuthenticationType == "database">
 
     @Basic
     @Column(name = "Password", nullable = true, length = 128)
@@ -161,7 +164,7 @@ public class  UserEntity implements Serializable {
     public void setPassword(String password) {
         this.password = password;
     }
-
+    
     @Basic
     @Column(name = "PasswordResetCode", nullable = true, length = 328)
     public String getPasswordResetCode() {
@@ -171,7 +174,18 @@ public class  UserEntity implements Serializable {
     public void setPasswordResetCode(String passwordResetCode) {
         this.passwordResetCode = passwordResetCode;
     }
+    
+    @Basic
+    @Column(name = "ShouldChangePasswordOnNextLogin", nullable = true)
+    public Boolean ShouldChangePasswordOnNextLogin() {
+        return shouldChangePasswordOnNextLogin;
+    }
 
+    public void setShouldChangePasswordOnNextLogin(Boolean shouldChangePasswordOnNextLogin) {
+        this.shouldChangePasswordOnNextLogin = shouldChangePasswordOnNextLogin;
+    }
+    
+</#if>
     @Basic
     @Column(name = "PhoneNumber", nullable = true, length = 32)
     public String getPhoneNumber() {
@@ -190,16 +204,6 @@ public class  UserEntity implements Serializable {
 
     public void setProfilePictureId(Long profilePictureId) {
         this.profilePictureId = profilePictureId;
-    }
-
-    @Basic
-    @Column(name = "ShouldChangePasswordOnNextLogin", nullable = true)
-    public Boolean ShouldChangePasswordOnNextLogin() {
-        return shouldChangePasswordOnNextLogin;
-    }
-
-    public void setShouldChangePasswordOnNextLogin(Boolean shouldChangePasswordOnNextLogin) {
-        this.shouldChangePasswordOnNextLogin = shouldChangePasswordOnNextLogin;
     }
 
     @Basic

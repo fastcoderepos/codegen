@@ -1,4 +1,4 @@
-package [=PackageName].domain<#if AuthenticationType != "none" && ClassName == AuthenticationTable>.authorization</#if>.[=ClassName?lower_case];
+package [=PackageName].domain<#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>.authorization</#if>.[=ClassName?lower_case];
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -103,7 +103,7 @@ public class [=ClassName]ManagerTest {
 	    Mockito.<Optional<[=ClassName]Entity>>when(_[=ClassName?uncap_first]Repository.findById(<#if CompositeKeyClasses?seq_contains(ClassName)>any([=IdClass].class)<#else><#list Fields as key,value><#if value.isPrimaryKey!false><#if value.fieldType?lower_case == "long">anyLong()<#elseif value.fieldType?lower_case == "integer">any(Integer.class)<#elseif value.fieldType?lower_case == "short">any(Short.class)<#elseif value.fieldType?lower_case == "double">any(Double.class)<#elseif value.fieldType?lower_case == "string">anyString()</#if></#if></#list></#if>)).thenReturn(Optional.empty());
 		Assertions.assertThat(_[=ClassName?uncap_first]Manager.FindById(<#if CompositeKeyClasses?seq_contains(ClassName)>[=IdClass?uncap_first]<#else><#list Fields as key,value><#if value.isPrimaryKey!false><#if value.fieldType?lower_case == "long" || value.fieldType?lower_case == "integer" || value.fieldType?lower_case == "short" || value.fieldType?lower_case == "double" || value.fieldType?lower_case == "string">ID</#if></#if></#list></#if>)).isEqualTo(null);
 	}
-	<#if AuthenticationType != "none" && ClassName == AuthenticationTable>
+	<#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>
 	<#if AuthenticationFields??>
 	<#list AuthenticationFields as authKey,authValue>
 	<#if authKey== "UserName">

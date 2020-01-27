@@ -6,6 +6,7 @@ import [=PackageName].application.authorization.userrole.dto.FindUserroleByIdOut
 import [=PackageName].application.authorization.userpermission.dto.FindUserpermissionByIdOutput;
 import [=PackageName].application.authorization.user.UserAppService;
 import [=PackageName].application.authorization.user.dto.*;
+import [=PackageName].security.JWTAppService;
 import [=CommonModulePackage].search.SearchCriteria;
 import [=CommonModulePackage].search.SearchUtils;
 import [=CommonModulePackage].application.OffsetBasedPageRequest;
@@ -18,7 +19,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+<#if AuthenticationType == "database">
 import org.springframework.security.crypto.password.PasswordEncoder;
+</#if>
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -41,8 +44,13 @@ public class UserController {
 	@Autowired
 	private UserroleAppService  _userroleAppService;
 	
+	<#if AuthenticationType == "database">
 	@Autowired
     private PasswordEncoder pEncoder;
+    </#if>
+    
+    @Autowired
+ 	private JWTAppService _jwtAppService;
 
 	@Autowired
 	private LoggingHelper logHelper;
@@ -51,12 +59,15 @@ public class UserController {
 	private Environment env;
 	
 	public UserController(UserAppService userAppService, UserpermissionAppService userpermissionAppService,
-			UserroleAppService userroleAppService,PasswordEncoder pEncoder, LoggingHelper logHelper) {
+			UserroleAppService userroleAppService,<#if AuthenticationType == "database">PasswordEncoder pEncoder,</#if>JWTAppService jwtAppService, LoggingHelper logHelper) {
 		super();
 		this._userAppService = userAppService;
 		this._userpermissionAppService = userpermissionAppService;
 		this._userroleAppService = userroleAppService;
+		this._jwtAppService = jwtAppService;
+		<#if AuthenticationType == "database">
 		this.pEncoder = pEncoder;
+		</#if>
 		this.logHelper = logHelper;
 	}
 
@@ -72,8 +83,9 @@ public class UserController {
 	        throw new EntityExistsException(
 	        	String.format("There already exists a user with a name=%s", user.getUserName()));
 	    }
-	        
+	    <#if AuthenticationType == "database">
 	    user.setPassword(pEncoder.encode(user.getPassword()));
+	    </#if>
 	    CreateUserOutput output=_userAppService.Create(user);
 		if(output==null)
 		{
@@ -112,11 +124,12 @@ public class UserController {
 			logHelper.getLogger().error("Unable to update. User with id {} not found.", id);
 			return new ResponseEntity(new EmptyJsonResponse(), HttpStatus.NOT_FOUND);
 		}
-		
+		<#if AuthenticationType == "database">
 		user.setPassword(currentUser.getPassword());
+		</#if>
 		if(currentUser.getIsActive() && !user.getIsActive()) { 
  
-            _userAppService.deleteAllUserTokens(currentUser.getUserName()); 
+            _jwtAppService.deleteAllUserTokens(currentUser.getUserName()); 
         } 
     return new ResponseEntity(_userAppService.Update(Long.valueOf(id),user), HttpStatus.OK);
 	}

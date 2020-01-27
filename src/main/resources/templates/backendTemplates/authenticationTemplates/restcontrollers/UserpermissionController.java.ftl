@@ -25,6 +25,7 @@ import [=CommonModulePackage].search.SearchCriteria;
 import [=CommonModulePackage].search.SearchUtils;
 import [=CommonModulePackage].application.OffsetBasedPageRequest;
 import [=CommonModulePackage].domain.EmptyJsonResponse;
+import [=PackageName].security.JWTAppService;
 import [=PackageName].application.authorization.[=AuthenticationTable?lower_case].[=AuthenticationTable]AppService;
 import [=PackageName].application.authorization.[=AuthenticationTable?lower_case]permission.[=AuthenticationTable]permissionAppService;
 import [=PackageName].application.authorization.[=AuthenticationTable?lower_case]permission.dto.*;
@@ -43,15 +44,19 @@ public class [=AuthenticationTable]permissionController {
 
 	@Autowired
 	private LoggingHelper logHelper;
+	
+	@Autowired
+ 	private JWTAppService _jwtAppService;
 
 	@Autowired
 	private Environment env;
 	
 	public [=AuthenticationTable]permissionController([=AuthenticationTable]permissionAppService [=AuthenticationTable?uncap_first]permissionAppService, [=AuthenticationTable]AppService [=AuthenticationTable?uncap_first]AppService,
-			LoggingHelper helper) {
-		
+			JWTAppService jwtAppService, LoggingHelper helper) {
+	
 		this._[=AuthenticationTable?uncap_first]permissionAppService = [=AuthenticationTable?uncap_first]permissionAppService;
 		this._[=AuthenticationTable?uncap_first]AppService = [=AuthenticationTable?uncap_first]AppService;
+		this._jwtAppService = jwtAppService;
 		this.logHelper = helper;
 	}
     
@@ -67,7 +72,7 @@ public class [=AuthenticationTable]permissionController {
 	    }
 	    
 		Find[=AuthenticationTable]ByIdOutput found[=AuthenticationTable] =_[=AuthenticationTable?uncap_first]AppService.FindById(<#if (AuthenticationType!="none" && !UserInput??)>output.get[=AuthenticationTable]Id()<#elseif AuthenticationType!="none" && UserInput??><#if CompositeKeyClasses??><#if CompositeKeyClasses?seq_contains(ClassName)>new [=AuthenticationTable]Id(</#if></#if><#list PrimaryKeys as key,value><#if key_has_next>output.get[=AuthenticationTable][=key?cap_first](),<#else>output.get[=AuthenticationTable][=key?cap_first]()</#if></#list></#if><#if CompositeKeyClasses??><#if CompositeKeyClasses?seq_contains(ClassName)>)</#if></#if>);
-	   _[=AuthenticationTable?uncap_first]AppService.deleteAllUserTokens(found[=AuthenticationTable].get<#if AuthenticationType!= "none"><#if AuthenticationFields??><#list AuthenticationFields as authKey,authValue><#if authKey== "UserName">[=authValue.fieldName?cap_first]</#if></#list><#else>UserName</#if></#if>());  
+	   _jwtAppService.deleteAllUserTokens(found[=AuthenticationTable].get<#if AuthenticationType!= "none"><#if AuthenticationFields??><#list AuthenticationFields as authKey,authValue><#if authKey== "UserName">[=authValue.fieldName?cap_first]</#if></#list><#else>UserName</#if></#if>());  
 		
 		return new ResponseEntity(output, HttpStatus.OK);
 	}
@@ -93,7 +98,7 @@ public class [=AuthenticationTable]permissionController {
 	 _[=AuthenticationTable?uncap_first]permissionAppService.Delete([=AuthenticationTable?uncap_first]permissionId);
 	 
 	 Find[=AuthenticationTable]ByIdOutput found[=AuthenticationTable] =_[=AuthenticationTable?uncap_first]AppService.FindById(<#if (AuthenticationType!="none" && !UserInput??)>output.get[=AuthenticationTable]Id()<#elseif AuthenticationType!="none" && UserInput??><#if CompositeKeyClasses??><#if CompositeKeyClasses?seq_contains(ClassName)>new [=AuthenticationTable]Id(</#if></#if><#list PrimaryKeys as key,value><#if key_has_next>output.get[=AuthenticationTable][=key?cap_first](),<#else>output.get[=AuthenticationTable][=key?cap_first]()</#if></#list></#if><#if CompositeKeyClasses??><#if CompositeKeyClasses?seq_contains(ClassName)>)</#if></#if>);
-	 _[=AuthenticationTable?uncap_first]AppService.deleteAllUserTokens(found[=AuthenticationTable].get<#if AuthenticationType!= "none"><#if AuthenticationFields??><#list AuthenticationFields as authKey,authValue><#if authKey== "UserName">[=authValue.fieldName?cap_first]</#if></#list><#else>UserName</#if></#if>());  
+	 _jwtAppService.deleteAllUserTokens(found[=AuthenticationTable].get<#if AuthenticationType!= "none"><#if AuthenticationFields??><#list AuthenticationFields as authKey,authValue><#if authKey== "UserName">[=authValue.fieldName?cap_first]</#if></#list><#else>UserName</#if></#if>());  
 		
     }
 	
@@ -116,7 +121,7 @@ public class [=AuthenticationTable]permissionController {
 	}
 		
     Find[=AuthenticationTable]ByIdOutput found[=AuthenticationTable] =_[=AuthenticationTable?uncap_first]AppService.FindById(<#if (AuthenticationType!="none" && !UserInput??)>current[=AuthenticationTable]permission.get[=AuthenticationTable]Id()<#elseif AuthenticationType!="none" && UserInput??><#if CompositeKeyClasses??><#if CompositeKeyClasses?seq_contains(ClassName)>new [=AuthenticationTable]Id(</#if></#if><#list PrimaryKeys as key,value><#if key_has_next>current[=AuthenticationTable]permission.get[=AuthenticationTable][=key?cap_first](),<#else>current[=AuthenticationTable]permission.get[=AuthenticationTable][=key?cap_first]()</#if></#list></#if><#if CompositeKeyClasses??><#if CompositeKeyClasses?seq_contains(ClassName)>)</#if></#if>);
-	_[=AuthenticationTable?uncap_first]AppService.deleteAllUserTokens(found[=AuthenticationTable].get<#if AuthenticationType!= "none"><#if AuthenticationFields??><#list AuthenticationFields as authKey,authValue><#if authKey== "UserName">[=authValue.fieldName?cap_first]</#if></#list><#else>UserName</#if></#if>());  
+	_jwtAppService.deleteAllUserTokens(found[=AuthenticationTable].get<#if AuthenticationType!= "none"><#if AuthenticationFields??><#list AuthenticationFields as authKey,authValue><#if authKey== "UserName">[=authValue.fieldName?cap_first]</#if></#list><#else>UserName</#if></#if>());  
 		
 		
 	return new ResponseEntity(_[=AuthenticationTable?uncap_first]permissionAppService.Update([=AuthenticationTable?uncap_first]permissionId,[=AuthenticationTable?uncap_first]permission), HttpStatus.OK);

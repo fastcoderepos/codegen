@@ -379,7 +379,7 @@ public class EntityDetails {
 		}
 		return null;
 	}
-
+ 
 	public List<FieldDetails> getFields(String relationEntityName, List<Class<?>> classList) {
 		List<FieldDetails> fieldsList = new ArrayList<>();
 		for (Class<?> currentClass : classList) {

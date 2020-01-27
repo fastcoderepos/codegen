@@ -17,7 +17,6 @@ import org.springframework.context.ApplicationContext;
 public class CodegenApplication implements ApplicationRunner {
 	static Map<String, String> root = new HashMap<>();
 
-
 	public static void main(String[] args) throws ClassNotFoundException, IOException {
 	
 		ApplicationContext context = SpringApplication.run(CodegenApplication.class, args);

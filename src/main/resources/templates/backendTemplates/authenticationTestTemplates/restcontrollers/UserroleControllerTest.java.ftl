@@ -33,25 +33,20 @@ import org.springframework.cache.CacheManager;
 import [=PackageName].domain.model.[=AuthenticationTable]Id;
 </#if>
 import org.springframework.data.web.SortHandlerMethodArgumentResolver;
-
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import [=CommonModulePackage].logging.LoggingHelper;
+import [=PackageName].security.JWTAppService;
 import [=PackageName].application.authorization.[=AuthenticationTable?lower_case]role.[=AuthenticationTable]roleAppService;
 import [=PackageName].application.authorization.[=AuthenticationTable?lower_case]role.dto.Create[=AuthenticationTable]roleInput;
 import [=PackageName].application.authorization.[=AuthenticationTable?lower_case]role.dto.Find[=AuthenticationTable]roleByIdOutput;
 import [=PackageName].application.authorization.[=AuthenticationTable?lower_case]role.dto.Update[=AuthenticationTable]roleInput;
-<#if Flowable!false>
-import [=PackageName].application.Flowable.ActIdUserMapper;
-import [=PackageName].application.Flowable.FlowableIdentityService;
-import [=PackageName].domain.Flowable.Users.ActIdUserEntity;
-</#if>
+
 import [=PackageName].application.authorization.[=AuthenticationTable?lower_case].[=AuthenticationTable]AppService;
 import [=PackageName].application.authorization.[=AuthenticationTable?lower_case].dto.Find[=AuthenticationTable]ByIdOutput;
 import [=PackageName].domain.irepository.IRoleRepository;
@@ -92,6 +87,9 @@ public class [=AuthenticationTable]roleControllerTest {
 
 	@Mock
 	private Logger loggerMock;
+	
+	@SpyBean
+	private JWTAppService jwtAppService;
 
 	private [=AuthenticationTable]roleEntity [=AuthenticationTable?uncap_first]role;
 
@@ -105,23 +103,12 @@ public class [=AuthenticationTable]roleControllerTest {
 
 	@Autowired 
 	private CacheManager cacheManager; 
-</#if>
-<#if Flowable!false>
 
-	@Autowired
-	private FlowableIdentityService idmIdentityService;
-
-	@Autowired
-	private ActIdUserMapper actIdUserMapper;
-</#if>
-
-<#if Cache !false>
 	public void evictAllCaches(){ 
 		for(String name : cacheManager.getCacheNames()){
 			cacheManager.getCache(name).clear(); 
 		} 
 	}
-	
 </#if>
 
     @PostConstruct
@@ -137,11 +124,6 @@ public class [=AuthenticationTable]roleControllerTest {
 		  em.createNativeQuery("drop table [=SchemaName?lower_case].[=AuthenticationTable?uncap_first]role CASCADE").executeUpdate();
 		  em.createNativeQuery("drop table [=SchemaName?lower_case].role CASCADE").executeUpdate();
 		  em.createNativeQuery("drop table [=SchemaName?lower_case].[=AuthenticationTable?uncap_first] CASCADE").executeUpdate();
-		  <#if Flowable!false>
-		  em.createNativeQuery("drop table [=SchemaName?lower_case].act_id_membership CASCADE").executeUpdate();
-		  em.createNativeQuery("drop table [=SchemaName?lower_case].act_id_group CASCADE").executeUpdate();
-		  em.createNativeQuery("drop table [=SchemaName?lower_case].act_id_user CASCADE").executeUpdate();
-		  </#if>
 		  em.getTransaction().commit();
 		} catch(Exception ex) {
 		  em.getTransaction().rollback();
@@ -172,7 +154,7 @@ public class [=AuthenticationTable]roleControllerTest {
 		
 		[=AuthenticationTable]roleEntity [=AuthenticationTable?uncap_first]role = new [=AuthenticationTable]roleEntity();
 		[=AuthenticationTable?uncap_first]role.setRoleId(role.getId());
-		<#if (AuthenticationType!="none" && !UserInput??)>
+		<#if (AuthenticationType == "database" || UsersOnly == "true") && !UserInput??>
 		[=AuthenticationTable?uncap_first]role.set[=AuthenticationTable]Id(user.getId());
 		<#else>
 		<#if PrimaryKeys??>
@@ -193,7 +175,7 @@ public class [=AuthenticationTable]roleControllerTest {
 	public static Create[=AuthenticationTable]roleInput create[=AuthenticationTable]roleInput() {
 		Create[=AuthenticationTable]roleInput [=AuthenticationTable?uncap_first]role = new Create[=AuthenticationTable]roleInput();
 		[=AuthenticationTable?uncap_first]role.setRoleId(3L);
-		<#if (AuthenticationType!="none" && !UserInput??)>
+		<#if (AuthenticationType == "database" || UsersOnly == "true") && !UserInput??>
 		[=AuthenticationTable?uncap_first]role.set[=AuthenticationTable]Id(3L);
 		<#else>
 		<#if PrimaryKeys??>
@@ -218,14 +200,16 @@ public class [=AuthenticationTable]roleControllerTest {
 
 	public static [=AuthenticationTable]Entity create[=AuthenticationTable]Entity() {
 		[=AuthenticationTable]Entity [=AuthenticationTable?uncap_first] = new [=AuthenticationTable]Entity();
-		<#if (AuthenticationType!="none" && !UserInput??)>
+		<#if (AuthenticationType == "database" || UsersOnly == "true") && !UserInput??>
 	    [=AuthenticationTable?uncap_first].setId(DEFAULT_USER_ID);
 		[=AuthenticationTable?uncap_first].setIsActive(true);
 		[=AuthenticationTable?uncap_first].set[=AuthenticationTable]Name("u1");
 		[=AuthenticationTable?uncap_first].setEmailAddress("u1@g.com");
 		[=AuthenticationTable?uncap_first].setFirstName("U1");
 		[=AuthenticationTable?uncap_first].setLastName("1");
+		<#if AuthenticationType =="database">
 		[=AuthenticationTable?uncap_first].setPassword("secret");
+		</#if>
 		<#else>
   		<#list Fields as key,value>
   		<#if value.isNullable==false>
@@ -281,7 +265,7 @@ public class [=AuthenticationTable]roleControllerTest {
 	public Find[=AuthenticationTable]ByIdOutput create[=AuthenticationTable]ByIdOuput()
 	{
 		Find[=AuthenticationTable]ByIdOutput [=AuthenticationTable?uncap_first] = new Find[=AuthenticationTable]ByIdOutput();
-		<#if (AuthenticationType!="none" && !UserInput??)>
+		<#if (AuthenticationType == "database" || UsersOnly == "true") && !UserInput??>
 		[=AuthenticationTable?uncap_first].setId(4L);
 		[=AuthenticationTable?uncap_first].setIsActive(true);
 		[=AuthenticationTable?uncap_first].set[=AuthenticationTable]Name("u4");
@@ -290,7 +274,7 @@ public class [=AuthenticationTable]roleControllerTest {
 		[=AuthenticationTable?uncap_first].setLastName("4");
 		<#else>
   		<#list Fields as key,value>
-  		<#if value.isNullable==false && (AuthenticationFields?? && AuthenticationFields.Password.fieldName != value.fieldName)>
+  		<#if value.isNullable==false && (AuthenticationType =="database" && AuthenticationFields?? && AuthenticationFields.Password.fieldName != value.fieldName)>
 		<#if value.fieldType?lower_case == "long">
 		[=ClassName?uncap_first].set[=key?cap_first](4L);
 		<#elseif value.fieldType?lower_case == "integer">
@@ -306,7 +290,7 @@ public class [=AuthenticationTable]roleControllerTest {
 		</#list>
 		<#if AuthenticationFields??>
 		<#list AuthenticationFields as authKey,authValue>
-		<#if !Fields[authValue.fieldName]?? && authKey != "Password">
+		<#if !Fields[authValue.fieldName]?? && ( AuthenticationType =="database" && authKey != "Password")>
 		<#if authValue.fieldType?lower_case == "long">
 		[=ClassName?uncap_first].set[=authValue.fieldName?cap_first](4L);
 		<#elseif authValue.fieldType?lower_case == "integer">
@@ -334,7 +318,9 @@ public class [=AuthenticationTable]roleControllerTest {
 		[=AuthenticationTable]Entity [=AuthenticationTable?uncap_first] =create[=AuthenticationTable]Entity();
 		<#if (AuthenticationType!="none" && !UserInput??)>
 		[=AuthenticationTable?uncap_first].set[=AuthenticationTable]Name("u2");
+		<#if AuthenticationType =="database" >
 		[=AuthenticationTable?uncap_first].setPassword("secret");
+		</#if>
 		[=AuthenticationTable?uncap_first].setIsActive(true);
 		[=AuthenticationTable?uncap_first].setFirstName("U2");
 		[=AuthenticationTable?uncap_first].setEmailAddress("u2@gil.com");
@@ -412,7 +398,9 @@ public class [=AuthenticationTable]roleControllerTest {
 		[=AuthenticationTable?uncap_first].setFirstName("U5");
 		[=AuthenticationTable?uncap_first].setEmailAddress("u5@gma.com");
 		[=AuthenticationTable?uncap_first].setId(5L);
+		<#if AuthenticationType =="database">
 		[=AuthenticationTable?uncap_first].setPassword("secret");
+		</#if>
 		[=AuthenticationTable?uncap_first].setIsActive(true);
 		<#else>
   		<#list Fields as key,value>
@@ -432,7 +420,7 @@ public class [=AuthenticationTable]roleControllerTest {
 		</#list>
 		<#if AuthenticationFields??>
 		<#list AuthenticationFields as authKey,authValue>
-		<#if !Fields[authValue.fieldName]?? && authKey != "Password">
+		<#if !Fields[authValue.fieldName]?? && (AuthenticationType =="database" && authKey != "Password")>
 		<#if authValue.fieldType?lower_case == "long">
 		[=ClassName?uncap_first].set[=authValue.fieldName?cap_first](5L);
 		<#elseif authValue.fieldType?lower_case == "integer">
@@ -484,7 +472,7 @@ public class [=AuthenticationTable]roleControllerTest {
         <#if Cache !false>
 		evictAllCaches();
 		</#if>
-		final [=AuthenticationTable]roleController [=AuthenticationTable?uncap_first]roleController = new [=AuthenticationTable]roleController([=AuthenticationTable?uncap_first]roleAppService, [=AuthenticationTable?uncap_first]AppService,logHelper);
+		final [=AuthenticationTable]roleController [=AuthenticationTable?uncap_first]roleController = new [=AuthenticationTable]roleController([=AuthenticationTable?uncap_first]roleAppService, [=AuthenticationTable?uncap_first]AppService,jwtAppService,logHelper);
 
 		when(logHelper.getLogger()).thenReturn(loggerMock);
 		doNothing().when(loggerMock).error(anyString());
@@ -558,7 +546,9 @@ public class [=AuthenticationTable]roleControllerTest {
 	    [=AuthenticationTable?uncap_first].setEmailAddress("u3@g.com");
 	    [=AuthenticationTable?uncap_first].setFirstName("U");
 	    [=AuthenticationTable?uncap_first].setLastName("3");
+	    <#if AuthenticationType =="database">
 	    [=AuthenticationTable?uncap_first].setPassword("secret");
+	    </#if>
 		<#else>
   		<#list Fields as key,value>
   		<#if value.isNullable==false>
@@ -656,11 +646,6 @@ public class [=AuthenticationTable]roleControllerTest {
 	public void Delete_IdIsValid_ReturnStatusNoContent() throws Exception {
 
 		[=AuthenticationTable]roleEntity up = [=AuthenticationTable?uncap_first]roleRepository.save(createNewEntityForDelete());
-		<#if Flowable!false>
-		ActIdUserEntity actIdUser = actIdUserMapper.createUsersEntityToActIdUserEntity(up.get[=AuthenticationTable]());
-		idmIdentityService.createUser(up.get[=AuthenticationTable](), actIdUser);
-		idmIdentityService.addUserGroupMapping(up.get[=AuthenticationTable]().get<#if AuthenticationType!= "none"><#if AuthenticationFields??><#list AuthenticationFields as authKey,authValue><#if authKey== "UserName">[=authValue.fieldName?cap_first]</#if></#list><#else>UserName</#if></#if>(), up.getRole().getName());
-        </#if>
 		Find[=AuthenticationTable]roleByIdOutput output= new Find[=AuthenticationTable]roleByIdOutput();
 		<#if (AuthenticationType!="none" && !UserInput??)>
 	    output.set[=AuthenticationTable]Id(up.get[=AuthenticationTable]Id());
@@ -679,7 +664,7 @@ public class [=AuthenticationTable]roleControllerTest {
 	
 		Mockito.when([=AuthenticationTable?uncap_first]AppService.FindById(<#if (AuthenticationType!="none" && !UserInput??)>up.get[=AuthenticationTable]Id()<#elseif AuthenticationType!="none" && UserInput??><#if CompositeKeyClasses??><#if CompositeKeyClasses?seq_contains(ClassName)>new [=AuthenticationTable]Id(</#if></#if><#if PrimaryKeys??><#list PrimaryKeys as key,value>up.get[=AuthenticationTable][=key?cap_first]()<#sep>,</#list></#if></#if><#if CompositeKeyClasses??><#if CompositeKeyClasses?seq_contains(ClassName)>)</#if></#if>
 		)).thenReturn(create[=AuthenticationTable]ByIdOuput());
-		doNothing().when([=AuthenticationTable?uncap_first]AppService).deleteAllUserTokens(anyString());
+		doNothing().when(jwtAppService).deleteAllUserTokens(anyString());
 
 		mvc.perform(delete("/[=AuthenticationTable?uncap_first]role/roleId:"+up.getRoleId() +",<#if (AuthenticationType!="none" && !UserInput??)>[=AuthenticationTable?uncap_first]Id:" + up.get[=AuthenticationTable]Id()<#else><#if PrimaryKeys??><#list PrimaryKeys as key,value>[=AuthenticationTable?uncap_first][=key?cap_first]:" + up.get[=AuthenticationTable][=key?cap_first]()<#sep>+ ",</#list></#if></#if>)
 				.contentType(MediaType.APPLICATION_JSON))
@@ -753,12 +738,6 @@ public class [=AuthenticationTable]roleControllerTest {
 //	public void Update[=AuthenticationTable]role_[=AuthenticationTable]roleExists_ReturnStatusOk() throws Exception {
 //
 //		[=AuthenticationTable]roleEntity up = [=AuthenticationTable?uncap_first]roleRepository.save(createNewEntityForUpdate());
-//		<#if Flowable!false>
-//		ActIdUserEntity actIdUser = actIdUserMapper.createUsersEntityToActIdUserEntity(up.get[=AuthenticationTable]());
-//		idmIdentityService.createUser(up.get[=AuthenticationTable](), actIdUser);
-//		idmIdentityService.addUserGroupMapping(up.get[=AuthenticationTable]().get<#if AuthenticationType!= "none"><#if AuthenticationFields??><#list AuthenticationFields as authKey,authValue><#if authKey== "UserName">[=authValue.fieldName?cap_first]</#if></#list><#else>UserName</#if></#if>(), up.getRole().getName());
-//      </#if>
-//        
 //		Find[=AuthenticationTable]roleByIdOutput output= new Find[=AuthenticationTable]roleByIdOutput();
 //		<#if (AuthenticationType!="none" && !UserInput??)>
 //		output.set[=AuthenticationTable]Id(up.get[=AuthenticationTable]Id());
@@ -789,7 +768,7 @@ public class [=AuthenticationTable]roleControllerTest {
 //
 //		doReturn(output).when([=AuthenticationTable?uncap_first]roleAppService).FindById(new [=AuthenticationTable]roleId(up.getRoleId(),<#if (AuthenticationType!="none" && !UserInput??)>up.get[=AuthenticationTable]Id()<#else><#if PrimaryKeys??><#list PrimaryKeys as key,value>up.get[=AuthenticationTable][=key?cap_first]()<#sep>,</#list></#if></#if>));
 //		Mockito.when([=AuthenticationTable?uncap_first]AppService.FindById(<#if (AuthenticationType!="none" && !UserInput??)>up.get[=AuthenticationTable]Id()<#else><#if PrimaryKeys??><#list PrimaryKeys as key,value>up.get[=AuthenticationTable][=key?cap_first]()<#sep>,</#list></#if></#if>)).thenReturn(create[=AuthenticationTable]ByIdOuput());
-//		doNothing().when([=AuthenticationTable?uncap_first]AppService).deleteAllUserTokens(anyString());
+//		doNothing().when(jwtAppService).deleteAllUserTokens(anyString());
 //
 //      ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
 //		String json = ow.writeValueAsString([=AuthenticationTable?uncap_first]role);

@@ -46,6 +46,7 @@ import org.springframework.cache.CacheManager;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import [=CommonModulePackage].logging.LoggingHelper;
+import [=PackageName].security.JWTAppService;
 import [=PackageName].application.authorization.user.UserAppService;
 import [=PackageName].application.authorization.user.dto.CreateUserInput;
 import [=PackageName].application.authorization.user.dto.FindUserByIdOutput;
@@ -82,8 +83,13 @@ public class UserControllerTest {
 	@SpyBean
 	private LoggingHelper logHelper;
 	
+	<#if AuthenticationType == "database">
 	@SpyBean
 	private PasswordEncoder pEncoder;
+	</#if>
+	
+	@SpyBean
+	private JWTAppService jwtAppService;
 	
 	@Mock
 	private Logger loggerMock;
@@ -91,14 +97,6 @@ public class UserControllerTest {
 	private UserEntity user;
 	
 	private MockMvc mvc;
-    <#if Flowable!false>
-    
-	@Autowired
-    private FlowableIdentityService idmIdentityService;
-
-    @Autowired
-    private ActIdUserMapper actIdUserMapper;
-    </#if>
 
 	<#if Cache !false>
 	
@@ -134,7 +132,9 @@ public class UserControllerTest {
 		UserEntity user = new UserEntity();
 		user.setUserName(DEFAULT_USER_NAME);
 		user.setId(1L);
+		<#if AuthenticationType == "database">
 		user.setPassword("secret");
+		</#if>
 		user.setFirstName("U1");
 		user.setLastName("11");
 		user.setEmailAddress("u11@g.com");
@@ -146,7 +146,9 @@ public class UserControllerTest {
 		CreateUserInput user = new CreateUserInput();
 		
 		user.setUserName("newUser");
+		<#if AuthenticationType == "database">
 		user.setPassword("secret");
+		</#if>
 		user.setFirstName("U22");
 		user.setLastName("122");
 		user.setEmailAddress("u122@g.com");
@@ -158,7 +160,9 @@ public class UserControllerTest {
 	public static UserEntity createNewEntity() {
 		UserEntity user = new UserEntity();
 		user.setId(2L);
+		<#if AuthenticationType == "database">
 		user.setPassword("secret");
+		</#if>
 		user.setUserName("U25");
 		user.setFirstName("U25");
 		user.setLastName("125");
@@ -174,7 +178,7 @@ public class UserControllerTest {
         <#if Cache !false>
         evictAllCaches();
         </#if>
-        final UserController userController = new UserController(userAppService,userpermissionAppService,userroleAppService,pEncoder,logHelper);
+        final UserController userController = new UserController(userAppService,userpermissionAppService,userroleAppService,<#if AuthenticationType == "database">pEncoder,</#if>jwtAppService,logHelper);
         
         when(logHelper.getLogger()).thenReturn(loggerMock);
 		doNothing().when(loggerMock).error(anyString());
@@ -195,10 +199,6 @@ public class UserControllerTest {
 		List<UserEntity> list= user_repository.findAll();
 	    if(list.isEmpty()) {
 		   user_repository.save(user);
-		   <#if Flowable!false>
-		   ActIdUserEntity actIdUser = actIdUserMapper.createUsersEntityToActIdUserEntity(user);
-		   idmIdentityService.createUser(user, actIdUser);
-		   </#if>
 	    }
 	
 	}
@@ -281,10 +281,6 @@ public class UserControllerTest {
 	    output.setIsActive(true);
 	    
 	    Mockito.when(userAppService.FindById(anyLong())).thenReturn(output);
-	    <#if Flowable!false>
-	    ActIdUserEntity actIdUser = actIdUserMapper.createUsersEntityToActIdUserEntity(createNewEntity());
-		idmIdentityService.createUser(createNewEntity(), actIdUser);
-		</#if>
 		
      	 mvc.perform(delete("/user/"+id.toString())
      			 .contentType(MediaType.APPLICATION_JSON))
@@ -323,14 +319,13 @@ public class UserControllerTest {
 	    output.setLastName(ue.getLastName());
 	    output.setEmailAddress(ue.getEmailAddress());
 	    output.setIsActive(ue.getIsActive());
+	    <#if AuthenticationType == "database">
 	    output.setPassword(ue.getPassword());
+	    </#if>
 	    
 		Mockito.doReturn(output).when(userAppService).FindWithAllFieldsById(anyLong());
-		<#if Flowable!false>
-		ActIdUserEntity actIdUser = actIdUserMapper.createUsersEntityToActIdUserEntity(ue);
-		idmIdentityService.createUser(ue, actIdUser);
-		</#if>
-	    doNothing().when(userAppService).deleteAllUserTokens(anyString());  
+	    
+	    doNothing().when(jwtAppService).deleteAllUserTokens(anyString());  
 	    
         UpdateUserInput user = new UpdateUserInput();
         user.setId(id.longValue());

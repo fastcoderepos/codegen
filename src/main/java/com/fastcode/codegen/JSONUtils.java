@@ -22,7 +22,7 @@ public class JSONUtils {
 		JSONParser parser = new JSONParser();
 		FileReader fr = new FileReader(path);
 		Object obj = parser.parse(fr);
-		fr.close();
+		fr.close(); 
 		return obj;
 	}
 

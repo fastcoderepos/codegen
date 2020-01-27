@@ -6,9 +6,11 @@ import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Date;
-<#if AuthenticationType!="none" && ClassName == AuthenticationTable>
+<#if ClassName == AuthenticationTable>
+<#if AuthenticationType == "database" || (AuthenticationType != "database" && (UsersOnly?? && UsersOnly == "true"))>
 import [=PackageName].domain.model.[=AuthenticationTable]permissionEntity;
 import [=PackageName].domain.model.[=AuthenticationTable]roleEntity;
+</#if>
 </#if>
 @Entity
 @Table(<#if TableName??>name = "[=TableName]",</#if> schema = "[=SchemaName]")
@@ -259,7 +261,8 @@ public class [=ClassName]Entity implements Serializable {
  </#if> 
 </#list>
 
-<#if AuthenticationType!="none" && ClassName == AuthenticationTable>
+<#if ClassName == AuthenticationTable>
+<#if AuthenticationType == "database" || (AuthenticationType != "database" && (UsersOnly?? && UsersOnly == "true"))>
   @OneToMany(mappedBy = "[=AuthenticationTable?uncap_first]", cascade = CascadeType.ALL, orphanRemoval = true) 
   public Set<[=AuthenticationTable]permissionEntity> get[=AuthenticationTable]permissionSet() { 
 	return [=AuthenticationTable?uncap_first]permissionSet; 
@@ -282,7 +285,7 @@ public class [=ClassName]Entity implements Serializable {
  
     private Set<[=AuthenticationTable]roleEntity> [=AuthenticationTable?uncap_first]roleSet = new HashSet<[=AuthenticationTable]roleEntity>(); 
 </#if>
-
+</#if>
 //  @Override
 //  public boolean equals(Object o) {
 //    if (this == o) return true;

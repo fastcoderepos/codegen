@@ -1,7 +1,9 @@
 package [=PackageName];
 
+<#if AuthenticationType !="oidc">
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment; 
+</#if>
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -11,7 +13,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+<#if AuthenticationType !="oidc">
 import [=PackageName].security.JWTAuthenticationFilter;
+</#if>
 import [=PackageName].security.JWTAuthorizationFilter;
 
 import static [=PackageName].security.SecurityConstants.CONFIRM;
@@ -23,12 +27,15 @@ import javax.naming.AuthenticationNotSupportedException;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
+<#if AuthenticationType =="database">
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
-
+</#if>
+<#if AuthenticationType !="oidc">
     @Autowired
 	private Environment env;
-	
+</#if>
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 
@@ -39,7 +46,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     .and()
                     .csrf().disable()
                     .authorizeRequests()
-                    .antMatchers(<#if Flowable!false>"/content-api/**","/dmn-api/**","/form-api/**","/app-api/**","/cmmn-api/**","/process-api/**",</#if>"/v2/api-docs", "/actuator/**","/configuration/ui", "/swagger-resources", "/configuration/security", "/swagger-ui.html", "/webjars/**", "/swagger-resources/configuration/ui", "/swagger-resources/configuration/security", "/browser/index.html#", "/browser/**").permitAll()
+                    .antMatchers("/v2/api-docs", "/actuator/**","/configuration/ui", "/swagger-resources", "/configuration/security", "/swagger-ui.html", "/webjars/**", "/swagger-resources/configuration/ui", "/swagger-resources/configuration/security", "/browser/index.html#", "/browser/**").permitAll()
                     .antMatchers(HttpMethod.POST, REGISTER).permitAll()
                     .antMatchers(HttpMethod.POST, CONFIRM).permitAll()
                     .anyRequest().authenticated()
@@ -58,27 +65,31 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     .csrf().disable()
                     .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                     .authorizeRequests()
-                    .antMatchers(<#if Flowable!false>"/content-api/**","/dmn-api/**","/form-api/**","/app-api/**","/cmmn-api/**","/process-api/**",</#if>"/v2/api-docs", "/actuator/**", "/configuration/ui", "/swagger-resources", "/configuration/security", "/swagger-ui.html", "/webjars/**", "/swagger-resources/configuration/ui", "/swagger-resources/configuration/security", "/browser/index.html#", "/browser/**").permitAll()
+                    .antMatchers("/v2/api-docs", "/actuator/**", "/configuration/ui", "/swagger-resources", "/configuration/security", "/swagger-ui.html", "/webjars/**", "/swagger-resources/configuration/ui", "/swagger-resources/configuration/security", "/browser/index.html#", "/browser/**").permitAll()
                     .antMatchers(HttpMethod.POST, REGISTER).permitAll()
                     .antMatchers(HttpMethod.POST, CONFIRM).permitAll()
                     .anyRequest().authenticated()
                     .and()
+                    <#if AuthenticationType !="oidc">
                     .addFilter(new JWTAuthenticationFilter(authenticationManager()))
+                    </#if>
                     .addFilter(new JWTAuthorizationFilter(authenticationManager()));
       //  }
     }
 
-
+<#if AuthenticationType !="oidc">
     @Autowired
     public void configure(AuthenticationManagerBuilder auth) throws Exception {
 
-        if((env.getProperty("fastCode.auth.method").equalsIgnoreCase("database") ||
-                env.getProperty("fastCode.auth.method").equalsIgnoreCase("oidc"))) {
+      <#if AuthenticationType =="database">
+        if(env.getProperty("fastCode.auth.method").equalsIgnoreCase("database")) {
             auth
                     .userDetailsService(userDetailsService)
                     .passwordEncoder(new BCryptPasswordEncoder());
         }
-        else if (env.getProperty("fastCode.auth.method").equalsIgnoreCase("ldap") ) {
+        </#if>
+        <#if AuthenticationType =="ldap">
+        if (env.getProperty("fastCode.auth.method").equalsIgnoreCase("ldap") ) {
             auth
                 .ldapAuthentication()
                 .contextSource()
@@ -92,14 +103,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .groupSearchFilter(env.getProperty("fastCode.ldap.groupsearchfilter"))
                 .rolePrefix(env.getProperty("fastCode.ldap.roleprefix"));
         }
-
-     /*   else if (env.getProperty("fastCode.auth.method").equalsIgnoreCase("oidc") || env.getProperty("fastCode.auth.method").equalsIgnoreCase("saml")) {
-
-        }*/
-
+        </#if>
         else {
             throw new AuthenticationNotSupportedException();
         }
     }
-
+</#if>
 }

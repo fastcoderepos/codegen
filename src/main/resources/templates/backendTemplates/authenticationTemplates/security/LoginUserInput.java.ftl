@@ -1,4 +1,4 @@
-package [=PackageName].application.authorization.[=AuthenticationTable?lower_case].dto;
+package [=PackageName].security;
 
 public class LoginUserInput {
 

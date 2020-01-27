@@ -77,7 +77,7 @@ public class EntityDetailsTest {
 	@Test
 	public void getFields_parametersAreValid_returnFieldsList() throws IOException, ClassNotFoundException
 	{
-		ArrayList<Class<?>> classes =loadClasses();
+		ArrayList<Class<?>> classes =loadClasses(); 
 		List<FieldDetails> expected = new ArrayList<>();
 		FieldDetails fDetails = new FieldDetails();
 		fDetails.setFieldName("deactivatedOn");
@@ -188,7 +188,7 @@ public class EntityDetailsTest {
 	@Test
 	public void findOneToOneJoinColFromChildEntity_entityHasJoinColumnAnnotation_returnMap() throws ClassNotFoundException, IOException
 	{
-		ArrayList<Class<?>> classes =loadClasses();
+		ArrayList<Class<?>> classes = loadClasses();
 
 		Map<String, RelationDetails> relationMap = new HashMap<String, RelationDetails>();
 		RelationDetails relationDetails = new RelationDetails();
@@ -198,7 +198,7 @@ public class EntityDetailsTest {
 
 		relationMap.put("Books-Checkouts", relationDetails);
 
-		Assertions.assertThat(entityDetails.FindOneToManyJoinColFromChildEntity(relationMap, classes)).isEqualTo(relationMap);
+		Assertions.assertThat(entityDetails.FindOneToOneJoinColFromChildEntity(relationMap, classes)).isEqualTo(relationMap);
 
 	}
 
@@ -465,5 +465,7 @@ public class EntityDetailsTest {
 		urlClassLoader.close();
 		return classes;
 	}
+	
+	
 
 }

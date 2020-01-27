@@ -2,7 +2,7 @@ package [=PackageName].restcontrollers;
 
 import [=PackageName].application.authorization.rolepermission.RolepermissionAppService;
 import [=PackageName].application.authorization.rolepermission.dto.FindRolepermissionByIdOutput;
-<#if AuthenticationType != "none">
+<#if (AuthenticationType == "database" || UsersOnly == "true")>
 import [=PackageName].application.authorization.[=AuthenticationTable?lower_case]role.dto.Find[=AuthenticationTable]roleByIdOutput;
 import [=PackageName].application.authorization.[=AuthenticationTable?lower_case]role.[=AuthenticationTable]roleAppService;
 </#if>
@@ -32,7 +32,7 @@ import java.util.Map;
 @RequestMapping("/role")
 public class RoleController {
 
-    <#if AuthenticationType != "none">
+    <#if (AuthenticationType == "database" || UsersOnly == "true")>
     @Autowired
 	private [=AuthenticationTable]roleAppService  _[=AuthenticationTable?uncap_first]roleAppService;
 	</#if>
@@ -48,11 +48,13 @@ public class RoleController {
 	@Autowired
 	private Environment env;
 	
-	public RoleController(RoleAppService appService,LoggingHelper helper,[=AuthenticationTable]roleAppService [=AuthenticationTable?uncap_first]roleAppService,RolepermissionAppService rolepermissionAppService) {
+	public RoleController(RoleAppService appService,LoggingHelper helper,<#if (AuthenticationType == "database" || UsersOnly == "true")>[=AuthenticationTable]roleAppService [=AuthenticationTable?uncap_first]roleAppService,</#if>RolepermissionAppService rolepermissionAppService) {
 		
 		this._roleAppService= appService;
 		this.logHelper = helper;
+		<#if (AuthenticationType == "database" || UsersOnly == "true")>
 		this._[=AuthenticationTable?uncap_first]roleAppService = [=AuthenticationTable?uncap_first]roleAppService;
+		</#if>
 		this._rolepermissionAppService = rolepermissionAppService;
 	}
 
@@ -128,7 +130,7 @@ public class RoleController {
  		return ResponseEntity.ok(roles);
 	}
 	
-	<#if AuthenticationType != "none">
+	<#if (AuthenticationType == "database" || UsersOnly == "true")>
 	@PreAuthorize("hasAnyAuthority('ROLEENTITY_READ')")
 	@RequestMapping(value = "/{roleid}/[=AuthenticationTable?uncap_first]role", method = RequestMethod.GET)
 	public ResponseEntity Get[=AuthenticationTable]role(@PathVariable String roleid, @RequestParam(value="search", required=false) String search, @RequestParam(value = "offset", required=false) String offset, @RequestParam(value = "limit", required=false) String limit, Sort sort)throws Exception {

@@ -32,7 +32,7 @@ public class CodeGeneratorUtils {
 	
 	public URL toURL(File file) {
 		try {
-			return file.toURI().toURL();
+			return file.toURI().toURL(); 
 		} catch (MalformedURLException e) {
 			logHelper.getLogger().error("Error Occured : ", e.getMessage());
 			throw new InternalError(e);
@@ -76,7 +76,7 @@ public class CodeGeneratorUtils {
 
 		for (Map.Entry<String, Object> entry : templateFiles.entrySet()) {
 			try {
-				Template template = cfg.getTemplate(entry.getKey());
+				Template template = cfg.getTemplate(entry.getKey()); 
 
 				String entryPath = entry.getValue().toString();
 				File fileName = new File(destPath + "/" + entry.getValue().toString());
@@ -97,7 +97,7 @@ public class CodeGeneratorUtils {
 
 			} catch (Exception e) {
 				logHelper.getLogger().error("Error Occured : ", e.getMessage());
-
+				
 			}
 		}
 	}
