@@ -1,21 +1,25 @@
 package [=PackageName].security;
 
-<#if AuthenticationType != "none">
-import [=PackageName].application.authorization.[=AuthenticationTable?lower_case].dto.LoginUserInput;
-</#if>
 import [=PackageName].domain.irepository.IJwtRepository;
 import [=PackageName].domain.model.JwtEntity;
-import [=PackageName].domain.model.RolepermissionEntity;
-import [=PackageName].domain.authorization.role.IRoleManager;
 import [=PackageName].domain.model.RoleEntity;
-import [=PackageName].domain.authorization.role.RoleManager;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.security.authentication.AuthenticationManager;
+<#if AuthenticationType == "ldap">
+<#if UsersOnly== "true">
+import [=PackageName].domain.model.[=AuthenticationTable]Entity;
+import [=PackageName].domain.authorization.user.I[=AuthenticationTable]Manager;
+<#else>
+import [=PackageName].domain.authorization.role.IRoleManager;
+</#if>
+</#if>
 <#if AuthenticationType != "none">
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.ldap.userdetails.LdapUserDetailsImpl;
 </#if>
@@ -41,22 +45,29 @@ import java.util.stream.Collectors;
 
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
-    IRoleManager _roleManager;
-    IJwtRepository jwtRepo;
-
+    <#if AuthenticationType == "ldap">
+    private SecurityUtils securityUtils;
+    <#if UsersOnly== "true">
+    private I[=AuthenticationTable]Manager _userManager;
+    <#else>
+    private IRoleManager _roleManager;
+    </#if>
+    </#if>
+    private IJwtRepository jwtRepo;
+	
     private AuthenticationManager authenticationManager;
 
     public JWTAuthenticationFilter(AuthenticationManager authenticationManager) {
         this.authenticationManager = authenticationManager;
     }
- <#if AuthenticationType != "none">
+    <#if AuthenticationType != "none">
     @Override
-    public Authentication attemptAuthentication(HttpServletRequest req,
+    public Authentication attemptAuthentication(HttpServletRequest request,
                                                 HttpServletResponse res) throws AuthenticationException {
         try {
             System.out.println("I am here ...");
             LoginUserInput creds = new ObjectMapper()
-                    .readValue(req.getInputStream(), LoginUserInput.class);
+                    .readValue(request.getInputStream(), LoginUserInput.class);
 
             return authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -68,36 +79,83 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             throw new RuntimeException(e);
         }
     }
- </#if>
+    </#if>
     @Override
-    protected void successfulAuthentication(HttpServletRequest req,
+    protected void successfulAuthentication(HttpServletRequest request,
                                             HttpServletResponse res,
                                             FilterChain chain,
                                             Authentication auth) throws IOException, ServletException {
 
-        // We cannot autowire RolesManager, but need to use the code below to set it
-        if(_roleManager==null){
-            ServletContext servletContext = req.getServletContext();
+        <#if AuthenticationType == "ldap">
+        if(securityUtils==null){
+			ServletContext servletContext = request.getServletContext();
+			WebApplicationContext webApplicationContext = WebApplicationContextUtils.getWebApplicationContext(servletContext);
+			securityUtils = webApplicationContext.getBean(SecurityUtils.class);
+		}
+		
+        <#if UsersOnly == "true">
+        if(_userManager==null){
+            ServletContext servletContext = request.getServletContext();
             WebApplicationContext webApplicationContext = WebApplicationContextUtils.getWebApplicationContext(servletContext);
-            _roleManager = webApplicationContext.getBean(RoleManager.class);
+            _userManager = webApplicationContext.getBean(I[=AuthenticationTable?cap_first]Manager.class);
         }
-
-        Claims claims = Jwts.claims();
-       // claims.put("scopes", (convertToPrivilegeAuthorities(auth.getAuthorities())).stream().map(s -> s.toString()).collect(Collectors.toList()));
-        claims.put("scopes", (auth.getAuthorities().stream().map(s -> s.toString()).collect(Collectors.toList())));
         
+        <#else>
+         // We cannot autowire RolesManager, but need to use the code below to set it
+          if(_roleManager==null){
+            ServletContext servletContext = request.getServletContext();
+            WebApplicationContext webApplicationContext = WebApplicationContextUtils.getWebApplicationContext(servletContext);
+            _roleManager = webApplicationContext.getBean(IRoleManager.class);
+        }
+        
+        </#if>
+        </#if>
+        Claims claims = Jwts.claims();
+        String userName = "";
         if (auth != null) {
-            String userId = "";
             if (auth.getPrincipal() instanceof org.springframework.security.core.userdetails.User) {
-                userId = ((User) auth.getPrincipal()).getUsername();
-                claims.setSubject(userId);
+                userName = ((User) auth.getPrincipal()).getUsername();
+                claims.setSubject(userName);
             }
             else if (auth.getPrincipal() instanceof LdapUserDetailsImpl) {
-                userId = ((LdapUserDetailsImpl) auth.getPrincipal()).getUsername();
-                claims.setSubject(userId);
+                userName = ((LdapUserDetailsImpl) auth.getPrincipal()).getUsername();
+                claims.setSubject(userName);
             }
             
         }
+        <#if AuthenticationType == "database">
+        claims.put("scopes", (auth.getAuthorities().stream().map(s -> s.toString()).collect(Collectors.toList())));
+        </#if>
+        <#if AuthenticationType == "ldap">
+        List<String> scopes  = (auth.getAuthorities().stream().map(s -> s.toString()).collect(Collectors.toList()));
+		List<String> permissionsList = new ArrayList<String>();
+		<#if UsersOnly== "true">
+		<#if UserInput?? && AuthenticationFields??>
+        [=AuthenticationTable]Entity user = _userManager.FindBy[=AuthenticationFields.UserName.fieldName?cap_first](userName);       
+        <#else>
+        [=AuthenticationTable]Entity user = _userManager.FindByUserName(userName);
+        </#if>      
+        if (user == null) {
+		throw new UsernameNotFoundException(userName);
+	    }
+
+		List<String> permissions = securityUtils.getAllPermissionsFromUserAndRole(user);
+		permissionsList.addAll(permissions);
+		<#else>
+		for( String item : scopes)
+		{
+			RoleEntity role = _roleManager.FindByRoleName(item);
+			if(role != null) {
+			List<String> permissions= securityUtils.getAllPermissionsFromRole(role);
+			permissionsList.addAll(permissions);
+			}
+		}
+		</#if>
+
+		String[] groupsArray = new String[permissionsList.size()];
+		List<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList(permissionsList.toArray(groupsArray));
+		claims.put("scopes", (authorities.stream().map(s -> s.toString()).collect(Collectors.toList())));
+        </#if>
 
         claims.setExpiration(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME));
         String token = Jwts.builder()
@@ -106,17 +164,13 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .compact();
                 
         // Add the user and token to the JwtEntity table 
- 
         JwtEntity jt = new JwtEntity(); 
         jt.setToken("Bearer "+ token); 
- 
-        User appUser = (User) auth.getPrincipal(); 
-        jt.setUserName(appUser.getUsername()); 
- 
+        jt.setUserName(userName); 
         jt.setIsActive(true); 
  
         if(jwtRepo==null){ 
-            ServletContext servletContext = req.getServletContext(); 
+            ServletContext servletContext = request.getServletContext(); 
             WebApplicationContext webApplicationContext = WebApplicationContextUtils.getWebApplicationContext(servletContext); 
             jwtRepo = webApplicationContext.getBean(IJwtRepository.class); 
         } 
@@ -133,52 +187,6 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         out.println("}");
         out.close();
 
-
-//        String responseToClient= "{"+ "token:"+ TOKEN_PREFIX + token + "}";
-//        res.getWriter().write(responseToClient);
-        //res.getWriter().flush();
     }
-
-//    private List<GrantedAuthority> convertToPrivilegeAuthorities(Collection<? extends GrantedAuthority> authorities) {
-//
-//        List<GrantedAuthority> currentlistAuthorities = new ArrayList<GrantedAuthority>();
-//        currentlistAuthorities.addAll(authorities);
-//
-//        List<GrantedAuthority> newlistAuthorities = new ArrayList<GrantedAuthority>();
-//
-//        // Iterate through the list and check for ROLE_ authorities. We need to convert these into privileges and then remove duplicate privileges
-//
-//        for (GrantedAuthority ga : currentlistAuthorities) {
-//        	System.out.println(" Authorities " + ga.getAuthority());
-//            if (ga.getAuthority().startsWith("ROLE_")) {
-//
-//                RoleEntity re = _roleManager.FindByRoleName(ga.getAuthority());
-//                Set<RolepermissionEntity> spe= re.getRolepermissionSet();
-//                if(spe.size() != 0) {
-//                    for (RolepermissionEntity pe : spe) {
-//                        SimpleGrantedAuthority authority = new SimpleGrantedAuthority(pe.getPermission().getName());
-//                        newlistAuthorities.add(authority);
-//                    }
-//                }
-////                Set<PermissionEntity> spe = re.getPermissions();
-////                if(spe.size() != 0) {
-////                    for (PermissionEntity pe : spe) {
-////                        SimpleGrantedAuthority authority = new SimpleGrantedAuthority(pe.getName());
-////                        newlistAuthorities.add(authority);
-////                    }
-////                }
-//            }
-//
-//            else {
-//
-//                newlistAuthorities.add(ga);
-//            }
-//        }
-//        return newlistAuthorities.stream()
-//                .distinct()
-//                .collect(Collectors.toList());
-//
-//    }
-
 
 }

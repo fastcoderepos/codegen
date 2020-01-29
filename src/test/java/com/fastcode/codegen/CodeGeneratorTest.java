@@ -36,6 +36,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import com.fastcode.codegen.CodeGenerator;
 import com.fastcode.codegen.CodeGeneratorUtils;
 import com.fastcode.codegen.JSONUtils;
+import com.fastcode.entitycodegen.AuthenticationConstants;
 import com.fastcode.entitycodegen.EntityDetails;
 import com.fastcode.entitycodegen.EntityGeneratorUtils;
 import com.fastcode.entitycodegen.FieldDetails;
@@ -87,8 +88,13 @@ public class CodeGeneratorTest {
 	}
 	
 	@Test 
-	public void buildEntityInfo_parameterListIsValid_ReturnMap()
+	public void buildEntityInfo_authenticationTableIsNotNull_ReturnMap()
 	{
+		Map<String,String> authenticationInputMap = new HashMap<String, String>();
+		authenticationInputMap.put(AuthenticationConstants.AUTHENTICATION_SCHEMA, testValue);
+		authenticationInputMap.put(AuthenticationConstants.AUTHENTICATION_TYPE, testValue);
+		authenticationInputMap.put(AuthenticationConstants.USERS_ONLY, "true");
+		
 		EntityDetails details = new EntityDetails(new HashMap<String, FieldDetails>(), new HashMap<String, RelationDetails>(),testValue, testValue);
 		Map<String, Object> root = new HashMap<>();
 		root.put("Schema", testValue);
@@ -105,18 +111,58 @@ public class CodeGeneratorTest {
 		root.put("IEntity", "I" + entityName);
 		root.put("IEntityFile", "i" + moduleName);
 		root.put("CommonModulePackage" , packageName.concat(".commonmodule"));
-		root.put("AuthenticationType", testValue);
+		root.put("UsersOnly", authenticationInputMap.get(AuthenticationConstants.USERS_ONLY));
+		root.put("AuthenticationType", authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE));
 		root.put("ApiPath", entityName);
 		root.put("FrontendUrlPath", entityName.toLowerCase());
 	    root.put("UserInput","true");
-	    root.put("AuthenticationTable", testValue);
+	    root.put("AuthenticationTable", authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA));
 		root.put("PrimaryKeys", details.getPrimaryKeys());
 		root.put("Fields", details.getFieldsMap());
 		root.put("Relationship", details.getRelationsMap());
 		
 		Mockito.doReturn(moduleName).when(mockedUtils).camelCaseToKebabCase(anyString());
-		Assertions.assertThat(codeGenerator.buildEntityInfo(entityName,packageName,testValue, details
-				,testValue,testValue,testValue,true)).isEqualTo(root);
+		Assertions.assertThat(codeGenerator.buildEntityInfo(entityName,packageName,details, authenticationInputMap
+				,testValue,true)).isEqualTo(root);
+	}
+	
+	@Test 
+	public void buildEntityInfo_authenticationTableIsNull_ReturnMap()
+	{
+		Map<String,String> authenticationInputMap = new HashMap<String, String>();
+		authenticationInputMap.put(AuthenticationConstants.AUTHENTICATION_SCHEMA, null);
+		authenticationInputMap.put(AuthenticationConstants.AUTHENTICATION_TYPE, testValue);
+		authenticationInputMap.put(AuthenticationConstants.USERS_ONLY, "true");
+		
+		EntityDetails details = new EntityDetails(new HashMap<String, FieldDetails>(), new HashMap<String, RelationDetails>(),testValue, testValue);
+		Map<String, Object> root = new HashMap<>();
+		root.put("Schema", testValue);
+		root.put("Cache", true);
+		root.put("ModuleName", moduleName);
+		root.put("EntityClassName", entityName+"Entity");
+		root.put("ClassName", entityName);
+		root.put("PackageName", packageName);
+		root.put("InstanceName", entityName);
+		root.put("CompositeKeyClasses",details.getCompositeKeyClasses());
+		root.put("IdClass", details.getIdClass());
+		root.put("DescriptiveField",details.getEntitiesDescriptiveFieldMap());
+		root.put("AuthenticationFields",details.getAuthenticationFieldsMap());
+		root.put("IEntity", "I" + entityName); 
+		root.put("IEntityFile", "i" + moduleName);
+		root.put("CommonModulePackage" , packageName.concat(".commonmodule"));
+		root.put("UsersOnly", authenticationInputMap.get(AuthenticationConstants.USERS_ONLY));
+		root.put("AuthenticationType", authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE));
+		root.put("ApiPath", entityName);
+		root.put("FrontendUrlPath", entityName.toLowerCase());
+	    root.put("UserInput",null);
+	    root.put("AuthenticationTable", "User");
+		root.put("PrimaryKeys", details.getPrimaryKeys());
+		root.put("Fields", details.getFieldsMap());
+		root.put("Relationship", details.getRelationsMap());
+		 
+		Mockito.doReturn(moduleName).when(mockedUtils).camelCaseToKebabCase(anyString());
+		Assertions.assertThat(codeGenerator.buildEntityInfo(entityName,packageName,details, authenticationInputMap
+				,testValue,true)).isEqualTo(root);
 	}
 	
 	@Test
@@ -126,14 +172,22 @@ public class CodeGeneratorTest {
 		details.put("com.fastcode.Entity1",new EntityDetails());
 		details.put("com.fastcode.Entity2",new EntityDetails());
 		
-		Mockito.doNothing().when(codeGenerator).generate(anyString(), anyString(), anyString(), anyString(), anyString(), anyString(),anyString(), any(EntityDetails.class), anyString(), any(Boolean.class),  anyString(), anyString());
-		
-		Assertions.assertThat(codeGenerator.generateAllModulesForEntities(details, testValue, testValue, packageName, true, destPath.getAbsolutePath(), testValue, testValue, testValue, testValue).size()).isEqualTo(2);
+		List<String> entityNames = new ArrayList<String>();
+		entityNames.add("Entity2");
+		entityNames.add("Entity1");
+
+		Mockito.doNothing().when(codeGenerator).generate(anyString(), anyString(), anyString(), anyString(), anyString(),anyString(), any(EntityDetails.class), any(HashMap.class), any(Boolean.class), anyString());
+		Assertions.assertThat(codeGenerator.generateAllModulesForEntities(details, testValue, testValue, packageName, true, destPath.getAbsolutePath(), testValue, new HashMap<String,String>())).isEqualTo(entityNames);
 	}
 	
 	@Test
 	public void generateAll_parametersAreValid_ReturnList() throws IOException
 	{
+		Map<String,String> authenticationInputMap = new HashMap<String, String>();
+		authenticationInputMap.put(AuthenticationConstants.AUTHENTICATION_SCHEMA, "Entity1");
+		authenticationInputMap.put(AuthenticationConstants.AUTHENTICATION_TYPE, testValue);
+		authenticationInputMap.put(AuthenticationConstants.USERS_ONLY, "true");
+		
 		Map<String,EntityDetails> details = new HashMap<String, EntityDetails>();
 		EntityDetails entityDetails = new EntityDetails();
 		FieldDetails fieldDetails= new FieldDetails();
@@ -152,17 +206,23 @@ public class CodeGeneratorTest {
 	
 		Mockito.when(mockEntityGeneratorUtils.parseConnectionString(anyString())).thenReturn(new HashMap<String, String>());
 		
-		Mockito.doReturn(list).when(codeGenerator).generateAllModulesForEntities(any(HashMap.class), anyString(), anyString(), anyString(), any(Boolean.class),anyString(), anyString(),anyString(),anyString(), anyString());
+		Mockito.doReturn(list).when(codeGenerator).generateAllModulesForEntities(any(HashMap.class), anyString(), anyString(), anyString(), any(Boolean.class),anyString(),anyString(),any(HashMap.class));
 		Mockito.doNothing().when(codeGenerator).updateAppRouting(anyString(),anyString(), any(List.class), anyString());
 		Mockito.doNothing().when(codeGenerator).updateAppModule(anyString(),anyString(), any(List.class));
 		Mockito.doNothing().when(codeGenerator).updateEntitiesJsonFile(anyString(),any(List.class),anyString());
 
-		Mockito.when(codeGenerator.getInfoForApplicationPropertiesFile(anyString(),anyString(), anyString(), anyString(),anyString(), any(Boolean.class))).thenReturn(new HashMap<String, Object>());
+		Mockito.doReturn(new HashMap<String, Object>()).when(codeGenerator).getInfoForApplicationPropertiesFile(anyString(),anyString(), anyString(), anyString(),any(HashMap.class), any(Boolean.class));
 		Mockito.doNothing().when(codeGenerator).generateApplicationProperties(any(HashMap.class), anyString());
 		Mockito.doNothing().when(codeGenerator).generateBeanConfig(anyString(),anyString(),anyString(),anyString(),any(HashMap.class),any(Boolean.class),anyString());
 		Mockito.doNothing().when(codeGenerator).modifyMainClass(anyString(),anyString());
 		
-		codeGenerator.generateAll(testValue, testValue, packageName, true,destPath.getAbsolutePath(), testValue, details, connStr, testValue, testValue,"Entity1");
+		codeGenerator.generateAll(testValue, testValue, packageName, true,destPath.getAbsolutePath(),details, connStr, testValue, authenticationInputMap);
+		
+		Mockito.verify(codeGenerator).generateAllModulesForEntities( Matchers.<Map<String, EntityDetails>>any(),anyString(), anyString(), anyString(), any(Boolean.class), anyString(), anyString(), Matchers.<Map<String, String>>any());
+        Mockito.verify(codeGenerator).generateApplicationProperties( Matchers.<Map<String, Object>>any(),anyString() );
+		
+		Mockito.verify(codeGenerator).modifyMainClass(anyString(),anyString());
+		
 	}
 	
 	@Test
@@ -179,6 +239,11 @@ public class CodeGeneratorTest {
 	@Test 
 	public void getInfoForApplicationPropertiesFile_parameterListIsValid_ReturnMap()
 	{
+		Map<String,String> authenticationInputMap = new HashMap<String, String>();
+		authenticationInputMap.put(AuthenticationConstants.AUTHENTICATION_SCHEMA, "Entity1");
+		authenticationInputMap.put(AuthenticationConstants.AUTHENTICATION_TYPE, testValue);
+		authenticationInputMap.put(AuthenticationConstants.LOGON_NAME, testValue);
+		
 		String connStr="jdbc:postgresql://localhost:5432/Demo?username=postgres;password=fastcode";
 		
 		Map<String,Object> propertyInfo = new HashMap<String,Object>();
@@ -187,14 +252,15 @@ public class CodeGeneratorTest {
 		propertyInfo.put("appName", testValue);
 		propertyInfo.put("Schema", testValue);
 		propertyInfo.put("Cache", true);
-		propertyInfo.put("AuthenticationType",testValue);
+		propertyInfo.put("AuthenticationType",authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE));
+		propertyInfo.put("LogonName",authenticationInputMap.get(AuthenticationConstants.LOGON_NAME));
+		propertyInfo.put("AuthenticationSchema" ,authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA));
 		propertyInfo.put("packageName",testValue);
 		propertyInfo.put("packagePath", testValue);
 		
-		
 		Mockito.when(mockEntityGeneratorUtils.parseConnectionString(anyString())).thenReturn(new HashMap<String, String>());
 		Assertions.assertThat(codeGenerator.getInfoForApplicationPropertiesFile(destPath.getAbsolutePath(),testValue,connStr,
-				testValue, testValue,true)).isEqualTo(propertyInfo);
+				testValue, authenticationInputMap,true)).isEqualTo(propertyInfo);
 	}
 	
 	@Test 
@@ -281,6 +347,15 @@ public class CodeGeneratorTest {
 	}
 	
 	@Test 
+	public void getApplicationTestTemplates_parameterListIsValid_ReturnMap()
+	{
+		Map<String, Object> backEndTemplate = new HashMap<>();
+		backEndTemplate.put("backendTemplates/appServiceTest.java.ftl", entityName + "AppServiceTest.java");
+
+		Assertions.assertThat(codeGenerator.getApplicationTestTemplates(entityName)).isEqualTo(backEndTemplate);
+	}
+	
+	@Test 
 	public void getRepositoryTemplates_parameterListIsValid_ReturnMap()
 	{
 		Map<String, Object> backEndTemplate = new HashMap<>();
@@ -316,8 +391,24 @@ public class CodeGeneratorTest {
 	}
 	
 	@Test 
+	public void getDomainTestTemplates_parameterListIsValid_ReturnMap()
+	{
+
+		Map<String, Object> backEndTemplate = new HashMap<>();
+		backEndTemplate.put("backendTemplates/managerTest.java.ftl", entityName + "ManagerTest.java");
+
+		Assertions.assertThat(codeGenerator.getDomainTestTemplates(entityName)).isEqualTo(backEndTemplate);
+	}
+	
+	@Test 
 	public void getDtos_parameterListIsValid_ReturnMap()
 	{
+		
+		Map<String,String> authenticationInputMap = new HashMap<String, String>();
+		authenticationInputMap.put(AuthenticationConstants.AUTHENTICATION_SCHEMA, entityName);
+		authenticationInputMap.put(AuthenticationConstants.AUTHENTICATION_TYPE, testValue);
+		authenticationInputMap.put(AuthenticationConstants.USERS_ONLY, "true");
+		
 		FieldDetails fieldDetails= new FieldDetails();
 		fieldDetails.setFieldName("UserName");
 		Map<String, FieldDetails> authMap = new HashMap<String, FieldDetails>();
@@ -335,14 +426,18 @@ public class CodeGeneratorTest {
 		backEndTemplate.put("backendTemplates/Dto/updateOutput.java.ftl", "Update" + entityName + "Output.java");
 		
 	    backEndTemplate.put("backendTemplates/authenticationTemplates/application/authorization/user/dto/GetRoleOutput.java.ftl", "GetRoleOutput.java");
-		backEndTemplate.put("backendTemplates/authenticationTemplates/application/authorization/user/dto/LoginUserInput.java.ftl", "LoginUserInput.java");
 		
-		Assertions.assertThat(codeGenerator.getDtos(entityName,entityName,authMap)).isEqualTo(backEndTemplate);
+		Assertions.assertThat(codeGenerator.getDtos(entityName,authenticationInputMap,authMap)).isEqualTo(backEndTemplate);
 	}
 	
 	@Test 
 	public void getRelationDto_parameterListIsValid_ReturnMap()
 	{
+		Map<String,String> authenticationInputMap = new HashMap<String, String>();
+		authenticationInputMap.put(AuthenticationConstants.AUTHENTICATION_SCHEMA, testValue);
+		authenticationInputMap.put(AuthenticationConstants.AUTHENTICATION_TYPE, testValue);
+		authenticationInputMap.put(AuthenticationConstants.USERS_ONLY, "true");
+		
 		Map<String,EntityDetails> details = new HashMap<String, EntityDetails>();
 		EntityDetails entityDetails = new EntityDetails();
 		FieldDetails fieldDetails= new FieldDetails();
@@ -363,30 +458,58 @@ public class CodeGeneratorTest {
 		root.put("ClassName", "entity1");
 		
 		Mockito.doNothing().when(mockedUtils).generateFiles(any(HashMap.class),any(HashMap.class),anyString(),anyString());
-		codeGenerator.generateRelationDto(entityDetails,root,destPath.getAbsolutePath(), entityName,testValue);
+		codeGenerator.generateRelationDto(entityDetails,root,destPath.getAbsolutePath(), entityName,authenticationInputMap);
 		Mockito.verify(mockedUtils,Mockito.times(1)).generateFiles(Matchers.<Map<String, Object>>any(),Matchers.<Map<String, Object>>any(),anyString(),anyString());
 	}
 	
 	@Test 
 	public void generateBackendFiles_parameterListIsValid_ReturnMap()
 	{
+		Map<String,String> authenticationInputMap = new HashMap<String, String>();
+		authenticationInputMap.put(AuthenticationConstants.AUTHENTICATION_SCHEMA, entityName);
+		authenticationInputMap.put(AuthenticationConstants.AUTHENTICATION_TYPE, testValue);
+		authenticationInputMap.put(AuthenticationConstants.USERS_ONLY, "true");
+		
 		Map<String,Object> root= new HashMap<String, Object>();
 		root.put("ClassName", entityName);
 		
 		Mockito.doReturn(new HashMap<String, Object>()).when(codeGenerator).getApplicationTemplates(anyString());
-		Mockito.doReturn(new HashMap<String, Object>()).when(codeGenerator).getDtos(anyString(),anyString(),any(HashMap.class));
+		Mockito.doReturn(new HashMap<String, Object>()).when(codeGenerator).getDtos(anyString(),any(HashMap.class),any(HashMap.class));
 		Mockito.doReturn(new HashMap<String, Object>()).when(codeGenerator).getDomainTemplates(anyString());
 		Mockito.doReturn(new HashMap<String, Object>()).when(codeGenerator).getRepositoryTemplates(anyString());
 		Mockito.doReturn(new HashMap<String, Object>()).when(codeGenerator).getControllerTemplates(anyString());
 		Mockito.doNothing().when(mockedUtils).generateFiles(any(HashMap.class),any(HashMap.class),anyString(),anyString());
 
-		codeGenerator.generateBackendFiles(root,destPath.getAbsolutePath(), entityName);
+		codeGenerator.generateBackendFiles(root,destPath.getAbsolutePath(), authenticationInputMap);
 		Mockito.verify(mockedUtils,Mockito.times(5)).generateFiles(Matchers.<Map<String, Object>>any(),Matchers.<Map<String, Object>>any(),anyString(),anyString());
+	}
+	
+	@Test 
+	public void generate_parameterListIsValid_ReturnMap()
+	{
+		Map<String,Object> root= new HashMap<String, Object>();
+		root.put("ClassName", entityName);
+		root.put("ModuleName", moduleName);
+		
+		Mockito.doReturn(root).when(codeGenerator).buildEntityInfo(anyString(), anyString(), any(EntityDetails.class), any(HashMap.class), anyString(), any(Boolean.class));
+		Mockito.doReturn(new HashMap<String, Object>()).when(codeGenerator).getUITemplates(anyString());
+		Mockito.doNothing().when(mockedUtils).generateFiles(any(HashMap.class),any(HashMap.class),anyString(),anyString());
+		Mockito.doNothing().when(codeGenerator).generateBackendFiles(any(HashMap.class), anyString(), any(HashMap.class));
+		Mockito.doNothing().when(codeGenerator).generateBackendUnitAndIntegrationTestFiles(any(HashMap.class), anyString(), any(HashMap.class));
+		Mockito.doNothing().when(codeGenerator).generateRelationDto(any(EntityDetails.class), any(HashMap.class),anyString(),anyString(), any(HashMap.class));
+		
+		codeGenerator.generate(entityName, testValue, destPath.getAbsolutePath(), destPath.getAbsolutePath(), packageName, destPath.getAbsolutePath(), new EntityDetails(), new HashMap<String,String>() , false, testValue);
+
 	}
 	
 	@Test 
 	public void generateBackendIntegrationTestFiles_parameterListIsValid_ReturnMap()
 	{
+		Map<String,String> authenticationInputMap = new HashMap<String, String>();
+		authenticationInputMap.put(AuthenticationConstants.AUTHENTICATION_SCHEMA, entityName);
+		authenticationInputMap.put(AuthenticationConstants.AUTHENTICATION_TYPE, testValue);
+		authenticationInputMap.put(AuthenticationConstants.USERS_ONLY, "true");
+		
 		Map<String,Object> root= new HashMap<String, Object>();
 		root.put("ClassName", entityName);
 
@@ -395,7 +518,7 @@ public class CodeGeneratorTest {
 		Mockito.doReturn(new HashMap<String, Object>()).when(codeGenerator).getControllerTestTemplates(anyString());
 		
 		Mockito.doNothing().when(mockedUtils).generateFiles(any(HashMap.class),any(HashMap.class),anyString(),anyString());
-		codeGenerator.generateBackendUnitAndIntegrationTestFiles(root,destPath.getAbsolutePath(),entityName);
+		codeGenerator.generateBackendUnitAndIntegrationTestFiles(root,destPath.getAbsolutePath(),authenticationInputMap);
 		Mockito.verify(mockedUtils,Mockito.times(3)).generateFiles(Matchers.<Map<String, Object>>any(),Matchers.<Map<String, Object>>any(),anyString(),anyString());
 	}
 	
@@ -413,7 +536,7 @@ public class CodeGeneratorTest {
 	@Test 
 	public void addImports_parameterListIsValid_ReturnStringBuilder()
 	{
-		String moduleName = "entity-1";
+		String moduleName = "entity-1"; 
 		StringBuilder builder=new StringBuilder();
 		builder.append("import { " + entityName + "ListComponent , " + entityName + "DetailsComponent, " + entityName + "NewComponent } from './" + moduleName + "/index';" + "\n");
 		List<String> entities = new ArrayList<>();
@@ -433,6 +556,15 @@ public class CodeGeneratorTest {
 		tempFile.renameTo(newFile);
 	
 		codeGenerator.modifyMainClass(destPath.getAbsolutePath(),packageName);
+		Mockito.verify(codeGenerator,Mockito.times(1)).modifyMainClass(destPath.getAbsolutePath(),packageName);
+		
+	}
+	
+	@Test 
+	public void modifyMainClass_pathIsNotValid_ThrowException() throws IOException
+	{
+		codeGenerator.modifyMainClass(destPath.getAbsolutePath(),packageName);
+		Mockito.verify(codeGenerator,Mockito.times(1)).modifyMainClass(destPath.getAbsolutePath(),packageName);
 	}
 	
 	@Test 
@@ -485,6 +617,32 @@ public class CodeGeneratorTest {
 		entities.add("entity2");
 		
 		codeGenerator.updateEntitiesJsonFile(path,entities,entityName);
+		Mockito.verify(jsonUtils).readJsonFile(anyString());
+		Mockito.verify(codeGenerator).updateEntitiesJsonFile(path,entities,entityName);
+	}
+	 
+	@Test 
+	public void updateEntitiesJsonFile_parameterListIsNotValid_ThrowIOException() throws IOException, ParseException
+	{
+		String className = "entities.json";
+		File newTempFolder = folder.newFolder("tempFolder","fAppClient","src","app","common","components","main-nav");
+	
+		File tempFile = File.createTempFile("entities", ".json", newTempFolder);
+		File newFile = new File(newTempFolder.getAbsolutePath()+ "/" + className);
+		tempFile.renameTo(newFile);
+		FileUtils.writeStringToFile(newFile, "[]");
+		
+		String path = destPath.getAbsolutePath()+"\\fAppClient\\src\\app\\common\\components\\main-nav\\entities.json";
+
+		Mockito.doThrow(new IOException()).when(jsonUtils).readJsonFile(path);
+
+		List<String> entities = new ArrayList<>();
+		entities.add(entityName);
+		entities.add("entity2");
+		
+		codeGenerator.updateEntitiesJsonFile(path,entities,entityName);
+		Mockito.verify(jsonUtils).readJsonFile(anyString());
+
 	}
 	
 	

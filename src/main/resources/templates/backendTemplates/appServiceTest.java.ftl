@@ -1,4 +1,4 @@
-package [=PackageName].application<#if AuthenticationType != "none"  && ClassName == AuthenticationTable>.authorization</#if>.[=ClassName?lower_case];
+package [=PackageName].application<#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>.authorization</#if>.[=ClassName?lower_case];
 
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.mock;
@@ -29,9 +29,9 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import [=PackageName].domain<#if AuthenticationType!= "none" && ClassName == AuthenticationTable>.authorization</#if>.[=ClassName?lower_case].*;
+import [=PackageName].domain<#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>.authorization</#if>.[=ClassName?lower_case].*;
 import [=CommonModulePackage].search.*;
-import [=PackageName].application<#if AuthenticationType!= "none" && ClassName == AuthenticationTable>.authorization</#if>.[=ClassName?lower_case].dto.*;
+import [=PackageName].application<#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>.authorization</#if>.[=ClassName?lower_case].dto.*;
 import [=PackageName].domain.model.Q[=EntityClassName];
 import [=PackageName].domain.model.[=EntityClassName];
 <#if CompositeKeyClasses?seq_contains(ClassName)>
@@ -40,7 +40,7 @@ import [=PackageName].domain.model.[=IdClass];
 <#list Relationship as relationKey,relationValue>
 <#if ClassName != relationValue.eName>
 import [=PackageName].domain.model.[=relationValue.eName]Entity;
-import [=PackageName].domain<#if AuthenticationType!= "none" && relationValue.eName == AuthenticationTable>.authorization</#if>.[=relationValue.eName?lower_case].[=relationValue.eName]Manager;
+import [=PackageName].domain<#if (AuthenticationType == "database" || UsersOnly == "true") && relationValue.eName == AuthenticationTable>.authorization</#if>.[=relationValue.eName?lower_case].[=relationValue.eName]Manager;
 <#if relationValue.relation == "ManyToOne">
 <#assign i= relationValue.joinDetails?size>
 <#if i!=0 && i!=1>
@@ -49,7 +49,7 @@ import [=PackageName].domain.model.[=relationValue.eName]Id;
 </#if>
 </#if>
 </#list>
-<#if AuthenticationType != "none"  && ClassName == AuthenticationTable>
+<#if (AuthenticationType == "database" || UsersOnly == "true")  && ClassName == AuthenticationTable>
 import [=PackageName].domain.authorization.role.RoleManager;
 import [=PackageName].domain.model.RoleEntity;
 </#if>
@@ -83,7 +83,7 @@ public class [=ClassName]AppServiceTest {
 	@Mock
 	private LoggingHelper logHelper;
 	
-	<#if AuthenticationType != "none"  && ClassName == AuthenticationTable>
+	<#if (AuthenticationType == "database" || UsersOnly == "true")  && ClassName == AuthenticationTable>
 	@Mock
 	private RoleManager _roleManager;
     </#if>
@@ -822,7 +822,7 @@ public class [=ClassName]AppServiceTest {
 		Assertions.assertThat(_appService.parse[=ClassName]Key(keyString)).isEqualTo(null);
 	}
 	</#if>
-  <#if AuthenticationType != "none" && ClassName == AuthenticationTable>
+  <#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>
 	
 	@Test 
 	public void find[=ClassName]ByName_NameIsNotNullAnd[=ClassName]DoesNotExist_ReturnNull() {

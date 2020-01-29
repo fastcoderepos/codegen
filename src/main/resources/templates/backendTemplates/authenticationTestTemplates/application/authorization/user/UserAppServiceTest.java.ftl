@@ -243,8 +243,10 @@ public class UserAppServiceTest {
 		builder.or(user.firstName.eq(search));
 		builder.or(user.isPhoneNumberConfirmed.eq(search));
 		builder.or(user.lastName.eq(search));
+		<#if AuthenticationType == "database">
 		builder.or(user.password.eq(search));
 		builder.or(user.passwordResetCode.eq(search));
+		</#if>
 		builder.or(user.phoneNumber.eq(search));
 		builder.or(user.userName.eq(search));
 		
@@ -317,8 +319,10 @@ public class UserAppServiceTest {
 		builder.or(user.firstName.eq("xyz"));
 		builder.or(user.isPhoneNumberConfirmed.eq("xyz"));
 		builder.or(user.lastName.eq("xyz"));
+		<#if AuthenticationType == "database">
 		builder.or(user.password.eq("xyz"));
 		builder.or(user.passwordResetCode.eq("xyz"));
+		</#if>
 		builder.or(user.phoneNumber.eq("xyz"));
 		builder.or(user.userName.eq("xyz"));
         Assertions.assertThat(userAppService.Search(search)).isEqualTo(builder);

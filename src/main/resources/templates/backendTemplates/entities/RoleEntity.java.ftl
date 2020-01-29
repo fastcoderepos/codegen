@@ -68,8 +68,7 @@ public class RoleEntity implements Serializable {
  
     private Set<RolepermissionEntity> rolepermissionSet = new HashSet<RolepermissionEntity>(); 
   
-<#if AuthenticationType != "none">
-
+<#if AuthenticationType == "database" || (AuthenticationType != "database" && (UsersOnly?? && UsersOnly == "true"))>
     @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, orphanRemoval = true) 
     public Set<[=AuthenticationTable]roleEntity> get[=AuthenticationTable]roleSet() { 
       return [=AuthenticationTable?uncap_first]roleSet; 

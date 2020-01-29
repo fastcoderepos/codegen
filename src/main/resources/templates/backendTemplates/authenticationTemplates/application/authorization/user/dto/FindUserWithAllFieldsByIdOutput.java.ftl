@@ -16,10 +16,12 @@ public class FindUserWithAllFieldsByIdOutput {
     private String firstName;
     private String phoneNumber;
     private Long profilePictureId;
+    <#if AuthenticationType =="database">
     private Boolean shouldChangePasswordOnNextLogin;
+    private String password;
+    </#if>
     private String lastName;
     private String userName;
-    private String password;
     private String authenticationSource;     
   
     public String getAuthenticationSource() {
@@ -109,14 +111,6 @@ public class FindUserWithAllFieldsByIdOutput {
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
-    
-    public String getPassword() {
-  		return password;
-  	}
-
-  	public void setPassword(String password){
-  		this.password = password;
-  	}
 
     public String getPhoneNumber() {
         return phoneNumber;
@@ -133,7 +127,7 @@ public class FindUserWithAllFieldsByIdOutput {
     public void setProfilePictureId(Long profilePictureId) {
         this.profilePictureId = profilePictureId;
     }
-
+ <#if AuthenticationType =="database">
     public Boolean isShouldChangePasswordOnNextLogin() {
         return shouldChangePasswordOnNextLogin;
     }
@@ -141,7 +135,15 @@ public class FindUserWithAllFieldsByIdOutput {
     public void setShouldChangePasswordOnNextLogin(Boolean shouldChangePasswordOnNextLogin) {
         this.shouldChangePasswordOnNextLogin = shouldChangePasswordOnNextLogin;
     }
+    
+    public String getPassword() {
+  		return password;
+  	}
 
+  	public void setPassword(String password){
+  		this.password = password;
+  	}
+</#if>
     public String getLastName() {
         return lastName;
     }
@@ -158,38 +160,5 @@ public class FindUserWithAllFieldsByIdOutput {
         this.userName = userName;
     }
 
-   <#if Audit!false>
-    public java.util.Date getCreationTime() {
-        return creationTime;
-    }
-
-    public void setCreationTime(java.util.Date creationTime) {
-      	this.creationTime = creationTime;
-    }
-
-    public String getLastModifierUserId() {
-      	return lastModifierUserId;
-    }
-
-    public void setLastModifierUserId(String lastModifierUserId) {
-      	this.lastModifierUserId = lastModifierUserId;
-    }
-
-    public java.util.Date getLastModificationTime() {
-      	return lastModificationTime;
-    }
-
-    public void setLastModificationTime(java.util.Date lastModificationTime) {
-      	this.lastModificationTime = lastModificationTime;
-    }
-
-    public String getCreatorUserId() {
-      	return creatorUserId;
-    }
-
-    public void setCreatorUserId(String creatorUserId) {
-      	this.creatorUserId = creatorUserId;
-    }
-</#if>
 
 }

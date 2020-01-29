@@ -36,9 +36,6 @@ public class UserAppService implements IUserAppService {
 
 	@Autowired
 	private UserMapper mapper;
-	
-    @Autowired
- 	private IJwtRepository _jwtRepository;
 
     @Transactional(propagation = Propagation.REQUIRED)
 	public CreateUserOutput Create(CreateUserInput input) {
@@ -173,8 +170,10 @@ public class UserAppService implements IUserAppService {
 			builder.or(user.firstName.likeIgnoreCase("%"+ value + "%"));
 			builder.or(user.isPhoneNumberConfirmed.likeIgnoreCase("%"+ value + "%"));
 			builder.or(user.lastName.likeIgnoreCase("%"+ value + "%"));
+			<#if AuthenticationType == "database">
 			builder.or(user.password.likeIgnoreCase("%"+ value + "%"));
 			builder.or(user.passwordResetCode.likeIgnoreCase("%"+ value + "%"));
+			</#if>
 			builder.or(user.phoneNumber.likeIgnoreCase("%"+ value + "%"));
 			builder.or(user.userName.likeIgnoreCase("%"+ value + "%"));
 		}
@@ -186,8 +185,10 @@ public class UserAppService implements IUserAppService {
         	builder.or(user.firstName.eq(value));
         	builder.or(user.isPhoneNumberConfirmed.eq(value));
         	builder.or(user.lastName.eq(value));
+        	<#if AuthenticationType == "database">
         	builder.or(user.password.eq(value));
         	builder.or(user.passwordResetCode.eq(value));
+        	</#if>
         	builder.or(user.phoneNumber.eq(value));
         	builder.or(user.userName.eq(value));
         	if(value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")) {
@@ -227,8 +228,10 @@ public class UserAppService implements IUserAppService {
 		 list.get(i).replace("%20","").trim().equals("lastLoginTime") ||
 		 list.get(i).replace("%20","").trim().equals("lastName") ||
 		 list.get(i).replace("%20","").trim().equals("lockoutEndDateUtc") ||
+		 <#if AuthenticationType == "database">
 		 list.get(i).replace("%20","").trim().equals("password") ||
 		 list.get(i).replace("%20","").trim().equals("passwordResetCode") ||
+		 </#if>
 		 list.get(i).replace("%20","").trim().equals("phoneNumber") ||
 		 list.get(i).replace("%20","").trim().equals("profilePictureId") ||
 		 list.get(i).replace("%20","").trim().equals("userrole") ||
@@ -307,6 +310,7 @@ public class UserAppService implements IUserAppService {
 				if(operator.equals("equals") && SearchUtils.stringToDate(value)!=null)
 					builder.or(user.lockoutEndDateUtc.eq(SearchUtils.stringToDate(value)));
 			}
+			<#if AuthenticationType == "database">
             if(list.get(i).replace("%20","").trim().equals("password")) {
 				if(operator.equals("contains"))
 					builder.or(user.password.likeIgnoreCase("%"+ value + "%"));
@@ -319,6 +323,7 @@ public class UserAppService implements IUserAppService {
 				else if(operator.equals("equals"))
 					builder.or(user.passwordResetCode.eq(value));
 			}
+			</#if>
             if(list.get(i).replace("%20","").trim().equals("phoneNumber")) {
 				if(operator.equals("contains"))
 					builder.or(user.phoneNumber.likeIgnoreCase("%"+ value + "%"));
@@ -465,6 +470,7 @@ public class UserAppService implements IUserAppService {
                  }
                    
 			}
+			<#if AuthenticationType == "database">
             if(details.getKey().replace("%20","").trim().equals("password")) {
 				if(details.getValue().getOperator().equals("contains"))
 					builder.and(user.password.likeIgnoreCase("%"+ details.getValue().getSearchValue() + "%"));
@@ -481,6 +487,7 @@ public class UserAppService implements IUserAppService {
 				else if(details.getValue().getOperator().equals("notEqual"))
 					builder.and(user.passwordResetCode.ne(details.getValue().getSearchValue()));
 			}
+			</#if>
             if(details.getKey().replace("%20","").trim().equals("phoneNumber")) {
 				if(details.getValue().getOperator().equals("contains"))
 					builder.and(user.phoneNumber.likeIgnoreCase("%"+ details.getValue().getSearchValue() + "%"));
@@ -537,18 +544,6 @@ public class UserAppService implements IUserAppService {
 		return joinColumnMap;
 		
 	}
-	
-	public void deleteAllUserTokens(String userName) { 
- 
-    List<JwtEntity> userTokens = _jwtRepository.findAll(); 
-    userTokens.removeAll(Collections.singleton(null)); 
- 
-    for (JwtEntity jwt : userTokens) { 
-    	if(jwt.getUserName().equals(userName)) { 
-        	_jwtRepository.delete(jwt); 
-        } 
-    } 
-    } 
 
 }
 

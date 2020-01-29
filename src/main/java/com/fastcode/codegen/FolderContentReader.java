@@ -72,6 +72,7 @@ public class FolderContentReader {
 
 			while( ( ze = zip.getNextEntry() ) != null ) {
 				String entryName = ze.getName();
+
 				if( entryName.startsWith("BOOT-INF/classes" + path + "/") && entryName.endsWith(".ftl") ) {
 					list.add( entryName );
 				}

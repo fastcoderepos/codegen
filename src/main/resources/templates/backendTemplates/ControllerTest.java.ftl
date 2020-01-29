@@ -20,7 +20,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityNotFoundException;
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
-<#if AuthenticationType != "none" && ClassName == AuthenticationTable>
+<#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>
 import javax.persistence.EntityExistsException;
 </#if>
 
@@ -47,8 +47,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import [=CommonModulePackage].logging.LoggingHelper;
-import [=PackageName].application<#if AuthenticationType != "none" && ClassName == AuthenticationTable>.authorization</#if>.[=ClassName?lower_case].[=ClassName]AppService;
-import [=PackageName].application<#if AuthenticationType != "none" && ClassName == AuthenticationTable>.authorization</#if>.[=ClassName?lower_case].dto.*;
+import [=PackageName].application<#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>.authorization</#if>.[=ClassName?lower_case].[=ClassName]AppService;
+import [=PackageName].application<#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>.authorization</#if>.[=ClassName?lower_case].dto.*;
 import [=PackageName].domain.irepository.I[=ClassName]Repository;
 import [=PackageName].domain.model.[=ClassName]Entity;
 <#list Relationship as relationKey,relationValue>
@@ -61,11 +61,14 @@ import [=PackageName].domain.model.[=relationValue.eName?cap_first]Entity;
 </#list>
 <#list Relationship as relationKey,relationValue>
 <#if ClassName != relationValue.eName && relationValue.eName !="OneToMany">
-import [=PackageName].application<#if AuthenticationType != "none" && relationValue.eName == AuthenticationTable>.authorization</#if>.[=relationValue.eName?lower_case].[=relationValue.eName]AppService;    
+import [=PackageName].application<#if (AuthenticationType == "database" || UsersOnly == "true") && relationValue.eName == AuthenticationTable>.authorization</#if>.[=relationValue.eName?lower_case].[=relationValue.eName]AppService;    
 </#if>
 </#list>
-<#if AuthenticationType != "none" && ClassName == AuthenticationTable>
+<#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>
+<#if AuthenticationType == "database">
 import org.springframework.security.crypto.password.PasswordEncoder;
+</#if>
+import [=PackageName].security.JWTAppService;
 import [=PackageName].application.authorization.[=AuthenticationTable?lower_case]role.[=AuthenticationTable]roleAppService;
 import [=PackageName].application.authorization.[=AuthenticationTable?lower_case]role.dto.Find[=AuthenticationTable]roleByIdOutput;
 import [=PackageName].application.authorization.[=AuthenticationTable?lower_case]permission.[=AuthenticationTable]permissionAppService;
@@ -102,11 +105,16 @@ public class [=ClassName]ControllerTest {
 	private [=relationValue.eName]AppService [=relationValue.eName?uncap_first]AppService;
     </#if>
     </#list>
-    <#if AuthenticationType != "none" && ClassName == AuthenticationTable>
+    <#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>
+    <#if AuthenticationType == "database">
     
 	@SpyBean
     private PasswordEncoder pEncoder;
-
+    
+    </#if>
+    @SpyBean
+	private JWTAppService jwtAppService;
+    
 	@SpyBean
     private [=AuthenticationTable]permissionAppService [=AuthenticationTable?uncap_first]permissionAppService;
     
@@ -324,7 +332,7 @@ public class [=ClassName]ControllerTest {
 		evictAllCaches();
 		</#if>
 		final [=ClassName]Controller [=ClassName?uncap_first]Controller = new [=ClassName]Controller([=ClassName?uncap_first]AppService,<#list Relationship as relationKey,relationValue><#if ClassName != relationValue.eName && relationValue.eName !="OneToMany">[=relationValue.eName?uncap_first]AppService,</#if></#list>
-	<#if AuthenticationType != "none" && ClassName == AuthenticationTable>pEncoder, [=AuthenticationTable?uncap_first]permissionAppService,[=AuthenticationTable?uncap_first]roleAppService,</#if>logHelper);
+	<#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable><#if AuthenticationType == "database">pEncoder,</#if> [=AuthenticationTable?uncap_first]permissionAppService,[=AuthenticationTable?uncap_first]roleAppService,jwtAppService,</#if>logHelper);
 		when(logHelper.getLogger()).thenReturn(loggerMock);
 		doNothing().when(loggerMock).error(anyString());
 
@@ -362,7 +370,7 @@ public class [=ClassName]ControllerTest {
 
 	}    
 	
-	<#if AuthenticationType != "none" && ClassName == AuthenticationTable>
+	<#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>
 	public void Create[=AuthenticationTable]_[=AuthenticationTable]DoesNotExist_ReturnStatusOk() throws Exception {
 	    <#if AuthenticationFields??>
 		<#list AuthenticationFields as authKey,authValue>
@@ -388,7 +396,7 @@ public class [=ClassName]ControllerTest {
 	    Find[=ClassName]By<#if AuthenticationFields??>[=AuthenticationFields["UserName"].fieldName?cap_first]</#if>Output output= new Find[=ClassName]By<#if AuthenticationFields??>[=AuthenticationFields["UserName"].fieldName?cap_first]</#if>Output();
 	    <#list Fields as key,value>
 		<#if value.isNullable==false>
-		<#if !(AuthenticationFields?? && AuthenticationFields.Password.fieldName == value.fieldName)>
+		<#if !(AuthenticationFields?? && (AuthenticationType == "database" && AuthenticationFields.Password.fieldName == key))>
 		<#if value.fieldType?lower_case == "long">
 		output.set[=key?cap_first](1L);
 		<#elseif value.fieldType?lower_case == "integer">
@@ -581,7 +589,7 @@ public class [=ClassName]ControllerTest {
 		Find[=ClassName]ByIdOutput output= new Find[=ClassName]ByIdOutput();
 		<#list Fields as key,value>
 		<#if value.isNullable==false>
-		<#if !(AuthenticationFields?? && AuthenticationFields.Password.fieldName == key)>
+		<#if !(AuthenticationFields?? && (AuthenticationType == "database" && AuthenticationFields.Password.fieldName == key))>
 		<#if value.fieldType?lower_case == "long" || value.fieldType?lower_case == "integer" || value.fieldType?lower_case == "short" || value.fieldType?lower_case == "double" || value.fieldType?lower_case == "boolean" || value.fieldType?lower_case == "date" || value.fieldType?lower_case == "string">
   		output.set[=key?cap_first](entity.get[=key?cap_first]());
 		</#if> 
@@ -613,7 +621,7 @@ public class [=ClassName]ControllerTest {
 		Update[=ClassName]Input [=ClassName?uncap_first] = new Update[=ClassName]Input();
 		<#list Fields as key,value>
 		<#if value.isNullable==false>
-		<#if !(AuthenticationFields?? && AuthenticationFields.Password.fieldName == key)>
+		<#if !(AuthenticationFields?? && (AuthenticationType == "database" && AuthenticationFields.Password.fieldName == key))>
 		<#if value.fieldType?lower_case == "long">
 		[=ClassName?uncap_first].set[=value.fieldName?cap_first](111L);
 		<#elseif value.fieldType?lower_case == "integer">
@@ -677,7 +685,7 @@ public class [=ClassName]ControllerTest {
 		</#if> 
 		</#list>
 		entity = [=ClassName?uncap_first]_repository.save(entity);
-		<#if AuthenticationType != "none" && ClassName == AuthenticationTable>
+		<#if AuthenticationType == "database" && ClassName == AuthenticationTable>
 		Find[=ClassName]WithAllFieldsByIdOutput output= new Find[=ClassName]WithAllFieldsByIdOutput();
 		<#else>
 		Find[=ClassName]ByIdOutput output= new Find[=ClassName]ByIdOutput();
@@ -691,14 +699,14 @@ public class [=ClassName]ControllerTest {
 		</#list>
 
 		<#if CompositeKeyClasses?seq_contains(ClassName)>
-		<#if AuthenticationType != "none" && ClassName == AuthenticationTable>
+		<#if AuthenticationType == "database" && ClassName == AuthenticationTable>
 		Mockito.when([=ClassName?uncap_first]AppService.FindWithAllFieldsById(new [=ClassName]Id(<#list PrimaryKeys as key,value><#if value?lower_case == "long" || value?lower_case == "integer" || value?lower_case == "short" || value?lower_case == "double" || value?lower_case == "string">entity.get[=key?cap_first]()</#if><#sep>, </#list>))).thenReturn(output);
 		<#else>
 	    Mockito.when([=ClassName?uncap_first]AppService.FindById(new [=ClassName]Id(<#list PrimaryKeys as key,value><#if value?lower_case == "long" || value?lower_case == "integer" || value?lower_case == "short" || value?lower_case == "double" || value?lower_case == "string">entity.get[=key?cap_first]()</#if><#sep>, </#list>))).thenReturn(output);
         
         </#if>
         <#else>
-        <#if AuthenticationType != "none" && ClassName == AuthenticationTable>
+        <#if AuthenticationType == "database" && ClassName == AuthenticationTable>
 		Mockito.when([=ClassName?uncap_first]AppService.FindWithAllFieldsById(<#list PrimaryKeys as key,value><#if value?lower_case == "long" || value?lower_case == "integer" || value?lower_case == "short" || value?lower_case == "double" || value?lower_case == "string">entity.get[=key?cap_first]()</#if></#list>)).thenReturn(output);
 		<#else>
         Mockito.when([=ClassName?uncap_first]AppService.FindById(<#list PrimaryKeys as key,value><#if value?lower_case == "long" || value?lower_case == "integer" || value?lower_case == "short" || value?lower_case == "double" || value?lower_case == "string">entity.get[=key?cap_first]()</#if></#list>)).thenReturn(output);
@@ -815,7 +823,7 @@ public class [=ClassName]ControllerTest {
     </#if>
     </#list>
     
-    <#if AuthenticationType != "none" && ClassName == AuthenticationTable>
+    <#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>
 	@Test
 	public void Get[=AuthenticationTable]role_searchIsNotEmptyAndPropertyIsNotValid_ThrowException() throws Exception {
 	

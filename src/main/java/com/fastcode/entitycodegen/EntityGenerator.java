@@ -59,7 +59,7 @@ public class EntityGenerator {
 	}
 	
 	public Map<String, EntityDetails> generateEntities(String connectionString, String schema,
-			List<String> tableList, String packageName, String destination, String authenticationTable, String authenticationType) { 
+			List<String> tableList, String packageName, String destination, Map<String,String> authenticationMap) { 
 
 		Map<String, String> connectionProps = entityGeneratorUtils.parseConnectionString(connectionString);
 		String entityPackage = packageName + ".domain.model";
@@ -87,14 +87,15 @@ public class EntityGenerator {
 			logHelper.getLogger().error("Compilation Error ", e.getMessage());
 		}
 		
-		Map<String, EntityDetails> entityDetailsMap = processAndGenerateRelevantEntities(targetPath, tempPackageName, schema, packageName, destinationPath, authenticationType, authenticationTable);
+		Map<String, EntityDetails> entityDetailsMap = processAndGenerateRelevantEntities(targetPath, tempPackageName, schema, packageName, destinationPath,authenticationMap);
+				
 		entityGeneratorUtils.deleteDirectory(destinationPath + "/" + tempPackageName.replaceAll("\\.", "/"));
 		logHelper.getLogger().info("Exit");
 		return entityDetailsMap;
 	}
 	
 	
-	public Map<String, EntityDetails> processAndGenerateRelevantEntities(String targetPath, String tempPackageName,String schema,String packageName, String destinationPath, String authenticationType, String authenticationTable)
+	public Map<String, EntityDetails> processAndGenerateRelevantEntities(String targetPath, String tempPackageName,String schema,String packageName, String destinationPath, Map<String,String> authenticationInputMap)
 	{
 		loader.setPath(targetPath);
 
@@ -132,21 +133,22 @@ public class EntityGenerator {
 					}
 					
 					entityDetailsMap.put(entityName.substring(entityName.lastIndexOf(".") + 1), details);
-					Map<String, Object> root =buildRootMap(details,entityName, packageName, schema, authenticationTable, authenticationType);
+					
+					Map<String, Object> root =buildRootMap(details,entityName, packageName, schema, authenticationInputMap);
 					
 					// Generate Entity based on template
 					generateEntityAndIdClass(root, details, packageName, destinationPath,compositePrimaryKeyEntities);
 				}
 			}
 
-			if(authenticationTable !=null  && authenticationType != "none")
+			if(authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA) !=null  && authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE) != "none")
 			{
-				entityDetailsMap=validateAuthenticationTable(entityDetailsMap, authenticationTable);
+				entityDetailsMap=validateAuthenticationTable(entityDetailsMap, authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA), authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE));
 			}
 			
-			if(authenticationType !="none")
+			if(authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE) !="none")
 			{
-				generateAutheticationEntities(entityDetailsMap, schema, packageName, destinationPath,authenticationTable,authenticationType);
+				generateAutheticationEntities(entityDetailsMap, schema, packageName, destinationPath,authenticationInputMap);
 			}
 
 		} catch (ClassNotFoundException ex) {
@@ -174,8 +176,7 @@ public class EntityGenerator {
 		for (Map.Entry<String, RelationDetails> entry : relationMap.entrySet()) {
 
 			if(entry.getValue().getRelation().equals("OneToOne") && !entry.getValue().getIsParent())
-			{
-                   
+			{            
 				if(identifyOneToOneRelationContainsPrimaryKeys(entry.getValue().getfDetails(),details.getPrimaryKeys(),entry.getValue().getJoinDetails())) {
 					details.setIdClass(entry.getValue().geteName()+"Id");
 				}
@@ -211,12 +212,16 @@ public class EntityGenerator {
 		for(String key: primaryKeysMap.keySet()) {
 			entityPrimaryKeys.add(key);
 		}
+		
+		if(entityPrimaryKeys.size()>1)
+		{
 		for(JoinDetails jDetails : joinDetailsList)
 		{
 			if(relationEntityPrimaryKeys.contains(jDetails.getReferenceColumn()) && entityPrimaryKeys.contains(jDetails.getReferenceColumn()))
 			{
 				return true;
 			}
+		}
 		}
 
 		return false;
@@ -267,7 +272,7 @@ public class EntityGenerator {
 		return entityDetails;
 	}
 
-	public Map<String,EntityDetails> validateAuthenticationTable(Map<String,EntityDetails> entityDetailsMap, String authenticationTable)
+	public Map<String,EntityDetails> validateAuthenticationTable(Map<String,EntityDetails> entityDetailsMap, String authenticationTable, String authenticationType)
 	{
 		Boolean isTableExits=false;
 		if(entityDetailsMap!=null)
@@ -281,11 +286,10 @@ public class EntityGenerator {
 				System.exit(0);
 			}
 
-			return getAuthenticationTableFieldsMapping(entityDetailsMap, authenticationTable);
+			return getAuthenticationTableFieldsMapping(entityDetailsMap, authenticationTable, authenticationType);
 		}
 		return entityDetailsMap;
 	}
-	
 	
 	public Map<String,FieldDetails> displayAuthFieldsAndGetMapping(Map<String,FieldDetails> authFields, List<FieldDetails> fieldsList)
 	{
@@ -298,7 +302,7 @@ public class EntityGenerator {
 				index++;
 			}
 			
-			System.out.println("\n Select field you want to map on "+ authFieldsEntry.getKey()+" by typing its corresponding number : ");
+			System.out.println("\n Select field you want to map on "+ authFieldsEntry.getKey() +" by typing its corresponding number : ");
 		    System.out.println(builder.toString());
 		    
 			index= userInput.getFieldsInput(fieldsList.size());
@@ -330,12 +334,13 @@ public class EntityGenerator {
 		return fieldsList;
 	}
 
-	public Map<String,EntityDetails> getAuthenticationTableFieldsMapping(Map<String,EntityDetails> entityDetails, String authenticationTable)
+	public Map<String,EntityDetails> getAuthenticationTableFieldsMapping(Map<String,EntityDetails> entityDetails, String authenticationTable, String authenticationType)
 	{
 		Map<String,FieldDetails> authFields=new HashMap<String, FieldDetails>();
 		authFields.put("UserName", null);
+		if(authenticationType.equals("database"))
 		authFields.put("Password", null);
-
+    
 		for(Map.Entry<String,EntityDetails> entry: entityDetails.entrySet())
 		{
 			if(entry.getKey().equals(authenticationTable))
@@ -345,20 +350,20 @@ public class EntityGenerator {
 				entry.getValue().setAuthenticationFieldsMap(authFields);
 			}
 		}
-
 		return entityDetails;
 	}
 
 	public void generateAutheticationEntities(Map<String,EntityDetails> entityDetails, String schemaName, String packageName,
-			String destPath, String authenticationTable,String authenticationType) {
+			String destPath, Map<String,String> authenticationInputMap) {
 		Map<String, Object> root = new HashMap<>();
 		root.put("PackageName", packageName);
 		root.put("CommonModulePackage" , packageName.concat(".commonmodule"));
-		root.put("AuthenticationType",authenticationType);
+		root.put("AuthenticationType",authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE));
 		root.put("SchemaName",schemaName);
-		if(authenticationTable!=null) {
+		root.put("UsersOnly", authenticationInputMap.get(AuthenticationConstants.USERS_ONLY));
+		if(authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA)!=null) {
 			root.put("UserInput","true");
-			root.put("AuthenticationTable", authenticationTable);
+			root.put("AuthenticationTable", authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA));
 		}
 		else
 		{
@@ -369,7 +374,7 @@ public class EntityGenerator {
 		for(Map.Entry<String,EntityDetails> entry : entityDetails.entrySet())
 		{
 			String className=entry.getKey().substring(entry.getKey().lastIndexOf(".") + 1);
-			if(className.equalsIgnoreCase(authenticationTable))
+			if(className.equalsIgnoreCase(authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA)))
 			{
 				root.put("ClassName", className);
 				root.put("IdClass", entry.getValue().getIdClass());
@@ -382,9 +387,20 @@ public class EntityGenerator {
 		}
 
 		String destinationFolder = destPath + "/" + packageName.replaceAll("\\.", "/") + "/domain/model";
-
-		codeGeneratorUtils.generateFiles(getAuthenticationEntitiesTemplates(ENTITIES_TEMPLATE_FOLDER,authenticationType,authenticationTable), root, destinationFolder,ENTITIES_TEMPLATE_FOLDER);
-	}
+		Map<String, Object> templates = new HashMap<String, Object>();
+		System.out.println(" USERS ONLY  " + authenticationInputMap.get(AuthenticationConstants.USERS_ONLY));
+		if(authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE).equals("database") || 
+				(!authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE).equals("database") && authenticationInputMap.get(AuthenticationConstants.USERS_ONLY).equals("true")))
+		{
+			templates=getAuthenticationEntitiesTemplates(ENTITIES_TEMPLATE_FOLDER,authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE),authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA));
+		
+		}
+		else if(!authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE).equals("database") && authenticationInputMap.get(AuthenticationConstants.USERS_ONLY).equals("false"))
+		{
+			templates = getAuthenticationEntitiesTemplatesForUserGroupCase(ENTITIES_TEMPLATE_FOLDER);
+		}
+		codeGeneratorUtils.generateFiles(templates, root, destinationFolder,ENTITIES_TEMPLATE_FOLDER);
+		}
 	
 	public Map<String, Object> getAuthenticationEntitiesTemplates(String templatePath, String authenticationType, String authenticationTable) {
 		List<String> filesList = codeGeneratorUtils.readFilesFromDirectory(templatePath);
@@ -418,12 +434,30 @@ public class EntityGenerator {
 		return templates;
 	}
 	
-	public Map<String, Object> buildRootMap(EntityDetails details,String entityName, String packageName, String schemaName, String authenticationTable,String authenticationType)
+	public Map<String, Object> getAuthenticationEntitiesTemplatesForUserGroupCase(String templatePath) {
+		List<String> filesList = codeGeneratorUtils.readFilesFromDirectory(templatePath);
+		filesList = codeGeneratorUtils.replaceFileNames(filesList, templatePath);
+		
+		Map<String, Object> templates = new HashMap<>();
+
+		for (String filePath : filesList) {
+			String outputFileName = filePath.substring(0, filePath.lastIndexOf('.'));
+
+				if(!(outputFileName.toLowerCase().contains("user")))
+				{ 		
+					templates.put(filePath, outputFileName);
+				}
+		}
+
+		return templates;
+	}
+	
+	public Map<String, Object> buildRootMap(EntityDetails details,String entityName, String packageName, String schemaName, Map<String,String> authenticationInputMap)
 	{
 		String className = entityName.substring(entityName.lastIndexOf(".") + 1);
 		String entityClassName = className.concat("Entity");
 		Map<String, Object> root = new HashMap<>();
-
+	
 		root.put("EntityClassName", entityClassName);
 		root.put("ClassName", className);
 		root.put("PackageName", packageName);
@@ -432,9 +466,10 @@ public class EntityGenerator {
 		root.put("TableName", details.getEntityTableName());
 		root.put("SchemaName", schemaName);
 		root.put("IdClass", details.getIdClass());
-		root.put("AuthenticationType",authenticationType);
-		if(authenticationTable !=null)
-			root.put("AuthenticationTable", authenticationTable);
+		root.put("UsersOnly", authenticationInputMap.get(AuthenticationConstants.USERS_ONLY));
+		root.put("AuthenticationType",authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE));
+		if(authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA) !=null)
+			root.put("AuthenticationTable", authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA));
 		else
 			root.put("AuthenticationTable", "User");
 		root.put("AuthenticationFields", details.getAuthenticationFieldsMap());

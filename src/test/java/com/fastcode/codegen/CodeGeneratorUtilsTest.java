@@ -5,10 +5,15 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.assertj.core.api.Assertions;
 import org.junit.After;
 import org.junit.Before;
@@ -27,6 +32,9 @@ import com.fastcode.codegen.CodeGenerator;
 import com.fastcode.codegen.CodeGeneratorUtils;
 import com.fastcode.codegen.FolderContentReader;
 import com.fastcode.logging.LoggingHelper;
+
+import freemarker.template.Configuration;
+import freemarker.template.Template;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 public class CodeGeneratorUtilsTest {
@@ -69,10 +77,11 @@ public class CodeGeneratorUtilsTest {
 	
 	@Test
 	public void toUrl_PathIsValid_ReturnURI() throws MalformedURLException {
+		
 		Assertions.assertThat(codeGeneratorUtils.toURL(destPath)).isEqualTo(destPath.toURI().toURL());
 	}
 	
-	@Test
+	@Test 
 	public void readFilesFromDirectory_PathIsValid_ReturnList() throws MalformedURLException {
 		
 		List<String> filesList = new ArrayList<String>();
@@ -104,12 +113,35 @@ public class CodeGeneratorUtilsTest {
 	}
 	
 	@Test
-	public void generateFiles_parametersAreValid_ReturnNothing()
+	public void generateFiles_parametersAreValid_throwException() throws IOException
 	{
-		String str = "testString";
-		Assertions.assertThat(codeGeneratorUtils.camelCaseToKebabCase(str)).isEqualTo("test-string");
+		
+
+		File tempFile = File.createTempFile("entities", ".java.ftl", destPath);
+		
+		Map<String, Object> templateFiles = new HashMap<String, Object>();
+		templateFiles.put(destPath.getAbsolutePath(), tempFile.getAbsolutePath());
+		codeGeneratorUtils.generateFiles(templateFiles,new HashMap<String, Object>(), destPath.getAbsolutePath(), destPath.getAbsolutePath());
+	
 	}
 	
-	
+//	@Test
+//	public void generateFiles_parametersAreValid_returnNothing() throws IOException
+//	{
+//		
+//
+//		File file1 = new File(System.getProperty("user.dir").replace("\\", "/") + "/src/test/resources/item.service.ts.ftl");
+//		File file = folder.newFile("item.service.ts.ftl");
+//		FileUtils.copyFile(file1, file);
+//		Map<String, Object> templateFiles = new HashMap<String, Object>();
+//		
+//		templateFiles.put(file.getAbsolutePath(), (Object) file.getName());
+//		String path = destPath.getParent().replace("\\", "/");
+//		path = path.substring(path.lastIndexOf("/") + 1);
+//		
+//		codeGeneratorUtils.generateFiles(templateFiles,new HashMap<String, Object>(), destPath.getAbsolutePath(), "/"+path);
+//	
+//	}
+
 
 }

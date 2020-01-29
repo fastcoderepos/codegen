@@ -17,23 +17,29 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
+<#if AuthenticationType !="oidc">
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import java.util.stream.Collectors;
+</#if>
 import java.net.URL;
 import org.springframework.security.core.authority.AuthorityUtils;
 import [=PackageName].domain.irepository.IJwtRepository;
 import [=PackageName].domain.model.JwtEntity;
-import [=PackageName].domain.model.[=AuthenticationTable]permissionEntity;
-import [=PackageName].domain.model.[=AuthenticationTable]roleEntity;
-import [=PackageName].domain.model.RolepermissionEntity;
-import [=PackageName].domain.model.RoleEntity;
-import [=PackageName].domain.authorization.[=AuthenticationTable?lower_case].I[=AuthenticationTable]Manager;
-import [=PackageName].domain.model.[=AuthenticationTable]Entity;
+<#if AuthenticationType =="oidc">
 import com.nimbusds.jose.*;
 import com.nimbusds.jwt.*;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+<#if UsersOnly == "true">
+import [=PackageName].domain.model.[=AuthenticationTable]Entity;
+import [=PackageName].domain.authorization.[=AuthenticationTable?lower_case].I[=AuthenticationTable]Manager;
+<#else>
+import [=PackageName].domain.model.RoleEntity;
+import [=PackageName].domain.authorization.role.IRoleManager;
+</#if>
+</#if>
 import java.util.*;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletContext;
@@ -45,13 +51,16 @@ import java.io.OutputStream;
 
 public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
 
-    //@Autowired
     private Environment environment;
-    
     private IJwtRepository jwtRepo;
-
+    <#if AuthenticationType == "oidc">
+    private SecurityUtils securityUtils;
+    <#if UsersOnly == "true">
     private I[=AuthenticationTable]Manager _userMgr;
-
+    <#else>
+    private IRoleManager _roleManager;
+    </#if>
+    </#if>
     public JWTAuthorizationFilter(AuthenticationManager authManager) {
         super(authManager);
     }
@@ -66,7 +75,6 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
             chain.doFilter(req, res);
             return;
         }
-
 
         UsernamePasswordAuthenticationToken authentication = null;
         ApiError apiError = new ApiError(HttpStatus.UNAUTHORIZED);
@@ -147,92 +155,94 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
         if (StringUtils.isNotEmpty(token) && token.startsWith(SecurityConstants.TOKEN_PREFIX)) {
             String userName = null;
             List<GrantedAuthority> authorities = null;
-            if(!environment.getProperty("fastCode.auth.method").equals("oidc")) {
-
-                 claims = Jwts.parser()
+            <#if AuthenticationType !="none" && AuthenticationType !="oidc">
+            claims = Jwts.parser()
                         .setSigningKey(SecurityConstants.SECRET.getBytes())
                         .parseClaimsJws(token.replace(SecurityConstants.TOKEN_PREFIX, ""))
                         .getBody();
-                userName = claims.getSubject();
-                List<String> scopes = claims.get("scopes", List.class);
-                authorities = scopes.stream()
+            userName = claims.getSubject();
+            List<String> scopes = claims.get("scopes", List.class);
+            authorities = scopes.stream()
                         .map(authority -> new SimpleGrantedAuthority(authority))
                         .collect(Collectors.toList());
+            <#elseif AuthenticationType =="oidc">
+            if(securityUtils==null){
+            ServletContext servletContext = request.getServletContext();
+            WebApplicationContext webApplicationContext = WebApplicationContextUtils.getWebApplicationContext(servletContext);
+            securityUtils = webApplicationContext.getBean(SecurityUtils.class);
             }
-            else{
-
+    		<#if UsersOnly == "true">
+    		if(_userMgr==null){
+            	ServletContext servletContext = request.getServletContext();
+                WebApplicationContext webApplicationContext = WebApplicationContextUtils.getWebApplicationContext(servletContext);
+                _userMgr = webApplicationContext.getBean(I[=AuthenticationTable]Manager.class);
+             }
+    		<#else>
+    		if(_roleManager==null){
+            	ServletContext servletContext = request.getServletContext();
+                WebApplicationContext webApplicationContext = WebApplicationContextUtils.getWebApplicationContext(servletContext);
+                _roleManager = webApplicationContext.getBean(IRoleManager.class);
+             }
+             
+             List<String> groups = new ArrayList<String>();
+    		</#if>
+            
 	            SignedJWT accessToken = null;
 	            JWTClaimsSet claimSet = null;
 	
 	            try {
 	              
 	                accessToken = SignedJWT.parse(token.replace(SecurityConstants.TOKEN_PREFIX, ""));
-	            
 	                String kid = accessToken.getHeader().getKeyID();
-	                
 	                JWKSet jwks = null;
 					jwks = JWKSet.load(new URL(environment.getProperty("spring.security.oauth2.client.provider.oidc.issuer-uri") + "/v1/keys"));
 	
 	                RSAKey jwk = (RSAKey) jwks.getKeyByKeyId(kid);
-	
 	                JWSVerifier verifier = new RSASSAVerifier(jwk);
 	
 	                if (accessToken.verify(verifier)) {
 	                    System.out.println("valid signature");
 	                    claimSet = accessToken.getJWTClaimsSet();
 	                    userName = claimSet.getSubject();
+	                    <#if UsersOnly != "true">
+	                     groups = (ArrayList<String>) claimSet.getClaims().get("groups");
+	                     </#if>
 	                } else {
 	                    System.out.println("invalid signature");
 	                }
 	                } catch (Exception e) {
 	                    e.printStackTrace();
 	            }
-                if(_userMgr==null){
-                    ServletContext servletContext = request.getServletContext();
-                    WebApplicationContext webApplicationContext = WebApplicationContextUtils.getWebApplicationContext(servletContext);
-                    _userMgr = webApplicationContext.getBean(I[=AuthenticationTable]Manager.class);
-                }
-
+               
+                <#if UsersOnly == "true">
                 // Add all the roles and permissions in a list and then convert the list into all permissions, removing duplicates
-
             	<#if UserInput?? && AuthenticationFields??>
                 [=AuthenticationTable]Entity user = _userMgr.FindBy[=AuthenticationFields.UserName.fieldName?cap_first](userName);       
             	<#else>
                 [=AuthenticationTable]Entity user = _userMgr.FindByUserName(userName);
-            	</#if>
-                List<String> permissions = new ArrayList<>();
-                Set<[=AuthenticationTable]roleEntity> ure = user.get[=AuthenticationTable]roleSet();
-                Iterator rIterator = ure.iterator();
-        		while (rIterator.hasNext()) {
-                    [=AuthenticationTable]roleEntity re = ([=AuthenticationTable]roleEntity) rIterator.next();
-                    Set<RolepermissionEntity> srp= re.getRole().getRolepermissionSet();
-                    for (RolepermissionEntity item : srp) {
-        				permissions.add(item.getPermission().getName());
-                    }
-        		}
-        		
-        		Set<[=AuthenticationTable]permissionEntity> spe = user.get[=AuthenticationTable]permissionSet();
-                Iterator pIterator = spe.iterator();
-        		while (pIterator.hasNext()) {
-                    [=AuthenticationTable]permissionEntity pe = ([=AuthenticationTable]permissionEntity) pIterator.next();
-                    
-                    if(permissions.contains(pe.getPermission().getName()) && (pe.getRevoked() != null && pe.getRevoked()))
-                    {
-                    	permissions.remove(pe.getPermission().getName());
-                    }
-                    if(!permissions.contains(pe.getPermission().getName()) && (pe.getRevoked()==null || !pe.getRevoked()))
-                    {
-                    	permissions.add(pe.getPermission().getName());
-        			
-                    }
-                 
-        		}
+            	</#if>    
+                if (applicationUser == null) {
+					throw new UsernameNotFoundException(username);
+				}
 
-        		String[] groupsArray = new String[permissions.size()];
-               // ConvertToPrivilegeAuthorities con = new ConvertToPrivilegeAuthorities();
-               // authorities = con.convert(AuthorityUtils.createAuthorityList(groups.toArray(groupsArray)));
-        		authorities = AuthorityUtils.createAuthorityList(permissions.toArray(groupsArray));
-            }
+                List<String> permissions = securityUtils.getAllPermissionsFromUserAndRole(user);
+                String[] groupsArray = new String[permissions.size()];
+             	authorities = AuthorityUtils.createAuthorityList(permissions.toArray(groupsArray));
+                
+                <#else>
+                List<String> permissionsList = new ArrayList<String>();
+            	for( String item : groups)
+   				{
+   					RoleEntity role = _roleManager.FindByRoleName(item);
+   					if(role != null) {
+   						List<String> permissions= securityUtils.getAllPermissionsFromRole(role);
+   						permissionsList.addAll(permissions);
+   					}
+   				}
+            	String[] groupsArray = new String[permissionsList.size()];
+            	authorities = AuthorityUtils.createAuthorityList(permissionsList.toArray(groupsArray));
+                </#if>
+            </#if>
 
             if ((userName != null) && StringUtils.isNotEmpty(userName)) {
             	return new UsernamePasswordAuthenticationToken(userName, null, authorities);
