@@ -1,12 +1,13 @@
 package com.fastcode.codegen;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -20,6 +21,7 @@ import com.fastcode.logging.LoggingHelper;
 public class FrontendBaseTemplateGenerator {
 
 	private static final String FRONTEND_BASE_TEMPLATE_FOLDER = "/templates/frontendBaseTemplate";
+	private static final String FRONTEND_ASSETS = "/src/main/resources/frontend_static/assets/";
 
 	@Autowired
 	private CodeGeneratorUtils codeGeneratorUtils;
@@ -39,10 +41,11 @@ public class FrontendBaseTemplateGenerator {
 		String command = "ng new " + clientSubfolder + " --skipInstall=true";
 		commandUtils.runProcess(command, destination);
 		editAngularJsonFile(destination + "/" + clientSubfolder + "/angular.json", clientSubfolder);
+		editTsConfigJsonFile(destination + "/" + clientSubfolder + "/tsconfig.json");
 
 		Map<String, Object> root = buildRootMap(appName, authenticationType, authenticationTable);
 		codeGeneratorUtils.generateFiles(getTemplates(FRONTEND_BASE_TEMPLATE_FOLDER),root, destination + "/"+ clientSubfolder,FRONTEND_BASE_TEMPLATE_FOLDER);
-		
+		copyAssets(destination + "/"+ clientSubfolder + "/src/assets");
 	}
 	
 	public Map<String, Object> buildRootMap(String appName, String authenticationType, String authenticationTable)
@@ -112,7 +115,6 @@ public class FrontendBaseTemplateGenerator {
 
 	}
 
-
 	public JSONObject getFastCodeCoreProjectNode() throws ParseException {
 		JSONParser parser = new JSONParser();
 		JSONObject fccore = (JSONObject) parser.parse("{\r\n" + 
@@ -159,7 +161,38 @@ public class FrontendBaseTemplateGenerator {
 		
 		return fccore;
 	}
+	
+  public void editTsConfigJsonFile(String path) {
 
+      try {
+          JSONObject jsonObject = (JSONObject) jsonUtils.readJsonFile(path);
+          JSONObject compilerOptions = (JSONObject) jsonObject.get("compilerOptions");
+
+          compilerOptions.put("resolveJsonModule",true);
+          compilerOptions.put("esModuleInterop",true);
+          compilerOptions.put("allowSyntheticDefaultImports",true);
+
+          String prettyJsonString = jsonUtils.beautifyJson(jsonObject,"Object"); 
+          jsonUtils.writeJsonToFile(path,prettyJsonString);
+
+      } catch (FileNotFoundException e) {
+          e.printStackTrace();
+      } catch (IOException e) {
+          e.printStackTrace();
+      } catch (ParseException e) {
+          e.printStackTrace();
+      }
+
+  }
+
+	private void copyAssets(String dest) {
+		try {
+			FileUtils.copyDirectory(new File(System.getProperty("user.dir").replace("\\", "/") + FRONTEND_ASSETS), new File(dest));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 }
 
 

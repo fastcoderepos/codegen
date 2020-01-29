@@ -235,8 +235,8 @@ export class BaseListComponent<E> implements OnInit {
 
   }
 
-  applyFilter(filterCritaria: ISearchField[]): void {
-    this.searchValue = filterCritaria;
+  applyFilter(filterCriteria: ISearchField[]): void {
+    this.searchValue = filterCriteria;
     this.isLoadingResults = true;
     this.initializePageInfo();
     let sortVal = this.getSortValue();

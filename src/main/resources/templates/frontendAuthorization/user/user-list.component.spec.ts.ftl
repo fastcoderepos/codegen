@@ -1,162 +1,293 @@
-
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { Injectable, CUSTOM_ELEMENTS_SCHEMA ,NO_ERRORS_SCHEMA, Input} from '@angular/core';
-import {  HttpTestingController } from '@angular/common/http/testing';
-import { Observable, throwError,of } from 'rxjs';
-import { catchError, tap, map } from 'rxjs/operators';
-import {Component, Directive, ChangeDetectorRef} from '@angular/core';
-import {IUser,UserListComponent,UserService } from './index';
-import { TestingModule,EntryComponents } from '../../testing/utils';
-import { environment } from '../../environments/environment';
+import { By } from '@angular/platform-browser';
+import { of } from 'rxjs';
+import { ChangeDetectorRef, NO_ERRORS_SCHEMA, DebugElement } from '@angular/core';
+import { Location } from '@angular/common';
+import { Router } from '@angular/router';
+import { RouterTestingModule } from '@angular/router/testing';
+import { ListFiltersComponent, ServiceUtils } from 'projects/fast-code-core/src/public_api';
 
+import { EntryComponents, TestingModule } from 'src/testing/utils';
+import { IUser, UserService, UserDetailsComponent, UserListComponent, UserNewComponent } from './index';
 
-@Injectable()
-class MockRouter { navigate = ()=> {}; }
-      
-@Injectable()
-class MockGlobals { }
-      
-@Injectable()
-class MockUserService { }
-      
-@Injectable()
-class MockPickerDialogService { }
-@Directive({
-selector:'[routerlink]',
-host: {'(click)':'onClick()'}
-})
-export  class RouterLinkDirectiveStub {
-  @Input('routerLink') linkParams: any;
-  navigatedTo: any = null;
-  onClick () {
-    this.navigatedTo = this.linkParams;
-  }
-}
 describe('UserListComponent', () => {
   let fixture:ComponentFixture<UserListComponent>;
   let component:UserListComponent;
-  let httpTestingController: HttpTestingController;
-  let userService: UserService;
-  let url:string = environment.apiUrl + '/user';
-  let mockGlobal = {
-    isSmallDevice$: of({value:true})
-  }; 
-  let data:IUser [] = [
-		{   
-			accessFailedCount: 1,
-			authenticationSource: 'authenticationSource1',
-			emailAddress: 'emailAddress1',
-			emailConfirmationCode: 'emailConfirmationCode1',
-			firstName: 'firstName1',
-			id:1,
-			isActive: true,
-			isEmailConfirmed: true,
-			isLockoutEnabled: true,
-			isPhoneNumberConfirmed: 'isPhoneNumberConfirmed1',
-			lastLoginTime: new Date().toLocaleDateString("en-US") ,
-			lastName: 'lastName1',
-			lockoutEndDateUtc: new Date().toLocaleDateString("en-US") ,
-			password: 'password1',
-			passwordResetCode: 'passwordResetCode1',
-			phoneNumber: 'phoneNumber1',
-			profilePictureId: 1,
-			twoFactorEnabled: true,
-			userName: 'userName1',
-		},
-		{   
-			accessFailedCount: 2,
-			authenticationSource: 'authenticationSource2',
-			emailAddress: 'emailAddress2',
-			emailConfirmationCode: 'emailConfirmationCode2',
-			firstName: 'firstName2',
-			id:2,
-			isActive: true,
-			isEmailConfirmed: true,
-			isLockoutEnabled: true,
-			isPhoneNumberConfirmed: 'isPhoneNumberConfirmed2',
-			lastLoginTime: new Date().toLocaleDateString("en-US") ,
-			lastName: 'lastName2',
-			lockoutEndDateUtc: new Date().toLocaleDateString("en-US") ,
-			password: 'password2',
-			passwordResetCode: 'passwordResetCode2',
-			phoneNumber: 'phoneNumber2',
-			profilePictureId: 2,
-			twoFactorEnabled: true,
-			userName: 'userName2',
-		},
-  ]; 
+  let el: HTMLElement;
+  let constData:IUser[] = [
+    {   
+      accessFailedCount: 1,
+      authenticationSource: 'authenticationSource1',
+      emailAddress: 'emailAddress1',
+      emailConfirmationCode: 'emailConfirmationCode1',
+      firstName: 'firstName1',
+      id: 1,
+      isActive: true,
+      isEmailConfirmed: true,
+      isLockoutEnabled: true,
+      isPhoneNumberConfirmed: 'isPhoneNumberConfirmed1',
+      lastLoginTime: new Date(),
+      lastName: 'lastName1',
+      lockoutEndDateUtc: new Date(),
+      password: 'password1',
+      passwordResetCode: 'passwordResetCode1',
+      phoneNumber: 'phoneNumber1',
+      profilePictureId: 1,
+      twoFactorEnabled: true,
+      userName: 'userName1',
+    },
+    {   
+      accessFailedCount: 2,
+      authenticationSource: 'authenticationSource2',
+      emailAddress: 'emailAddress2',
+      emailConfirmationCode: 'emailConfirmationCode2',
+      firstName: 'firstName2',
+      id: 2,
+      isActive: true,
+      isEmailConfirmed: true,
+      isLockoutEnabled: true,
+      isPhoneNumberConfirmed: 'isPhoneNumberConfirmed2',
+      lastLoginTime: new Date(),
+      lastName: 'lastName2',
+      lockoutEndDateUtc: new Date(),
+      password: 'password2',
+      passwordResetCode: 'passwordResetCode2',
+      phoneNumber: 'phoneNumber2',
+      profilePictureId: 2,
+      twoFactorEnabled: true,
+      userName: 'userName2',
+    },
+  ];
+  let data: IUser[] = [... constData];
 
-  beforeEach(async(() => {
-    
-    TestBed.configureTestingModule({
-      declarations: [
-        UserListComponent       
-      ].concat(EntryComponents),
-      imports: [TestingModule],
-      providers: [
-      UserService,      
-        ChangeDetectorRef,
-      ]      
-   
-    }).compileComponents();
+  describe('Unit tests', () => {
   
-  }));
-  beforeEach(() => {
-    fixture = TestBed.createComponent(UserListComponent);
-    httpTestingController = TestBed.get(HttpTestingController);
-    userService = TestBed.get(UserService);
-    component = fixture.componentInstance;
-  });
+    beforeEach(async(() => {
+      
+      TestBed.configureTestingModule({
+        declarations: [
+          UserListComponent       
+        ],
+        imports: [TestingModule],
+        providers: [
+          UserService,      
+          ChangeDetectorRef,
+        ],
+        schemas: [NO_ERRORS_SCHEMA]   
+      }).compileComponents();
 
-  it('should create a component', async () => {
-    expect(component).toBeTruthy();
-  });  
+    }));
     
-  it('should run #ngOnInit()', async () => {
-       
-    httpTestingController = TestBed.get(HttpTestingController);
-    fixture.detectChanges();
-   
-    const req = httpTestingController.expectOne(req => req.method === 'GET' && req.url === url ).flush(data);   
-   
-    expect(component.items.length).toEqual(2);
-    httpTestingController.verify(); 
-  });
-    
-    
-  it('should list items', async () => {
-    
-    fixture.detectChanges();
-    httpTestingController = TestBed.get(HttpTestingController);   
-    const req = httpTestingController.expectOne(req => req.method === 'GET' && req.url === url).flush(data);
+    beforeEach(() => {
+      fixture = TestBed.createComponent(UserListComponent);
+      component = fixture.componentInstance;
+      data = [... constData];
+      fixture.detectChanges();
+    });
+
+    it('should create a component', async () => {
+      expect(component).toBeTruthy();
+    });
+
+    it('should run #ngOnInit()', async () => {
+
+      spyOn(component.dataService, "getAll").and.returnValue(of(data));
+      component.ngOnInit();
+
+      expect(component.items.length).toEqual(data.length);
+      fixture.detectChanges();
+      let tableRows = fixture.nativeElement.querySelectorAll('mat-row');
+      expect(tableRows.length).toBe(data.length);
+
+      expect(component.associations).toBeDefined();
+      expect(component.entityName.length).toBeGreaterThan(0);
+      expect(component.primaryKeys.length).toBeGreaterThan(0);
+      expect(component.columns.length).toBeGreaterThan(0);
+      expect(component.selectedColumns.length).toBeGreaterThan(0);
+      expect(component.displayedColumns.length).toBeGreaterThan(0);
+
+    });
+
+    it('should run #addNew()', async () => {
+      component.IsCreatePermission = true;
+      fixture.detectChanges();
+      spyOn(component, "addNew").and.returnValue();
+      el = fixture.debugElement.query(By.css('button[name=add]')).nativeElement;
+      el.click();
+      expect(component.addNew).toHaveBeenCalled();
+    });
+
+    it('should run #delete()', async () => {
+      component.IsDeletePermission = true;
+      component.items = data;
+      fixture.detectChanges();
+
+      let tableRows = fixture.nativeElement.querySelectorAll('mat-row')
+      let firstRowCells = tableRows[0].querySelectorAll('mat-cell');
+      let editButtonCell = firstRowCells[firstRowCells.length - 1];
+      let editButton = editButtonCell.querySelectorAll('button')[1];
+
+      spyOn(component, "delete").and.returnValue();
+      editButton.click();
+      expect(component.delete).toHaveBeenCalledWith(data[0]);
+
+    });
+
+    it('should call openDetails function when edit button is clicked', async () => {
+      component.items = data;
+      fixture.detectChanges();
+
+      let tableRows = fixture.nativeElement.querySelectorAll('mat-row')
+      let firstRowCells = tableRows[0].querySelectorAll('mat-cell');
+      let editButtonCell = firstRowCells[firstRowCells.length - 1];
+      let editButton = editButtonCell.querySelectorAll('button')[0];
+
+      spyOn(component, 'openDetails').and.returnValue();
+      editButton.click();
+
+      expect(component.openDetails).toHaveBeenCalled();
+    });
+
+    it('should call applyFilter function in case of onSearch event of list-filter-component', async () => {
+      fixture.detectChanges();
+      
+      spyOn(component, 'applyFilter');
+      fixture.debugElement.query(By.css("app-list-filters")).triggerEventHandler('onSearch', null);
+      
+      expect(component.applyFilter).toHaveBeenCalled();
+    });
+
+    it('should pass the selected columns list as input to app list filters', async () => {
+      fixture.detectChanges();
+      
+      let listFilterElement: DebugElement = fixture.debugElement.query(By.css("app-list-filters"));
+      
+      expect(listFilterElement.properties.columnsList).toBe(component.selectedColumns);
+    });
   
-   expect(component.items.length).toEqual(data.length);
-   fixture.detectChanges(); 
- 
-    httpTestingController.verify()
-  });   
-	it('should run #addNew()', async () => {   
-		httpTestingController = TestBed.get(HttpTestingController);
-		fixture.detectChanges();
-		const req = httpTestingController.expectOne(req => req.method === 'GET' && req.url === url ).flush(data);
-		fixture.detectChanges();
-		const result = component.addNew();
-		httpTestingController.verify();
-	});
-        
-  it('should run #delete()', async () => {
-    
-    fixture.detectChanges();
-    httpTestingController = TestBed.get(HttpTestingController);
-   
-   const req = httpTestingController.expectOne(req => req.method === 'GET' && req.url === url ).flush(data);
-    
-   const result = component.delete(data[0]);   
-   const req2 = httpTestingController.expectOne(req => req.method === 'DELETE' && req.url === url + '/'+ data[0].id).flush(null);
-   expect(component.items.length).toEqual(1);
-   //fixture.detectChanges();
-   httpTestingController.verify();
- 
+  });
+  
+  describe('Integration tests', () => {
+
+    beforeEach(async(() => {
+
+      TestBed.configureTestingModule({
+        declarations: [
+          UserListComponent,
+          UserDetailsComponent,
+          UserNewComponent
+        ].concat(EntryComponents),
+        imports: [
+          TestingModule,
+          RouterTestingModule.withRoutes([
+            { path: 'user', component: UserListComponent },
+            { path: 'user/:id', component: UserDetailsComponent }
+          ])
+        ],
+        providers: [
+          UserService,
+          ChangeDetectorRef,
+        ]
+
+      }).compileComponents();
+
+    }));
+
+    beforeEach(() => {
+      fixture = TestBed.createComponent(UserListComponent);
+      component = fixture.componentInstance;
+      data = [... constData];
+      fixture.detectChanges();
+    });
+
+    it('should create a component', async () => {
+      expect(component).toBeTruthy();
+    });
+
+    it('should run #ngOnInit()', async () => {
+      spyOn(component.dataService, "getAll").and.returnValue(of(data));
+      component.ngOnInit();
+
+      expect(component.items.length).toEqual(data.length);
+      fixture.detectChanges();
+      let tableRows = fixture.nativeElement.querySelectorAll('mat-row');
+      expect(tableRows.length).toBe(data.length);
+
+      expect(component.associations).toBeDefined();
+      expect(component.entityName.length).toBeGreaterThan(0);
+      expect(component.primaryKeys.length).toBeGreaterThan(0);
+      expect(component.columns.length).toBeGreaterThan(0);
+      expect(component.selectedColumns.length).toBeGreaterThan(0);
+      expect(component.displayedColumns.length).toBeGreaterThan(0);
+    });
+
+    it('should open new dialog for new entry', async () => {
+      component.IsCreatePermission = true;
+      fixture.detectChanges();
+      spyOn(component.dialog, 'open').and.callThrough();
+      el = fixture.debugElement.query(By.css('button[name=add]')).nativeElement;
+      el.click();
+
+      expect(component.dialog.open).toHaveBeenCalled();
+    });
+
+    it('should delete the item from list', async () => {
+      component.IsDeletePermission = true;
+      component.items = data;
+      fixture.detectChanges();
+
+      let tableRows = fixture.nativeElement.querySelectorAll('mat-row')
+      let firstRowCells = tableRows[0].querySelectorAll('mat-cell');
+      let deleteButtonCell = firstRowCells[firstRowCells.length - 1];
+      let deleteButton = deleteButtonCell.querySelectorAll('button')[1];
+
+      spyOn(component.dataService, "delete").and.returnValue(of(null));
+      let itemsLength = component.items.length;
+      deleteButton.click();
+      expect(component.items.length).toBe(itemsLength - 1);
+    });
+
+    it('should set the columns list in app list filters component', async () => {
+      let listFilters: ListFiltersComponent = fixture.debugElement.query(By.css("app-list-filters")).componentInstance;
+      
+      expect(listFilters.columnsList).toEqual(component.selectedColumns);
+    });
+
+    it('should verify that redirected to details page when edit button is clicked', async () => {
+      const router = TestBed.get(Router);
+      const location = TestBed.get(Location);
+      component.items = data;
+      fixture.detectChanges();
+
+      let tableRows = fixture.nativeElement.querySelectorAll('mat-row')
+      let firstRowCells = tableRows[0].querySelectorAll('mat-cell');
+      let editButtonCell = firstRowCells[firstRowCells.length - 1];
+      let editButton = editButtonCell.querySelectorAll('button')[0];
+
+      spyOn(component.dataService, 'getById').and.returnValue(of(data[0]));
+      let navigationSpy = spyOn(router, 'navigate').and.callThrough();
+      editButton.click();
+
+      let responsePromise = navigationSpy.calls.mostRecent().returnValue;
+      await responsePromise;
+      
+      expect(location.path()).toBe(`/user/${ServiceUtils.encodeIdByObject(data[0], component.primaryKeys)}`);
+    });
+
+    it('should emit onSearch event of list-filter-component and call applyFilter function', async () => {
+      let filteredArray = [data[0]];
+      spyOn(component.dataService, 'getAssociations').and.returnValue(of(filteredArray));
+      spyOn(component.dataService, 'getAll').and.returnValue(of(filteredArray));
+
+      let filterableColumns = component.columns.filter(x => x.filter)
+      if (filterableColumns.length > 0) {
+        let searchButton = fixture.debugElement.query(By.css("app-list-filters")).query(By.css("button[name=search]")).nativeElement;
+        searchButton.click();
+
+        expect(component.items).toEqual(filteredArray);
+      }
+    });
+
   });
         
 });

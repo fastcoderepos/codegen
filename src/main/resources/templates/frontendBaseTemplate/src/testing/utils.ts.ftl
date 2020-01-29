@@ -4,7 +4,7 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 import { ActivatedRoute, } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
-import { Globals, PickerDialogService, PickerComponent, ListFiltersComponent, AddFilterFieldComponent } from 'projects/fast-code-core/src/public_api';
+import { Globals, PickerDialogService, PickerComponent, ListFiltersComponent, ConfirmDialogComponent} from 'projects/fast-code-core/src/public_api';
 
 import {
   MatButtonModule, MatToolbarModule, MatSidenavModule,
@@ -12,17 +12,22 @@ import {
   MatCardModule, MatTabsModule, MatInputModule, MatDialogModule,
   MatSelectModule, MatCheckboxModule, MatAutocompleteModule,
   MatDatepickerModule, MatNativeDateModule, MatMenuModule, MatTable,
-  MatChipsModule, MatSortModule, MatSnackBarModule
+  MatChipsModule, MatSortModule, MatSnackBarModule, MatProgressSpinnerModule
 } from '@angular/material';
+import { MatDialogRef, MatDialog } from '@angular/material/dialog';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgxMaterialTimepickerModule } from 'ngx-material-timepicker';
 import { TranslateTestingModule } from './translate-testing.module';
-import { mockActivatedRoute, mockGlobal } from './mocks';
+import { ActivatedRouteMock, GlobalsMock, AuthenticationServiceMock, GlobalPermissionServiceMock, MatDialogMock, dialogRefMock } from './mocks';
+<#if AuthenticationType != "none">
+import { AuthenticationService } from 'src/app/core/authentication.service';
+import { GlobalPermissionService } from 'src/app/core/global-permission.service';
+</#if>
 
 export var EntryComponents: any[] = [
   PickerComponent,
   ListFiltersComponent,
-  AddFilterFieldComponent
+  ConfirmDialogComponent
 ];
 
 export var imports: any[] = [
@@ -33,7 +38,7 @@ export var imports: any[] = [
   MatCardModule, MatTabsModule, MatInputModule, MatDialogModule,
   MatSelectModule, MatCheckboxModule, MatAutocompleteModule,
   MatDatepickerModule, MatNativeDateModule, MatMenuModule,
-  MatChipsModule, MatSortModule, MatSnackBarModule,
+  MatChipsModule, MatSortModule, MatSnackBarModule, MatProgressSpinnerModule,
   NgxMaterialTimepickerModule, TranslateTestingModule
 ];
 
@@ -45,17 +50,23 @@ export var exports: any[] = [
   MatCardModule, MatTabsModule, MatInputModule, MatDialogModule,
   MatSelectModule, MatCheckboxModule, MatAutocompleteModule,
   MatDatepickerModule, MatNativeDateModule, MatMenuModule, MatTable,
-  MatChipsModule, MatSortModule, MatSnackBarModule,
+  MatChipsModule, MatSortModule, MatSnackBarModule, MatProgressSpinnerModule,
   NgxMaterialTimepickerModule, TranslateTestingModule
 ];
 
 export var providers: any[] = [
   // {provide: Router, useClass: MockRouter},
-  { provide: ActivatedRoute, useValue: mockActivatedRoute },
-  { provide: Globals, useValue: mockGlobal },
+  { provide: ActivatedRoute, useValue: ActivatedRouteMock },
+  { provide: Globals, useValue: GlobalsMock },
   // MatDialog,
-  PickerDialogService,
   // {provide: PickerDialogService, useClass: MockPickerDialogService},
+  <#if AuthenticationType != "none">
+  { provide: AuthenticationService, useClass: AuthenticationServiceMock},
+  { provide: GlobalPermissionService, useClass: GlobalPermissionServiceMock},
+  </#if>
+  { provide: MatDialog, useClass: MatDialogMock},
+  { provide: MatDialogRef, useValue: dialogRefMock },
+  PickerDialogService,
 ]
 
 @NgModule({
@@ -66,4 +77,11 @@ export var providers: any[] = [
 })
 export class TestingModule {
   constructor() { }
+}
+
+export function checkValues( mainObject, objToBeChecked): boolean{
+  const doesValueMatch = (currentKey) => {
+    return mainObject[currentKey] == objToBeChecked[currentKey]
+  };
+  return Object.keys(objToBeChecked).every(doesValueMatch);
 }

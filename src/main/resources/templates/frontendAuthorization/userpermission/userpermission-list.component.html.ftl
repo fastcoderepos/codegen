@@ -15,14 +15,14 @@
         </ul>
       </div>
       <div class="fb-col-md-4 fb-text-right">
-        <button mat-raised-button color="primary" (click)="addNew()"><i class="material-icons">
+        <button name="add" mat-raised-button color="primary" (click)="addNew()"><i class="material-icons">
             add_circle_outline
           </i> &nbsp;{{'GENERAL.ACTIONS.ADD' | translate}}</button>
       </div>
     </div>
   </div>
-  <app-list-filters [columnsList]="selectedColumns" (onSearch)="applyFilter($event)"></app-list-filters>
   <mat-card>
+	  <app-list-filters [columnsList]="selectedColumns" (onSearch)="applyFilter($event)"></app-list-filters>
     <div class="table-container">
       <mat-table matSort [dataSource]="items" class="mat-elevation-z8">
         <ng-container matColumnDef="User">

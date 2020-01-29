@@ -10,7 +10,7 @@
             <li><a [routerLink]="['/dashboard']"><i class="material-icons">
                   home
                 </i> &nbsp;Dashboard</a></li>
-            <li><a [routerLink]="['/[=ClassName?lower_case]']">[=ClassName]</a></li>
+            <li><a (click)="onBack()">[=ClassName]</a></li>
             <li><a>{{idParam}}</a></li>
           </ul>
         </div>
@@ -98,8 +98,8 @@
                 </button>
             </div>
             <div class="fb-col-sm-6 fb-text-right">
-                <button mat-raised-button color="basic" [routerLink]="['/[=ClassName?lower_case]']"> Back </button> 
-                <button mat-raised-button color="primary"   [disabled]="!itemForm.valid || loading<#if AuthenticationType!="none"> || !IsUpdatePermission</#if>" (click)="itemNgForm.ngSubmit.emit()">
+                <button name="back" mat-raised-button color="basic" (click)="onBack()"> {{'GENERAL.ACTIONS.CANCEL' | translate}} </button> 
+                <button name="save" mat-raised-button color="primary" [disabled]="!itemForm.valid || loading<#if AuthenticationType!="none"> || !IsUpdatePermission</#if>" (click)="itemNgForm.ngSubmit.emit()">
                   {{'GENERAL.ACTIONS.SAVE' | translate}}
                 </button>
             </div>

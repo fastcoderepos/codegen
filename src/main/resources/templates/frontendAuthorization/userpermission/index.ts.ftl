@@ -1,6 +1,3 @@
-export { ListFiltersComponent } from 'projects/fast-code-core/src/public_api';
-export { AddFilterFieldComponent } from 'projects/fast-code-core/src/public_api';
-
 export { [=AuthenticationTable?cap_first]permissionListComponent } from './[=moduleName]permission-list.component';
 export { [=AuthenticationTable?cap_first]permissionDetailsComponent } from './[=moduleName]permission-details.component';
 export { [=AuthenticationTable?cap_first]permissionNewComponent } from './[=moduleName]permission-new.component';

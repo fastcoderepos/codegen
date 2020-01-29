@@ -1,25 +1,47 @@
-import { Injectable } from '@angular/core'; 
-import { Router, CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router'; 
-import {AuthenticationService} from './authentication.service' 
-@Injectable() 
-export class AuthGuard implements CanActivate { 
+import { Injectable } from '@angular/core';
+import { Router, CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+<#if AuthenticationType == "oidc">
+import { OidcSecurityService } from 'angular-auth-oidc-client';
+import { map } from 'rxjs/operators';
+<#else>
+import { AuthenticationService } from './authentication.service';
+</#if>
 
-constructor( private router: Router, private authSrv:AuthenticationService ) {} 
+@Injectable()
+export class AuthGuard implements CanActivate {
 
-canActivate( route: ActivatedRouteSnapshot, state: RouterStateSnapshot ) { 
+  constructor(
+    private router: Router,
+    <#if AuthenticationType == "oidc">
+    private oidcSecurityService: OidcSecurityService
+    <#else>
+    private authenticationService: AuthenticationService,
+    </#if>
+  ) { }
 
-if ( this.authSrv.token ) { 
-
-return true; 
-} 
-
-if(this.authSrv.loginType == 'oidc') { 
-this.authSrv.AuthLogin(); 
-
-} 
-else { 
-this.router.navigate( ['/login'], { queryParams: { returnUrl: state.url } } ); 
-} 
-return false; 
-} 
+  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
+    <#if AuthenticationType == "oidc">
+    return this.isAuthorized();
+    <#else>
+    if (this.authenticationService.token) {
+      return true;
+    }
+    this.router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
+    return false;
+    </#if>
+  }
+  <#if AuthenticationType == "oidc">
+  
+  private isAuthorized() {
+    return this.oidcSecurityService.getIsAuthorized().pipe(
+      map((isAuthorized: boolean) => {
+        if (!isAuthorized) {
+          this.router.navigate(['/']);
+          return false;
+        }
+        return true;
+      })
+    );
+  }
+  </#if>
 } 

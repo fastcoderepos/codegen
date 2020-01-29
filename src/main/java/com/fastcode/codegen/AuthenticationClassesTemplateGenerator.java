@@ -22,6 +22,7 @@ public class AuthenticationClassesTemplateGenerator {
 	
 	private static final String BACKEND_TEMPLATE_FOLDER = "/templates/backendTemplates";
 	private static final String AUTHORIZATION_TEMPLATE_FOLDER = "/templates/backendTemplates/authenticationTemplates";
+	private static final String FRONTEND_AUTHORIZATION_TEMPLATE_FOLDER = "/templates/frontendAuthorization/";
 	private static final String AUTHORIZATION_TEST_TEMPLATE_FOLDER = "/templates/backendTemplates/authenticationTestTemplates";
 
 	public void generateAutheticationClasses(String destination, String packageName, Boolean cache,String authenticationType
@@ -158,7 +159,6 @@ public class AuthenticationClassesTemplateGenerator {
 		String appName =packageName.substring(packageName.lastIndexOf(".") + 1);
 		String appFolderPath = destPath + "/" + appName + "Client/src/app/";
 		List<String> authorizationEntities = new ArrayList<String>();
-		String authorizationPath = "/templates/frontendAuthorization/";
 
 		authorizationEntities.add("role");
 		authorizationEntities.add("permission");
@@ -184,19 +184,24 @@ public class AuthenticationClassesTemplateGenerator {
 		codeGenerator.updateAppModule(destPath, appName, entityList);
 		codeGenerator.updateAppRouting(destPath, appName, entityList, authenticationType);
 
-		authorizationEntities.add("login");
+		if(authenticationType == "oidc") {
+			authorizationEntities.add("callback");
+			generateSilentRefreshFile(destPath + "/" + appName + "Client/src/assets/");
+		}
+		else {
+			authorizationEntities.add("login");	
+		}
 		authorizationEntities.add("core");
-		authorizationEntities.add("oauth");
 
 		for(String entity: authorizationEntities) {
 			if(entity == "userpermission" && authenticationTable != null) {
-				generateFrontendAuthorizationComponents(appFolderPath + codeGeneratorUtils.camelCaseToKebabCase(authenticationTable) + "permission", authorizationPath + entity, authenticationTable, root);
+				generateFrontendAuthorizationComponents(appFolderPath + codeGeneratorUtils.camelCaseToKebabCase(authenticationTable) + "permission", FRONTEND_AUTHORIZATION_TEMPLATE_FOLDER + entity, authenticationTable, root);
 			}
 			else if(entity == "userrole" && authenticationTable != null) {
-				generateFrontendAuthorizationComponents(appFolderPath + codeGeneratorUtils.camelCaseToKebabCase(authenticationTable) + "role", authorizationPath + entity, authenticationTable, root);
+				generateFrontendAuthorizationComponents(appFolderPath + codeGeneratorUtils.camelCaseToKebabCase(authenticationTable) + "role", FRONTEND_AUTHORIZATION_TEMPLATE_FOLDER + entity, authenticationTable, root);
 			}
 			else {
-				generateFrontendAuthorizationComponents(appFolderPath + entity, authorizationPath + entity, authenticationTable, root);
+				generateFrontendAuthorizationComponents(appFolderPath + entity, FRONTEND_AUTHORIZATION_TEMPLATE_FOLDER + entity, authenticationTable, root);
 			}
 		}
 
@@ -262,6 +267,15 @@ public class AuthenticationClassesTemplateGenerator {
 
 		new File(backEndRootFolder).mkdirs();
 		codeGeneratorUtils.generateFiles(template, root, backEndRootFolder,BACKEND_TEMPLATE_FOLDER);
+
+	}
+	
+	public void generateSilentRefreshFile(String destination){
+		
+		Map<String, Object> template = new HashMap<>();
+		template.put("silent-refresh.html.ftl", "silent-refresh.html");
+		new File(destination).mkdirs();
+		codeGeneratorUtils.generateFiles(template, null, destination, FRONTEND_AUTHORIZATION_TEMPLATE_FOLDER);
 
 	}
 

@@ -85,7 +85,7 @@
           </div>
         </div>
         <div class="button-div">
-          <button mat-raised-button (click)="search()" color="primary">
+          <button name="search" mat-raised-button (click)="search()" color="primary">
             {{'LIST-FILTERS.SEARCH-BUTTON-TEXT' | translate}}
           </button>
         </div>
