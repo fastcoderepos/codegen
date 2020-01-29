@@ -118,7 +118,7 @@ public class CodeGeneratorUtilsTest {
 		
 
 		File tempFile = File.createTempFile("entities", ".java.ftl", destPath);
-		
+		 
 		Map<String, Object> templateFiles = new HashMap<String, Object>();
 		templateFiles.put(destPath.getAbsolutePath(), tempFile.getAbsolutePath());
 		codeGeneratorUtils.generateFiles(templateFiles,new HashMap<String, Object>(), destPath.getAbsolutePath(), destPath.getAbsolutePath());

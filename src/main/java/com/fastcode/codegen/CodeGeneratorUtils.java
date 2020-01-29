@@ -1,6 +1,8 @@
 package com.fastcode.codegen;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -17,6 +19,7 @@ import com.fastcode.logging.LoggingHelper;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+import freemarker.template.TemplateException;
 
 @Component
 public class CodeGeneratorUtils {
@@ -55,7 +58,7 @@ public class CodeGeneratorUtils {
 			
 			updatedList.add(p);
 		}
-
+ 
 		return updatedList;
 	}
 
@@ -95,8 +98,12 @@ public class CodeGeneratorUtils {
 				writer.flush();
 				writer.close();
 
-			} catch (Exception e) {
-				logHelper.getLogger().error("Error Occured : ", e.getMessage());
+			} catch (IOException e ) {
+				logHelper.getLogger().error("Error occured while generating file");
+				
+			}
+			catch (TemplateException e ) {
+				logHelper.getLogger().error("Template not found " , e.getMessage() );
 				
 			}
 		}

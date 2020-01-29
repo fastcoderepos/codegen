@@ -87,11 +87,11 @@ public class AppStartupRunner implements ApplicationRunner {
 		</#list>
 		
 		for(String entity: entityList) {
-		<#if !UserInput??>
-		if(!environment.getProperty("fastCode.auth.method").equals("database") && (entity.equals("role") || entity.equals("user")))
-        <#elseif UserInput??>
-        if(!environment.getProperty("fastCode.auth.method").equals("database") && (entity.equals("role") || entity.equals("[=AuthenticationTable?lower_case]")))
-        </#if>
+			<#if !UserInput??>
+			if(!environment.getProperty("fastCode.auth.method").equals("database") && (entity.equals("role") || entity.equals("user")))
+        	<#elseif UserInput??>
+        	if(!environment.getProperty("fastCode.auth.method").equals("database") && (entity.equals("role") || entity.equals("[=AuthenticationTable?lower_case]")))
+        	</#if>
         	addEntityPermissions(entity, role.getId(),true);
 			else
 			addEntityPermissions(entity, role.getId(),false);

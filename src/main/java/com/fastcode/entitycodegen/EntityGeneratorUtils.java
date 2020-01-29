@@ -19,18 +19,62 @@ public class EntityGeneratorUtils {
 	public Map<String, String> parseConnectionString(String connectionString) {
 		Map<String, String> connectionStringMap = new HashMap<String, String>();
 
+		if(connectionString.contains("?"))
+		{
 		String[] urlArr = connectionString.split("\\?");
 		connectionStringMap.put("url", urlArr[0]);
+		
+		if(!urlArr[0].isEmpty())
+		{
+			if(urlArr[0].contains(":")) {
+			String[] paramsArr = urlArr[0].split("\\:");
+			if(!paramsArr[1].isEmpty() && checkDriverName(paramsArr[1]) !=null)
+			{
+			connectionStringMap.put("database", paramsArr[1]);
+			connectionStringMap.put("driverName", checkDriverName(paramsArr[1]));
+			}
+			else return null;
+			}
+			else return null;
+		}
+		else return null;
 
 		if(!urlArr[1].isEmpty()) {
+			
+			if(urlArr[1].contains(";"))
+			{
 			String[] paramsArr = urlArr[1].split("\\;");
 			for (String param : paramsArr) {
+				
+				if(param.contains("="))
+				{
 				String[] paramArr = param.split("\\=");
 				connectionStringMap.put(paramArr[0], paramArr[1]);
+				}
+				else return null;
 			}
+			}
+			else return null;
 		}
+		else return null;
+		}
+		else return null;
 
 		return connectionStringMap;
+	}
+	
+	public String checkDriverName(String name)
+	{
+		if(name.equals("postgresql"))
+			return "org.postgresql.Driver";
+		else if(name.equals("mysql")) 
+			return "com.mysql.jdbc.Driver";
+		else if(name.equals("oracle")) 
+			return "oracle.jdbc.driver.OracleDriver";
+		else if(name.equals("h2")) 
+			return "org.h2.Driver";
+		else
+			return null;
 	}
 	
 	public List<String> getPrimaryKeysFromList(List<FieldDetails> fieldsList)

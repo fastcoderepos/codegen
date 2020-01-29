@@ -51,7 +51,7 @@ public class CommandUtils {
         String[] builderCommand = getBuilderCommand(command);
         return runProcess(builderCommand, path, true);
     }
-
+ 
     public String runGitProcess(String args, String path) {
         String command = "git " + args;
         String[] builderCommand = getBuilderCommand(command);

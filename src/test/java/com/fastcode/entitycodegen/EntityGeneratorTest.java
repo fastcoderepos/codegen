@@ -6,6 +6,8 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
+import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -110,7 +112,7 @@ public class EntityGeneratorTest {
 	}
 
 	@Test
-	public void generateEntities_parametersAreValid_returnMap()
+	public void generateEntities_parametersAreValid_returnMap() throws SQLException, IOException
 	{
 		Mockito.doReturn(new HashMap<String, String>()).when(mockedEntityGeneratorUtils).parseConnectionString(anyString());
 		Mockito.doReturn("").when(entityGenerator).buildTablesStringFromList(any(List.class), any(String.class));

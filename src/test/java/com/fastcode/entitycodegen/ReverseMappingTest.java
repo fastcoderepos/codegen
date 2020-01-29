@@ -74,13 +74,15 @@ public class ReverseMappingTest {
 		connectionProps.put("url", "testValue");
 		connectionProps.put("userName", "testValue");
 		connectionProps.put("password", "testValue");
-		connectionProps.put("driver", "org.postgresql.Driver");
+		connectionProps.put("driverName", "org.postgresql.Driver");
 		JDBCConfiguration conf = new JDBCConfigurationImpl();
 
 		conf.setConnectionURL(connectionProps.get("url"));
 		conf.setConnectionUserName(connectionProps.get("username"));
 		conf.setConnectionPassword(connectionProps.get("password"));
 		conf.setConnectionDriverName("org.postgresql.Driver");
+		
+		Assertions.assertThat(reverseMapping.configureJdbc(connectionProps)).isEqualTo(conf);
 	}
 
 }

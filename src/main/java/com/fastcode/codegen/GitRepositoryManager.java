@@ -21,7 +21,7 @@ class GitRepositoryManager {
     private CodeGeneratorUtils codeGeneratorUtils;
     
     @Autowired
-    private CommandUtils comamndUtils;
+    private CommandUtils commandUtils;
     
     @Autowired
 	private LoggingHelper logHelper;
@@ -32,7 +32,7 @@ class GitRepositoryManager {
     
     public boolean isGitInstalled() {
         command = "--version";
-        String result = comamndUtils.runGitProcess(command , destinationPath);
+        String result = commandUtils.runGitProcess(command , destinationPath);
         String regex = ".*?((?<!\\w)\\d+([.-]\\d+)*).*";
         result = result.replaceAll(regex, "$1");
         if(result == "") {
@@ -46,27 +46,27 @@ class GitRepositoryManager {
 
     public Boolean isGitInitialized() {
         command = "rev-parse -q --is-inside-work-tree";
-        String commandResult = comamndUtils.runGitProcess(command, destinationPath);
+        String commandResult = commandUtils.runGitProcess(command, destinationPath);
         return commandResult.trim().equalsIgnoreCase("true");
     }
 
     public void initializeGit() {
         // Initialize directory as git repository
         command = "init";
-        comamndUtils.runGitProcess(command, destinationPath);
-
+        commandUtils.runGitProcess(command, destinationPath);
+ 
         // Set required configuration
         command = "config --global user.name \"fastCode\"";
-        comamndUtils.runGitProcess(command, destinationPath);
+        commandUtils.runGitProcess(command, destinationPath);
 
         command = "config --global user.email \"info@nfinityllc.com\"";
-        comamndUtils.runGitProcess(command, destinationPath);
+        commandUtils.runGitProcess(command, destinationPath);
     }
 
     public boolean hasUncommittedChanges() {
         //get git status
         command = "status --porcelain";
-        String cmdOutput = comamndUtils.runGitProcess(command, destinationPath);
+        String cmdOutput = commandUtils.runGitProcess(command, destinationPath);
         //Unable to check for local changes:
         //local changes found. Please commit/stash them before upgrading
        
@@ -75,17 +75,17 @@ class GitRepositoryManager {
 
     public String getCurrentBranch() {
         command = "rev-parse -q --abbrev-ref HEAD";
-        String cmdOutput = comamndUtils.runGitProcess(command, destinationPath);
+        String cmdOutput = commandUtils.runGitProcess(command, destinationPath);
         //Unable to detect current Git branch
         return cmdOutput;
     }
 
     public Boolean createUpgradeBranch() {
         command = "rev-parse -q --verify " + UPGRADE_BRANCH;
-        String commandResult = comamndUtils.runGitProcess(command, destinationPath);
+        String commandResult = commandUtils.runGitProcess(command, destinationPath);
         if(commandResult.isEmpty()) {
             command = "checkout --orphan " + UPGRADE_BRANCH;
-            comamndUtils.runGitProcess(command, destinationPath);
+            commandUtils.runGitProcess(command, destinationPath);
             //Unable to create ${UPGRADE_BRANCH} branch:
             //Created branch ${UPGRADE_BRANCH}
         }
@@ -99,7 +99,7 @@ class GitRepositoryManager {
         else {
             commitUpgradeBranch();
             command = "checkout -q " + sourceBranch;
-            comamndUtils.runGitProcess(command, destinationPath);
+            commandUtils.runGitProcess(command, destinationPath);
             //Merging changes back to source branch...
             if(versionCompare(getGitVersion(),  GIT_VERSION_NOT_ALLOW_MERGE_UNRELATED_HISTORIES) == -1) {
                 command = "merge --strategy=ours -q --no-edit " + UPGRADE_BRANCH;
@@ -107,14 +107,14 @@ class GitRepositoryManager {
             else {
                 command = "merge --allow-unrelated-histories " + UPGRADE_BRANCH;
             }
-            comamndUtils.runGitProcess(command, destinationPath);
+            commandUtils.runGitProcess(command, destinationPath);
             //Check conflicts in package.json
             command = "diff --name-only --diff-filter=U package.json";
-            comamndUtils.runGitProcess(command, destinationPath);
+            commandUtils.runGitProcess(command, destinationPath);
             //There are conflicts in package.json, please fix them and then run npm install command ('npm install')
             //Check conflicts during merge
             command = "diff --name-only --diff-filter=U";
-            comamndUtils.runGitProcess(command, destinationPath);
+            commandUtils.runGitProcess(command, destinationPath);
             //Please fix conflicts listed below and commit!
         }
     }
@@ -122,12 +122,12 @@ class GitRepositoryManager {
     public void commitInitialApplication() {
         if(isGitInstalled() && isGitInitialized()) {
             command = "add -A";
-            comamndUtils.runGitProcess(command, destinationPath);
+            commandUtils.runGitProcess(command, destinationPath);
 
             //TODO: Add version dynamically
             String commitMsg = "Initial application generated by fastCode-1.0";
             command = "commit -m \"" + commitMsg + "\"";
-            comamndUtils.runGitProcess(command, destinationPath);
+            commandUtils.runGitProcess(command, destinationPath);
             System.out.print("Application successfully committed to Git.");
         }
         else {
@@ -137,20 +137,20 @@ class GitRepositoryManager {
 
     public void commitUpgradeBranch() {
         command = "add -A";
-        comamndUtils.runGitProcess(command, destinationPath);
+        commandUtils.runGitProcess(command, destinationPath);
         //Unable to add resources in git:
 
         //TODO: Add version dynamically
         String commitMsg = "Generated with fastCode-1.0";
         command = "commit -q -m \"" + commitMsg + "\" -a --allow-empty --no-verify";
-        comamndUtils.runGitProcess(command, destinationPath);
+        commandUtils.runGitProcess(command, destinationPath);
         System.out.print("Application successfully committed to Git.");
     }
 
     public String getGitVersion() {
         //String(msg.match(/([0-9]+\.[0-9]+\.[0-9]+)/g))
         command = "--version";
-        String cmdOutput = comamndUtils.runGitProcess(command, destinationPath);
+        String cmdOutput = commandUtils.runGitProcess(command, destinationPath);
         cmdOutput = cmdOutput.replaceAll(".*?((?<!\\w)\\d+([.-]\\d+)*).*", "$1");
         return cmdOutput;
     }

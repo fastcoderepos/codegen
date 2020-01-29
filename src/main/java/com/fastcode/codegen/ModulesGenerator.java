@@ -2,6 +2,7 @@ package com.fastcode.codegen;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,12 +45,22 @@ public class ModulesGenerator {
 	@Autowired
 	private LoggingHelper logHelper;
 	
+	@Autowired
+	private CodegenDependenciesIdentifier dependenciesIdentifier;
+	
 	public void generateCode(UserInput input) { 
 	
 		File dir = new File(input.getDestinationPath());
 		if(!dir.exists()) {
 			dir.mkdirs();
 		};
+
+		dependenciesIdentifier.setDestinationPath(input.getDestinationPath());
+		
+		if(!dependenciesIdentifier.checkDependencies())
+		{
+			System.exit(1);
+		}
 
 		gitRepositoryManager.setDestinationPath(input.getDestinationPath());
 		String sourceBranch = "";
@@ -62,19 +73,19 @@ public class ModulesGenerator {
 		}
 		else {
 			logHelper.getLogger().error("Git repository could not be initialized, as Git is not installed on your system.");
-			return;
+			System.exit(1);
 		}
 		
 		if(input.getUpgrade()) {
 			if(gitRepositoryManager.hasUncommittedChanges()) {
 				logHelper.getLogger().info("\nGit has uncommitted changes. ");
-				return;
+				System.exit(1);
 			}
 			else {
 				sourceBranch = gitRepositoryManager.getCurrentBranch();
 				if(!gitRepositoryManager.createUpgradeBranch()) {
 					logHelper.getLogger().error("Unable to create upgrade branch.");
-					return;
+					System.exit(1);
 				}
 			}
 		}
@@ -102,14 +113,15 @@ public class ModulesGenerator {
 
 		baseAppGen.CreateBaseApplication(input.getDestinationPath(), artifactId, groupId, dependencies,
 				true, "-n=" + artifactId + "  -j=1.8 ");
-		
+		try { 
 		Map<String, EntityDetails> details = entityGenerator.generateEntities(input.getConnectionStr(),
 				input.getSchemaName(), null, groupArtifactId, input.getDestinationPath() + "/" + artifactId,input.getAuthenticationMap());
+
 
 		pomFileModifier.updatePomFile(input.getDestinationPath() + "/" + artifactId + "/pom.xml",input.getAuthenticationMap().get(AuthenticationConstants.AUTHENTICATION_TYPE),input.getCache());
 		commonModule.generateCommonModuleClasses(input.getDestinationPath()+ "/" + artifactId, groupArtifactId);
 		baseAppGen.CompileApplication(input.getDestinationPath() + "/" + artifactId);
-
+ 
 		frontendGenerator.generate(input.getDestinationPath(), artifactId, input.getAuthenticationMap().get(AuthenticationConstants.AUTHENTICATION_TYPE),input.getAuthenticationMap().get(AuthenticationConstants.AUTHENTICATION_SCHEMA));
 
 		if(!input.getAuthenticationMap().get(AuthenticationConstants.AUTHENTICATION_TYPE).equals("none"))
@@ -124,8 +136,16 @@ public class ModulesGenerator {
 		gitRepositoryManager.addToGitRepository(input.getUpgrade(), sourceBranch);
 
 		logHelper.getLogger().info("\n Code generation Completed ...");
+		System.exit(0);
+		}
 		
-		System.exit(1);
+		catch (IllegalStateException | IOException | SQLException e) {
+			logHelper.getLogger().error(" Exception Occured " , e.getMessage());
+			logHelper.getLogger().error("\n Code generation terminated ...");
+			System.exit(1);
+		} 
+		
+		
 
 	}
 

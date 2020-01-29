@@ -115,7 +115,6 @@ public class CodeGenerator {
 		//to generate all modules for list of entities
 		List<String> entityNames = generateAllModulesForEntities(details, backEndRootFolder, clientRootFolder, sourcePackageName, cache, destPath,schema, authenticationInputMap);
 
-
 		contentReader.copyFileFromJar("keystore.p12", destPath + "/" + backEndRootFolder + "/src/main/resources/keystore.p12");
 
 		//update front end modules

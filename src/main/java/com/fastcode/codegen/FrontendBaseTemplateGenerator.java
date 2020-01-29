@@ -115,7 +115,7 @@ public class FrontendBaseTemplateGenerator {
 		}
 
 	}
-
+ 
 	public JSONObject getFastCodeCoreProjectNode() throws ParseException {
 		JSONParser parser = new JSONParser();
 		JSONObject fccore = (JSONObject) parser.parse("{\r\n" + 

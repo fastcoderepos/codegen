@@ -54,8 +54,38 @@ public class EntityGeneratorUtilsTest {
 		connectionStringMap.put("url", "jdbc:postgresql://localhost:5432/Demo");
 		connectionStringMap.put("username", "postgres");
 		connectionStringMap.put("password", "fastcode");
+		connectionStringMap.put("database", "postgresql");
+		connectionStringMap.put("driverName", "org.postgresql.Driver");
 		
 		Assertions.assertThat(entityGeneratorUtils.parseConnectionString(conn)).isEqualTo(connectionStringMap);
+	}
+	
+	@Test
+	public void parseConnectionString_connectionStringContainsInvalidDatabase_returnNull()
+	{
+		String conn = "jdbc:post://localhost:5432/Demo?username=postgres;password=fastcode";
+//		Map<String, String> connectionStringMap = new HashMap<String, String>();
+//		connectionStringMap.put("url", "jdbc:postgresql://localhost:5432/Demo");
+//		connectionStringMap.put("username", "postgres");
+//		connectionStringMap.put("password", "fastcode");
+//		connectionStringMap.put("database", "postgresql");
+//		connectionStringMap.put("driverName", "org.postgresql.Driver");
+		
+		Assertions.assertThat(entityGeneratorUtils.parseConnectionString(conn)).isEqualTo(null);
+	}
+	
+	@Test
+	public void parseConnectionString_connectionStringIsInvalid_returnNull()
+	{
+		String conn = "jdbc:postgresql://localhost:5432/Demo?usernamepostgres;password=fastcode";
+//		Map<String, String> connectionStringMap = new HashMap<String, String>();
+//		connectionStringMap.put("url", "jdbc:postgresql://localhost:5432/Demo");
+//		connectionStringMap.put("username", "postgres");
+//		connectionStringMap.put("password", "fastcode");
+//		connectionStringMap.put("database", "postgresql");
+//		connectionStringMap.put("driverName", "org.postgresql.Driver");
+		
+		Assertions.assertThat(entityGeneratorUtils.parseConnectionString(conn)).isEqualTo(null);
 	}
 	
 	@Test

@@ -64,10 +64,10 @@ public class FolderContentReader {
 
 		}
 		catch (IOException e) {
-			logHelper.getLogger().error("IOException Occured : ", e.getMessage());
+			logHelper.getLogger().error("IO Exception Occured while reading files", e.getMessage());
 		}
 		catch (URISyntaxException e) {
-			logHelper.getLogger().error("URISyntaxException Occured : ", e.getMessage());
+			logHelper.getLogger().error("URI syntax is not valid", e.getMessage());
 		}
 		return null;
 	}
@@ -82,24 +82,6 @@ public class FolderContentReader {
 		return files;
 	}
 
-	public String readTextFromJarFile(String path)
-	{
-		InputStream in = FolderContentReader.class.getClassLoader().getResourceAsStream("classpath:/"+path); 
-		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-		StringBuilder sourceBuilder=new StringBuilder();
-		String line;
-		try {
-			while((line=reader.readLine() )!=null)
-			{
-				sourceBuilder.append(line);
-			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		return sourceBuilder.toString();
-	}
 
 	public void copyFileFromJar(String fileName , String destinationPath)
 	{
@@ -107,8 +89,6 @@ public class FolderContentReader {
 			URI uri;
 
 			uri = FolderContentReader.class.getResource("/" + fileName).toURI();
-			System.out.println(" filenae " + uri);
-			System.out.println(" filenae " + uri.getPath() );
 			if (uri.getScheme().equals("jar")) {
 				InputStream inputStream = FolderContentReader.class.getClassLoader().getResourceAsStream("classpath:/"+ fileName); 
 				if(inputStream != null)
@@ -116,12 +96,11 @@ public class FolderContentReader {
 					Files.copy(inputStream,Paths.get(destinationPath), StandardCopyOption.REPLACE_EXISTING);
 				}
 			}
-			else
+			else 
 			{
 				Files.copy(Paths.get(uri), Paths.get(destinationPath), StandardCopyOption.REPLACE_EXISTING);
 
 			}
-
 
 		} catch (IOException e) {
 
@@ -133,81 +112,50 @@ public class FolderContentReader {
 		}
 	}
 
-	public void copyDirectoryFromJar(String folder, String destinationPath)
-	{
-		try {
-			URI uri;
-			uri = FolderContentReader.class.getResource("/" +folder).toURI();
-			Path myPath;
-			if (uri.getScheme().equals("jar")) {
-				FileSystem fileSystem;
-
-				fileSystem = FileSystems.newFileSystem(uri, Collections.<String, Object>emptyMap());
-
-				System.out.println(" HEre " + uri.getPath() );
-				myPath = fileSystem.getPath("/resources"+folder);
-				fileSystem.close();
-			} else {
-				System.out.println(" HEre " + uri.getPath() );
-				myPath = Paths.get(uri);
-
-			}
-			Stream<Path> walk;
-
-			walk = Files.walk(myPath, 1);
-
-			for (Iterator<Path> it = walk.iterator(); it.hasNext();) {
-				Path p= it.next();
-				System.out.println(p + " \nfile name " + p.getFileName());
-				if(p.toFile().isFile())
-				{
-					copyFileFromJar(folder.concat("/" +p.getFileName().toString()),destinationPath);
-				}
-
-			}
-
-			walk.close();
-		} catch (URISyntaxException e1 ) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-
-	}
-
-	//	public void copyFromJar(String source, final Path target) throws URISyntaxException, IOException {
-	//		URI resource = this.getClass().getResource("/"+ source).toURI();
-	//		System.out.println(" path " + resource.getPath());
-	//		FileSystem fileSystem = FileSystems.newFileSystem(
-	//				resource,
-	//				Collections.<String, String>emptyMap()
-	//				);
-	//		System.out.println(" HEre " );
-	//
-	//		final Path jarPath = fileSystem.getPath(resource.getPath());
-	//
-	//		Files.walkFileTree(jarPath, new SimpleFileVisitor<Path>() {
-	//
-	//			private Path currentTarget;
-	//
-	//			@Override
-	//			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-	//				currentTarget = target.resolve(jarPath.relativize(dir).toString());
-	//				Files.createDirectories(currentTarget);
-	//				return FileVisitResult.CONTINUE;
-	//			}
-	//
-	//			@Override
-	//			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-	//				Files.copy(file, target.resolve(jarPath.relativize(file).toString()), StandardCopyOption.REPLACE_EXISTING);
-	//				return FileVisitResult.CONTINUE;
-	//			}
-	//
-	//		});
-	//	}
+//	public void copyDirectoryFromJar(String folder, String destinationPath)
+//	{
+//		try {
+//			URI uri;
+//			uri = FolderContentReader.class.getResource("/" +folder).toURI();
+//			Path myPath;
+//			if (uri.getScheme().equals("jar")) {
+//				FileSystem fileSystem;
+//
+//				fileSystem = FileSystems.newFileSystem(uri, Collections.<String, Object>emptyMap());
+//
+//				System.out.println(" HEre " + uri.getPath() );
+//				myPath = fileSystem.getPath("/resources"+folder);
+//				fileSystem.close();
+//			} else {
+//				System.out.println(" HEre " + uri.getPath() );
+//				myPath = Paths.get(uri);
+//
+//			}
+//			Stream<Path> walk;
+//
+//			walk = Files.walk(myPath, 1);
+//
+//			for (Iterator<Path> it = walk.iterator(); it.hasNext();) {
+//				Path p= it.next();
+//				System.out.println(p + " \nfile name " + p.getFileName());
+//				if(p.toFile().isFile())
+//				{
+//					copyFileFromJar(folder.concat("/" +p.getFileName().toString()),destinationPath);
+//				}
+//
+//			}
+//
+//			walk.close();
+//		} catch (URISyntaxException e1 ) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//
+//
+//	}
 
 	public List<String> getFilesFromJar(String path) throws IOException{
 		CodeSource src = this.getClass().getProtectionDomain().getCodeSource();

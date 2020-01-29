@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
+import org.apache.openjpa.lib.util.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +19,9 @@ public class UserInput {
 	@Autowired
 	EntityDetails entityDetails;
 	
+	@Autowired
+	EntityGeneratorUtils entityGeneratorUtils;
+	
 	String packageName;
 	String groupArtifactId;
 	String destinationPath;
@@ -25,8 +29,6 @@ public class UserInput {
 	String connectionStr;
 	List<String> tablesList;
 	Boolean cache=false;
-	String authenticationType=null;
-	String authenticationSchema=null;
 	Boolean doUpgrade=false;
 	Boolean usersOnly = false;
 	String logonName;
@@ -56,12 +58,6 @@ public class UserInput {
 	}
 	public void setCache(Boolean cache) {
 		this.cache = cache;
-	}
-	public String getAuthenticationSchema() {
-		return authenticationSchema;
-	}
-	public void setAuthenticationSchema(String authenticationSchema) {
-		this.authenticationSchema = authenticationSchema;
 	}
 	public String getGroupArtifactId() {
 		return groupArtifactId;
@@ -100,18 +96,12 @@ public class UserInput {
 	public void setTablesList(List<String> tablesList) {
 		this.tablesList = tablesList;
 	}
-	public String getAuthenticationType() {
-		return authenticationType;
-	}
-	public void setAuthenticationType(String authenticationType) {
-		this.authenticationType = authenticationType;
-	}
 	public Boolean getUpgrade() { return doUpgrade; }
 	public void setUpgrade(Boolean doUpgrade) { this.doUpgrade = doUpgrade; }
 	
 	public String getInput(Scanner inputReader, String inputType) {
 
-		System.out.print("Please enter value for " + inputType + ":");
+		System.out.print("\nPlease enter value for " + inputType + ":");
 		String value = inputReader.nextLine();
 		return value;
 	}
@@ -161,17 +151,39 @@ public class UserInput {
 	public UserInput composeInput(Map<String, String> root) {
 		UserInput input = new UserInput();
 		Scanner scanner = new Scanner(System.in);
-		//System.out.println(" v " + root.get("c") + "\n ss " + root.get("s"));
+
 		// jdbc:postgresql://localhost:5432/FCV2Db?username=postgres;password=fastcode
 		// jdbc:postgresql://localhost:5432/Demo?username=postgres;password=fastcode
-		// /Users/getachew/fc/exer/root
+
 		input.setUpgrade(root.get("upgrade") == null
 				? false: (root.get("upgrade").toLowerCase().equals("true") ? true : false));
-		input.setConnectionStr(root.get("conn") != null ? root.get("conn")
-				: (getInput(scanner, "DB Connection String")));
-		//input.setConnectionStr("jdbc:postgresql://localhost:5432/Demo?username=postgres;password=fastcode");
-		
+		input.setConnectionStr(root.get("conn") != null ? root.get("conn") : null);
+		if(input.getConnectionStr() == null)
+		{
+		System.out.print("\nDo you want to use sample schema for code generation ? (y/n) ");
+		String sampleSchemaOption = scanner.nextLine();
+
+		if(sampleSchemaOption.equalsIgnoreCase("y") || sampleSchemaOption.equalsIgnoreCase("yes"))
+		{
+		input.setConnectionStr("jdbc:h2:mem:testdb?username=sa;password=sa");
+		input.setSchemaName("sample");
+		}
+		else
+		{
+		input.setConnectionStr(getInput(scanner, "DB Connection String"));
 		input.setSchemaName(root.get("s") == null ? getInput(scanner, "Db schema") : root.get("s"));
+		
+		}
+		}
+		else
+		input.setSchemaName(root.get("s") == null ? getInput(scanner, "Db schema") : root.get("s"));
+		
+		while(entityGeneratorUtils.parseConnectionString(input.getConnectionStr())==null)
+		{
+			System.out.println("Invalid Connection String");
+			input.setConnectionStr(getInput(scanner, "Connection String"));
+		}
+	
 		input.setDestinationPath(
 				root.get("d") == null ? getInput(scanner, "destination folder") : root.get("d"));
 		input.setGroupArtifactId(
@@ -207,25 +219,15 @@ public class UserInput {
 			value = scanner.nextInt();
 		}
 		if (value == 1) {
-			//input.setAuthenticationType("none");
-			authenticationMap.put("authenticationType", "none");
+			authMap.put(AuthenticationConstants.AUTHENTICATION_TYPE, "none");
 		} 
 		else if (value>1) {
 			scanner.nextLine();
 			authMap.put(AuthenticationConstants.AUTHENTICATION_TYPE, value == 2 ? "database" : value==3 ? "ldap" : "oidc");
-//			if (value == 2) {
-//				//input.setAuthenticationType("database");
-//			}
-//			else if (value == 3) {
-//				//input.setAuthenticationType("ldap");
-//			}
-//			else if (value == 4) {
-//				//input.setAuthenticationType("oidc");
-//			}
-			
+
 			if (value == 3 || value == 4) {
 				
-				System.out.print("\nWhich one of the following do you store in LDAP for your application?");
+				System.out.print("\nWhich one of the following do you store in " + authMap.get(AuthenticationConstants.AUTHENTICATION_TYPE) + " for your application?");
 				System.out.print("\n1. User Information");
 				System.out.print("\n2. User and Group Information");
 				System.out.print("\nEnter 1 or 2 : ");
@@ -242,7 +244,6 @@ public class UserInput {
 					System.out.print("\nWhat is the User Logon Name you are using? ");
 					String logonName = scanner.nextLine();
 					authMap.put(AuthenticationConstants.LOGON_NAME, logonName);
-				//	input.setLogonName(logonName);
 				}
 			}
 	
@@ -253,13 +254,9 @@ public class UserInput {
 				System.out.print("\nEnter table name :");
 				str= scanner.nextLine();
 				str = str.contains("_") ? CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, str) : str;
-//				if(str.contains("_"))
-//				{
-//					str=CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, str);
-//				}
 				authMap.put(AuthenticationConstants.AUTHENTICATION_SCHEMA, str.substring(0, 1).toUpperCase() + str.substring(1));
-//				input.setAuthenticationSchema(str.substring(0, 1).toUpperCase() + str.substring(1));
 			}
+			
 		}
 		input.setAuthenticationMap(authMap);
 		return input;

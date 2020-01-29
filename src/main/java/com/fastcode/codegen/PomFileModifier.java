@@ -44,7 +44,7 @@ public class PomFileModifier {
 		Dependency springFoxSwaggerUI = new Dependency("io.springfox","springfox-swagger-ui","2.7.0");
 		Dependency springFoxDataRest = new Dependency("io.springfox","springfox-data-rest","2.8.0");
 	    Dependency httpComponents = new Dependency("org.apache.httpcomponents","httpclient","4.5");
-
+ 
 	    Dependency gson = new Dependency("com.google.code.gson","gson","2.8.5");
 	    
 	    if(cache)
@@ -78,7 +78,6 @@ public class PomFileModifier {
 		dependencies.add(gson);
 		
 		addDependenciesAndPluginsToPom(path,dependencies);
-
 	}
 	
 	public void addDependenciesAndPluginsToPom(String path, List<Dependency> dependencies) {

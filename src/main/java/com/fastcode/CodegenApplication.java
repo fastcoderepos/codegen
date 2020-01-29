@@ -3,11 +3,9 @@ package com.fastcode;
 import com.fastcode.codegen.ModulesGenerator;
 import com.fastcode.entitycodegen.UserInput;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.io.FileUtils;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
@@ -24,8 +22,8 @@ public class CodegenApplication implements ApplicationRunner {
 		
 		UserInput userInput = context.getBean(UserInput.class);
 		ModulesGenerator generator = context.getBean(ModulesGenerator.class);
-		generator.generateCode(userInput.composeInput(root));
-	}
+		generator.generateCode(userInput.composeInput(root)); 
+	} 
 
 	@Override 
 	public void run(ApplicationArguments args) throws Exception {
@@ -42,6 +40,8 @@ public class CodegenApplication implements ApplicationRunner {
 			System.out.println(optionName + "=" + args.getOptionValues(optionName));
 		});
 	}
+
+
 
 
 }
