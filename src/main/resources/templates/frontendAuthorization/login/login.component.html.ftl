@@ -31,7 +31,7 @@
           Wrong username or password.
         </mat-error>
         <mat-card-actions class="item-action text-center">
-          <button mat-flat-button color="primary" class="btn-submit">
+          <button name="login" mat-flat-button color="primary" class="btn-submit">
             Login &nbsp; <i class="material-icons" style="color:#fff; bottom:0;">
             near_me
             </i>

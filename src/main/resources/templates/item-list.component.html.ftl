@@ -15,15 +15,15 @@
         </ul>
       </div>
       <div class="fb-col-md-4 fb-text-right">
-        <button mat-raised-button color="primary" <#if AuthenticationType!="none"> [disabled]="!IsCreatePermission"</#if> (click)="addNew()"><i
+        <button name="add" mat-raised-button color="primary" <#if AuthenticationType!="none"> [disabled]="!IsCreatePermission"</#if> (click)="addNew()"><i
             class="material-icons">
             add_circle_outline
           </i> &nbsp;{{'GENERAL.ACTIONS.ADD' | translate}}</button>
       </div>
     </div>
   </div>
-	<app-list-filters [columnsList]="selectedColumns" (onSearch)="applyFilter($event)"></app-list-filters>
-	<mat-card>
+  <mat-card>
+	  <app-list-filters [columnsList]="selectedColumns" (onSearch)="applyFilter($event)"></app-list-filters>
   	<div class="table-container">
   		<mat-table matSort [dataSource]="items" class="mat-elevation-z8">
   			<#list Fields as key,value>
@@ -93,11 +93,11 @@
   			<ng-container matColumnDef="actions">
   				<mat-header-cell *matHeaderCellDef> {{getFieldLabel("Actions")}}</mat-header-cell>
   				<mat-cell *matCellDef="let item" (click)="$event.stopPropagation()">
-            <button mat-icon-button aria-label="Example icon-button with a heart icon text-dangger"
-              matTooltip="('GENERAL.ACTIONS.EDIT' | translate)" (click)="openDetails(item)">
+            <button name="edit" mat-icon-button aria-label="Example icon-button with a heart icon text-dangger"
+              matTooltip="('GENERAL.ACTIONS.OPEN-DETAILS' | translate)" (click)="openDetails(item)">
               <mat-icon>open_in_new</mat-icon>
             </button>
-            <button mat-icon-button color="warn" aria-label="Example icon-button with a heart icon text-dangger" matTooltip="('GENERAL.ACTIONS.DELETE' | translate)"  <#if AuthenticationType!="none"> [disabled]="!IsDeletePermission"</#if>
+            <button name="delete" mat-icon-button color="warn" aria-label="Example icon-button with a heart icon text-dangger" matTooltip="('GENERAL.ACTIONS.DELETE' | translate)"  <#if AuthenticationType!="none"> [disabled]="!IsDeletePermission"</#if>
               (click)="delete(item)">
               <mat-icon color="warn">delete</mat-icon>
             </button>

@@ -2,7 +2,7 @@
   <mat-card>
     <mat-card-header>
       <mat-card-title>{{title}}</mat-card-title>
-      <a href="javascript:void(0)" (click)="onCancel()" class="cancle-btn"><i
+      <a name="cancel" href="javascript:void(0)" (click)="onCancel()" class="cancle-btn"><i
           class="material-icons">add_circle</i></a>
     </mat-card-header>
     <mat-card-content>
@@ -20,7 +20,7 @@
       </form>
     </mat-card-content>
     <mat-card-actions class="fb-text-right">
-      <button mat-raised-button color="primary" (click)="itemNgForm.ngSubmit.emit()"
+      <button name="save" mat-raised-button color="primary" (click)="itemNgForm.ngSubmit.emit()"
         [disabled]="!itemForm.valid || loading || !IsCreatePermission">{{'GENERAL.ACTIONS.SAVE' | translate}}</button>
     </mat-card-actions>
   </mat-card>

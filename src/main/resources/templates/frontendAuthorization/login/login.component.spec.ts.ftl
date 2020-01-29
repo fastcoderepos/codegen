@@ -1,41 +1,40 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
-import {  LoginComponent } from './login.component';
-import { TestingModule,EntryComponents } from '../../testing/utils';
-import { AuthenticationService} from '../core/authentication.service';
-import {ILogin} from './ilogin'
+import { By } from "@angular/platform-browser";
 import { MatDialogRef } from '@angular/material';
-import { HttpTestingController } from '@angular/common/http/testing';
-import { environment } from '../../environments/environment';
-import { Validators, FormBuilder } from '@angular/forms';
+import { of, Observable } from 'rxjs';
+import { Router, ActivatedRoute } from '@angular/router';
+
+import { LoginComponent } from './login.component';
+import { TestingModule, EntryComponents } from '../../testing/utils';
+import { ILogin } from './ilogin'
+import { DebugElement } from '@angular/core';
 
 
 describe('LoginComponent', () => {
   let component: LoginComponent;
   let fixture: ComponentFixture<LoginComponent>;
-  let data:ILogin = {userName:'userName1',password: 'password1'};
-  let httpTestingController: HttpTestingController;
-  let url:string = environment.apiUrl + '/login'; //'http://localhost:5555/login'; //
-  let formBuilder:any = new FormBuilder(); 
+  let data: ILogin = {
+    userName: 'userName1',
+    password: 'password1'
+  };
+  let el: DebugElement;
+
   beforeEach(async(() => {
-  
+
     TestBed.configureTestingModule({
       declarations: [
-        LoginComponent       
+        LoginComponent
       ].concat(EntryComponents),
       imports: [TestingModule],
       providers: [
-      AuthenticationService,  
-       
-       {provide: MatDialogRef, useValue: {close: (dialogResult: any) => { }} },
-      ]      
-   
+        { provide: MatDialogRef, useValue: { close: (dialogResult: any) => { } } },
+      ]
+
     }).compileComponents();
   }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(LoginComponent);
-    httpTestingController = TestBed.get(HttpTestingController);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
@@ -43,36 +42,114 @@ describe('LoginComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
-  it('should run #ngOnInit()', async () => {
-       
-    httpTestingController = TestBed.get(HttpTestingController);
-    fixture.detectChanges();
-   
-    //const req = httpTestingController.expectOne(req => req.method === 'GET' && req.url === url ).flush(data);   
-   
-    expect(component.iLogin).toBeTruthy();
-    httpTestingController.verify(); 
-  });
-  it('should run #onSubmit()', async () => {
-   
-    //component.permissionForm=formBuilder.group(data);    && req.url === baseUrl + '/permissions/'+ data.id
 
-    //const req = httpTestingController.expectOne(req => req.method === 'GET'  && req.url === url + '?returnUrl=dashboard').flush(data);
-    //fixture.detectChanges();
-    ///if(component.per)
-   // httpTestingController = TestBed.get(HttpTestingController);
-    //fixture.detectChanges();
-    component.itemForm=formBuilder.group(data);  
-    console.log("on submit:" + url);
-    
-    const result = component.onSubmit(); 
+  it('should navigate to returnUrl if a valid token exists', async () => {
+    const router = TestBed.get(Router);
+    const aroutes = TestBed.get(ActivatedRoute);
+
+    aroutes.snapshot.queryParams['returnUrl'] = 'sampleReturn';
     fixture.detectChanges();
-    /*const req2 = httpTestingController.expectOne(req => {
-      console.log("url: ", req.url); 
-      return true  }); *///.flush(data); 
-      const req2 =  httpTestingController.expectOne(req => req.method === 'POST' && req.url === url ).flush(data);
-    httpTestingController.verify();
- 
+    spyOn(component.authenticationService , 'isTokenExpired').and.returnValue(false);
+    let navigationSpy = spyOn(router, 'navigate').and.returnValue(null);
+
+    component.ngOnInit();
+
+    let responsePromise = navigationSpy.calls.mostRecent().returnValue;
+    await responsePromise;
+      
+    expect(router.navigate).toHaveBeenCalledWith(['sampleReturn']);
+
   });
-  
+
+  it('should navigate dashboard if no redirect url is provided and a valid token exists', async () => {
+    const router = TestBed.get(Router);
+    spyOn(component.authenticationService , 'isTokenExpired').and.returnValue(false);
+    let navigationSpy = spyOn(router, 'navigate').and.returnValue(null);
+
+    component.ngOnInit();
+
+    let responsePromise = navigationSpy.calls.mostRecent().returnValue;
+    await responsePromise;
+      
+    expect(router.navigate).toHaveBeenCalledWith(['dashboard']);
+
+  });
+
+  it('should call logout initialize form if token is invalid', async () => {
+    spyOn(component.authenticationService , 'decodeToken').and.returnValue({sub: "sub1"});
+    spyOn(component.authenticationService , 'isTokenExpired').and.returnValue(true);
+    spyOn(component.authenticationService , 'logout').and.returnValue();
+    
+    component.ngOnInit();
+    
+    expect(component.authenticationService.logout).toHaveBeenCalled();
+    expect(component.itemForm).toBeDefined();
+
+  });
+
+  it('initialize form if token is present', async () => {
+    spyOn(component.authenticationService , 'decodeToken').and.returnValue(null);
+    component.ngOnInit();
+    expect(component.itemForm).toBeDefined();
+
+  });
+
+  it('should run #onSubmit()', async () => {
+
+    component.itemForm.patchValue(data);
+    component.itemForm.enable();
+    fixture.detectChanges();
+    spyOn(component.authenticationService, "postLogin").withArgs(data).and.returnValue(of({}));
+    el = fixture.debugElement.query(By.css('button[name=login]'));
+    el.nativeElement.click();
+    expect(component.authenticationService.postLogin).toHaveBeenCalledWith(data);
+
+  });
+
+  it('should navigate to returnUrl in case of successful authentication', async () => {
+    const router = TestBed.get(Router);
+
+    component.returnUrl = 'sampleReturn';
+    fixture.detectChanges();
+    let navigationSpy = spyOn(router, 'navigate').and.returnValue(null);
+
+    component.itemForm.patchValue(data);
+    component.itemForm.enable();
+    fixture.detectChanges();
+    spyOn(component.authenticationService, "postLogin").withArgs(data).and.returnValue(of({}));
+    el = fixture.debugElement.query(By.css('button[name=login]'));
+    el.nativeElement.click();
+
+    let responsePromise = navigationSpy.calls.mostRecent().returnValue;
+    await responsePromise;
+      
+    expect(router.navigate).toHaveBeenCalledWith(['sampleReturn']);
+
+  });
+
+  it('should have set passwordUserNameError in form in case of error in authentication', async () => {
+
+    component.itemForm.patchValue(data);
+    component.itemForm.enable();
+    fixture.detectChanges();
+    spyOn(component.authenticationService, "postLogin").withArgs(data).and.returnValue(Observable.create(observer => {
+        observer.error(new Error("invalid username or password"))
+      })
+    );
+
+    el = fixture.debugElement.query(By.css('button[name=login]'));
+    el.nativeElement.click();
+    expect(component.itemForm.getError('passwordUserNameError')).toBeDefined();
+
+  });
+
+  // it('login button should be disable when form is not valid', async () => {
+
+  //   fixture.detectChanges();
+  //   spyOn(component.authenticationService, "postLogin").withArgs(data).and.returnValue(of({}));
+  //   el = fixture.debugElement.query(By.css('button[name=login]'));
+  //   expect(el.nativeElement.disabled).toBe(true);
+
+  // });
+
 });

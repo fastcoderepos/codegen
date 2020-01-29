@@ -3,10 +3,10 @@ import { UserService } from './user.service';
 import { IUser } from './iuser';
 
 import { ActivatedRoute, Router } from "@angular/router";
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { first } from 'rxjs/operators';
+import { FormBuilder, Validators } from '@angular/forms';
 import { Globals, BaseNewComponent, PickerDialogService, ErrorService } from 'projects/fast-code-core/src/public_api';
 import { MatDialogRef, MatDialog, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { GlobalPermissionService } from '../core/global-permission.service';
 
 
 @Component({
@@ -28,6 +28,7 @@ export class UserNewComponent extends BaseNewComponent<IUser> implements OnInit 
     public pickerDialogService: PickerDialogService,
     public dataService: UserService,
     public errorService: ErrorService,
+    public globalPermissionService: GlobalPermissionService
   ) {
     super(formBuilder, router, route, dialog, dialogRef, data, global, pickerDialogService, dataService, errorService);
   }

@@ -34,6 +34,10 @@ export class TranslateServiceStub {
   public getLangs(){
     return Object.keys(translations);
   }
+
+  public instant():string{
+    return '';
+  }
 }
 
 @NgModule({

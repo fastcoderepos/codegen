@@ -51,8 +51,8 @@
                 </button>
             </div>
             <div class="fb-col-sm-6 fb-text-right">
-                <button mat-raised-button color="basic" [routerLink]="['/permission']"> Back </button> 
-                <button mat-raised-button color="primary"   (click)="itemNgForm.ngSubmit.emit()">
+                <button name="back" mat-raised-button color="basic" (click)="onBack()"> {{'GENERAL.ACTIONS.CANCEL' | translate}} </button> 
+                <button name="save" mat-raised-button color="primary" [disabled]="!itemForm.valid || loading || !IsUpdatePermission" (click)="itemNgForm.ngSubmit.emit()">
                   {{'GENERAL.ACTIONS.SAVE' | translate}}
                 </button>
             </div>

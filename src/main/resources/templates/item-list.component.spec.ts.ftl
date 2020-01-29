@@ -1,24 +1,14 @@
-import { async, ComponentFixture, TestBed, tick } from '@angular/core/testing';
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { of } from 'rxjs';
-import { ChangeDetectorRef, NO_ERRORS_SCHEMA, DebugElement, NgModule } from '@angular/core';
+import { ChangeDetectorRef, NO_ERRORS_SCHEMA, DebugElement } from '@angular/core';
 import { Location } from '@angular/common';
 import { Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { ListFiltersComponent, ServiceUtils } from 'projects/fast-code-core/src/public_api';
 
-import { imports, exports, providers, EntryComponents, TestingModule } from '../../testing/utils';
+import { EntryComponents, TestingModule } from 'src/testing/utils';
 import { [=IEntity], [=ClassName]Service, [=ClassName]DetailsComponent, [=ClassName]ListComponent, [=ClassName]NewComponent } from './index';
-
-@NgModule({
-  imports: imports.concat(),
-  exports: exports.concat(),
-  providers: providers,
-  entryComponents: EntryComponents.concat([[=ClassName]NewComponent])
-})
-class TestingModuleIntegration {
-  constructor() { }
-}
 
 describe('[=ClassName]ListComponent', () => {
   let fixture:ComponentFixture<[=ClassName]ListComponent>;
@@ -79,7 +69,7 @@ describe('[=ClassName]ListComponent', () => {
     },
     </#list> 
   ];
-  let data: [=IEntity][] = Object.assign([], constData);
+  let data: [=IEntity][] = [... constData];
 
   describe('Unit tests', () => {
   
@@ -102,6 +92,7 @@ describe('[=ClassName]ListComponent', () => {
     beforeEach(() => {
       fixture = TestBed.createComponent([=ClassName]ListComponent);
       component = fixture.componentInstance;
+      data = [... constData];
       fixture.detectChanges();
     });
 
@@ -196,7 +187,7 @@ describe('[=ClassName]ListComponent', () => {
           [=ClassName]DetailsComponent
         ].concat(EntryComponents),
         imports: [
-          TestingModuleIntegration,
+          TestingModule,
           RouterTestingModule.withRoutes([
             { path: '[=FrontendUrlPath]', component: [=ClassName]ListComponent },
             { path: '[=FrontendUrlPath]/:id', component: [=ClassName]DetailsComponent }
@@ -214,6 +205,7 @@ describe('[=ClassName]ListComponent', () => {
     beforeEach(() => {
       fixture = TestBed.createComponent([=ClassName]ListComponent);
       component = fixture.componentInstance;
+      data = [... constData];
       fixture.detectChanges();
     });
 
@@ -239,11 +231,13 @@ describe('[=ClassName]ListComponent', () => {
     });
 
     it('should open new dialog for new entry', async () => {
+      component.IsCreatePermission = true;
+      fixture.detectChanges();
+      spyOn(component.dialog, 'open').and.callThrough();
       el = fixture.debugElement.query(By.css('button[name=add]')).nativeElement;
       el.click();
 
-      expect(component.dialog.openDialogs.length).toEqual(1);
-      component.dialogRef.close();
+      expect(component.dialog.open).toHaveBeenCalled();
     });
 
     it('should delete the item from list', async () => {

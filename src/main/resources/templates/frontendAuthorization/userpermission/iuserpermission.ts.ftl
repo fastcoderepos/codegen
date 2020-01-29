@@ -4,7 +4,7 @@ export interface I[=AuthenticationTable]permission {
 	permissionId: number;
 	permissionDescriptiveField?: string;
 	<#if !UserInput??>
-	[=AuthenticationTable?uncap_first]Id?: string;
+	[=AuthenticationTable?uncap_first]Id: number;
 	[=AuthenticationTable?uncap_first]DescriptiveField?: string;
 	<#elseif UserInput??>
 	<#if PrimaryKeys??>

@@ -13,7 +13,7 @@ describe('VirtualScrollDirective', () => {
   let fixture: ComponentFixture<TestVirtualScrollComponent>;
   let inputEl: DebugElement;
   let directive: VirtualScrollDirective;
-  let scrollEventHandlerSpy;
+  let scrollEventEmitterSpy;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -23,23 +23,41 @@ describe('VirtualScrollDirective', () => {
     component = fixture.componentInstance;
     inputEl = fixture.debugElement.query(By.directive(VirtualScrollDirective));
     directive = new VirtualScrollDirective(inputEl);
-    scrollEventHandlerSpy = spyOn(directive, 'scrollEventHandler').and.returnValue(false);;
+    scrollEventEmitterSpy = spyOn(directive.onScroll, 'emit').and.callThrough();
   });
 
-  it('handling scroll event', () => {
-    inputEl.triggerEventHandler('scroll', null);
+  it('should emit scroll event', () => {
     
-    // let e = {
-    //   target :{
-    //     offsetHeight: 200,
-    //     scrollHeight: 200,
-    //     scrollTop: 50
+    let e = {
+      target :{
+        offsetHeight: 250,
+        scrollHeight: 300,
+        scrollTop: 50
+        
+      }
+    }
 
-    //   }
-    // }
-    directive.scrollEventHandler(null);
+    inputEl.triggerEventHandler('scroll', e);
+    directive.scrollEventHandler(e);
     fixture.detectChanges();
-    expect(scrollEventHandlerSpy).toHaveBeenCalled();
+    expect(scrollEventEmitterSpy).toHaveBeenCalled();
+  });
+
+  it('should not emit scroll event', () => {
+    
+    let e = {
+      target :{
+        offsetHeight: 200,
+        scrollHeight: 350,
+        scrollTop: 50
+        
+      }
+    }
+
+    inputEl.triggerEventHandler('scroll', e);
+    directive.scrollEventHandler(e);
+    fixture.detectChanges();
+    expect(scrollEventEmitterSpy).toHaveBeenCalledTimes(0);
   });
 
   // it('should create an instance', () => {

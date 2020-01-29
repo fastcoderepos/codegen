@@ -1,7 +1,7 @@
 <mat-sidenav-container class="sidenav-container">
   <mat-sidenav #drawer class="sidenav" fixedInViewport="true"
     [attr.role]="(isSmallDevice$ | async) ? 'dialog' : 'navigation'" [mode]="(isSmallDevice$ | async) ? 'over' : 'side'"
-    [opened]="!(isSmallDevice$ | async) && !isCurrentRootRoute <#if AuthenticationType != "none">&&  Auth.token</#if>">
+    [opened]="!(isSmallDevice$ | async) && !isCurrentRootRoute <#if AuthenticationType != "none">&& authenticationService.token</#if>">
 
     <mat-toolbar color="primary">
       <figure class="loggo">
@@ -86,16 +86,16 @@
     </mat-nav-list>
   </mat-sidenav>
   <mat-sidenav-content #navContent class="fc-sidenav-content">
-    <mat-toolbar class="fc-tool-bar" color="primary" [ngClass]="!Auth.token?'no-header':''" *ngIf="Auth.token">
+    <mat-toolbar class="fc-tool-bar" color="primary" [ngClass]="!authenticationService.token?'no-header':''" *ngIf="authenticationService.token">
       <figure class="loggo mob-logo">
         <img src="../../../../assets/images/logo.png" alt="logo"/>
       </figure>
       <span></span>
       <span>
         <#if AuthenticationType != "none">
-        <button mat-button *ngIf="!Auth.token" (click)="login()">Login</button>
+        <button mat-button *ngIf="!authenticationService.token" (click)="login()">Login</button>
         
-        <button mat-button [matMenuTriggerFor]="menu" *ngIf="Auth.token"><i class="material-icons">
+        <button mat-button [matMenuTriggerFor]="menu" *ngIf="authenticationService.token"><i class="material-icons">
             account_circle
           </i></button>
         <mat-menu #menu="matMenu">
