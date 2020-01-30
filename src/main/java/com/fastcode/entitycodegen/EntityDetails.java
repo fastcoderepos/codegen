@@ -26,9 +26,9 @@ import com.google.common.base.CaseFormat;
 @Component
 public class EntityDetails {
 
-//	@Autowired
-//	private CodeGeneratorUtils codeGeneratorUtils;
-	
+	//	@Autowired
+	//	private CodeGeneratorUtils codeGeneratorUtils;
+
 	@Autowired
 	private LoggingHelper logHelper;
 
@@ -169,7 +169,7 @@ public class EntityDetails {
 				JoinDetails joinDetails=new JoinDetails();
 				String str = field.getType().toString();
 				int index = str.lastIndexOf(".") + 1;
-				
+
 				details.setFieldName(field.getName());
 				String fieldType=str.substring(index);
 				if(fieldType.equals("int"))
@@ -264,12 +264,11 @@ public class EntityDetails {
 					if (a.annotationType().toString().equals("interface javax.persistence.JoinColumn")) {
 
 						JoinColumn joinCol= (javax.persistence.JoinColumn) a;
-						String referenceCol=CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, joinCol.referencedColumnName()); 
-					
+						
 						joinDetails.setJoinColumn(
 								CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, joinCol.name()));
 						joinDetails.setIsJoinColumnOptional(joinCol.nullable());
-						
+
 						String columnType = joinCol.columnDefinition();
 						if (columnType.equals("bigserial") || columnType.equals("int8"))
 							joinDetails.setJoinColumnType("Long");
@@ -284,11 +283,18 @@ public class EntityDetails {
 
 						if (joinDetails.getJoinColumn() != null) {
 							String entity = StringUtils.substringBeforeLast(entityName, ".");
-							String referenceColumn = findPrimaryKey(
+							Map<String, String> pKeyMap = findPrimaryKey(
 									entity.concat("." + relation.geteName()), classList);
 
-							if (referenceColumn != null)
-								joinDetails.setReferenceColumn(referenceColumn);
+							for(Map.Entry<String, String> pk : pKeyMap.entrySet())
+							{
+								String referenceColumn = pk.getKey();
+								if(columnType.isEmpty())
+									joinDetails.setJoinColumnType(pk.getValue());
+								if (!referenceColumn.isEmpty())
+									joinDetails.setReferenceColumn(referenceColumn);
+							}
+
 						}
 					}
 					if (a.annotationType().toString().equals("interface javax.persistence.OneToMany")) {
@@ -333,10 +339,10 @@ public class EntityDetails {
 					relation.setfDetails(getFields(relation.geteName(), classList));
 					relationsMap.put(className + "-" + relation.geteName(), relation);
 				}
-				
+
 				//details.setFieldName(details.getFieldName());
 				fieldsMap.put(details.getFieldName(), details);
-				
+
 			}
 		} catch (InstantiationException e) {
 			logHelper.getLogger().error("InstantiationException : ", e.getMessage());
@@ -348,9 +354,9 @@ public class EntityDetails {
 		return new EntityDetails(sortedMap, relationsMap,tableName,idClass);
 	}
 
-	public String findPrimaryKey(String entityPackage, List<Class<?>> classList) {
+	public Map<String,String> findPrimaryKey(String entityPackage, List<Class<?>> classList) {
 		String primaryKey = null;
-
+		
 		for (Class<?> currentClass : classList) {
 			String entityName = currentClass.getName();
 			if (entityName.equals(entityPackage)) {
@@ -364,7 +370,17 @@ public class EntityDetails {
 						for (Annotation a : annotations) {
 							if (a.annotationType().toString().equals("interface javax.persistence.Id")) {
 								primaryKey = field.getName();
-								return primaryKey;
+								String str = field.getType().toString();
+								int index = str.lastIndexOf(".") + 1;
+								String fieldType=str.substring(index);
+								if(fieldType.equals("int"))
+								{
+									fieldType="Integer";
+								}
+								fieldType=fieldType.substring(0, 1).toUpperCase() + fieldType.substring(1);
+								Map<String,String> pKeyMap = new HashMap<String,String>();
+								pKeyMap.put(primaryKey,fieldType);
+								return pKeyMap;
 
 							}
 						}
@@ -379,7 +395,7 @@ public class EntityDetails {
 		}
 		return null;
 	}
- 
+
 	public List<FieldDetails> getFields(String relationEntityName, List<Class<?>> classList) {
 		List<FieldDetails> fieldsList = new ArrayList<>();
 		for (Class<?> currentClass : classList) {
@@ -408,7 +424,6 @@ public class EntityDetails {
 								details.setIsPrimaryKey(true);
 							}
 						}
-
 
 						fieldsList.add(details);
 
@@ -526,15 +541,19 @@ public class EntityDetails {
 										if (joinDetails.getJoinColumn() != null) {
 
 											String entity = StringUtils.substringBeforeLast(currentClass.getName(), ".");
+											Map<String, String> pKeyMap = findPrimaryKey(
+													entity.concat("." + entry.getValue().geteName()), classList);
 
-											String referenceCol=CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, joinCol.referencedColumnName()); 
-											String name=CaseFormat.LOWER_UNDERSCORE .to(CaseFormat.LOWER_CAMEL, joinCol.name());
+											for(Map.Entry<String, String> pk : pKeyMap.entrySet())
+											{
+												String referenceColumn = pk.getKey();
+												if(columnType.isEmpty())
+													joinDetails.setJoinColumnType(pk.getValue());
+												if (!referenceColumn.isEmpty())
+													joinDetails.setReferenceColumn(referenceColumn);
+											}
 
-											String referenceColumn = findPrimaryKey(
-													entity.concat("." + entry.getValue().getcName()), classList);
-											if (referenceColumn != null)
-												joinDetails.setReferenceColumn(referenceColumn);
-											
+
 											joinDetailsList.add(joinDetails);
 
 											entry.getValue().setJoinDetails(joinDetailsList);
@@ -665,10 +684,18 @@ public class EntityDetails {
 											String entity = StringUtils.substringBeforeLast(currentClass.getName(), ".");
 											if(mappedBy!=null)
 												joinDetails.setMappedBy(mappedBy);
-											String referenceColumn = findPrimaryKey(
-													entity.concat("." + entry.getValue().getcName()), classList);
-											if (referenceColumn != null)
-												joinDetails.setReferenceColumn(referenceColumn);
+											Map<String, String> pKeyMap = findPrimaryKey(
+													entity.concat("." + entry.getValue().geteName()), classList);
+
+											for(Map.Entry<String, String> pk : pKeyMap.entrySet())
+											{
+
+												String referenceColumn = pk.getKey();
+												if(columnType.isEmpty())
+													joinDetails.setJoinColumnType(pk.getValue());
+												if (!referenceColumn.isEmpty())
+													joinDetails.setReferenceColumn(referenceColumn);
+											}
 											joinDetailsList.add(joinDetails);
 
 											entry.getValue().setJoinDetails(joinDetailsList);

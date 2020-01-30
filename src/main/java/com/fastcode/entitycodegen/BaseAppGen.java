@@ -23,7 +23,7 @@ public class BaseAppGen {
         boolean isWindows = System.getProperty("os.name").toLowerCase().startsWith("windows");
 
         String[] builderCommand;
-        if (isWindows) {
+        if (isWindows) { 
             builderCommand = new String[] { "cmd.exe", "/c", "mvn" + " clean" };
         } else {
             builderCommand = new String[] { "sh", "-c", "mvn" + " clean" };

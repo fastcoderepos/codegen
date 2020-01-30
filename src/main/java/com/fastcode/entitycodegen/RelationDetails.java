@@ -61,7 +61,7 @@ public class RelationDetails {
 		return joinTable;
 	}
 
-	public void setJoinTable(String joinTable) {
+	public void setJoinTable(String joinTable) { 
 		this.joinTable = joinTable;
 	}
 

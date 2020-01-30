@@ -41,6 +41,9 @@ public class UserInputTest {
 	@Mock
 	EntityDetails mockedEntityDetails;
 	
+	@Mock
+	EntityGeneratorUtils entityGeneratorUtils;
+	
 	@Before
 	public void setUp() throws Exception {
 		MockitoAnnotations.initMocks(userInput);
@@ -64,7 +67,7 @@ public class UserInputTest {
 	@Test
 	public void getFieldsInput_parametersAreValid_returnString()
 	{
-		systemInMock.provideLines("2");
+		systemInMock.provideLines("8","2");
 	    Scanner scanner = new Scanner(System.in);
 		Assertions.assertThat(userInput.getFieldsInput(3)).isEqualTo(2);
 		scanner.close();
@@ -74,7 +77,7 @@ public class UserInputTest {
 	public void getFilteredFieldsList_fieldsListIsNotEmpty_returnList()
 	{
 		FieldDetails details = new FieldDetails();
-		details.setFieldName("blogName");
+		details.setFieldName("blogName"); 
 		details.setFieldType("String");
 		
 		FieldDetails details1 = new FieldDetails();
@@ -111,15 +114,14 @@ public class UserInputTest {
 	public void composeInput_rootMapHasNullValues_takeMandatoryValuesFromUserAndSetDefaultValuesForOptionalFieldsAndReturnUserInput()
 	{
 		Map<String, String> root = new HashMap<String, String>();
-		
-		
+		systemInMock.provideLines("y");
 		UserInput userInputDto = new UserInput();
-		userInputDto.setAuthenticationSchema("testValue");
 		userInputDto.setCache(false);
-		userInputDto.setGroupArtifactId("com.nfin");
-		userInputDto.setConnectionStr("testValue");
+		userInputDto.setGroupArtifactId("com.nfin"); 
+		userInputDto.setConnectionStr("jdbc:h2:mem:testdb?username=sa;password=sa");
 		userInputDto.setDestinationPath("testValue");
 		
+		Mockito.doReturn(null).when(entityGeneratorUtils).parseConnectionString(anyString());
 		Mockito.doReturn(userInputDto.getConnectionStr(),userInputDto.getSchemaName(),userInputDto.getDestinationPath(),userInputDto.getGroupArtifactId()).when(userInput).getInput(any(Scanner.class), anyString());
 		Mockito.doReturn(userInputDto).when(userInput).getAuthenticationInput(any(UserInput.class),any(Scanner.class));
 		
@@ -131,21 +133,21 @@ public class UserInputTest {
 	{
 		Map<String, String> root = new HashMap<String, String>();
 		root.put("upgrade", "true");
-		root.put("conn", "testValue");
-		root.put("a", "com.nfin");
+		root.put("conn", "jdbc:h2:mem:testdb?username=sa;password=sa");
+		root.put("a", "com");
 		root.put("t", "all");
 		root.put("d", "testValue");
 		root.put("s", "testValue");
 		root.put("c", "true");
 		
 		UserInput userInputDto = new UserInput();
-		userInputDto.setAuthenticationSchema("testValue");
 		userInputDto.setCache(false);
 		userInputDto.setGroupArtifactId("com.nfin");
-		userInputDto.setConnectionStr("testValue");
+		userInputDto.setConnectionStr("jdbc:h2:mem:testdb?username=sa;password=sa");
 		userInputDto.setDestinationPath("testValue");
 		
-	//	Mockito.doReturn(userInputDto.getConnectionStr(),userInputDto.getSchemaName(),userInputDto.getDestinationPath(),userInputDto.getGroupArtifactId(),userInputDto.getGenerationType()).when(userInput).getInput(any(Scanner.class), anyString());
+		Mockito.doReturn("com.nfin").when(userInput).getInput(any(Scanner.class), anyString());
+		Mockito.doReturn(new HashMap<String, String> ()).when(entityGeneratorUtils).parseConnectionString(anyString());
 		Mockito.doReturn(userInputDto).when(userInput).getAuthenticationInput(any(UserInput.class),any(Scanner.class));
 		//systemInMock.provideLines("1");
 		
@@ -159,20 +161,30 @@ public class UserInputTest {
 		systemInMock.provideLines("1");
 	    Scanner scanner = new Scanner(System.in);
 		UserInput userInputDto = new UserInput();
-		userInputDto.setAuthenticationSchema("testValue");
-		userInputDto.setAuthenticationType("none");
 
 		Assertions.assertThat(userInput.getAuthenticationInput(userInputDto, scanner)).isEqualTo(userInputDto);
 	}
 	
 	@Test
-	public void getAuthenticationInput_userInputIsValid_ReturnUserInput()
+	public void getAuthenticationInput_userInputIsValidAndAuthenticationTypeIsDatabase_ReturnUserInput()
 	{
 		systemInMock.provideLines("2","y","user");
 	    Scanner scanner = new Scanner(System.in);
 		UserInput userInputDto = new UserInput();
-		userInputDto.setAuthenticationSchema("User");
-		userInputDto.setAuthenticationType("database");
+		userInputDto.setCache(false);
+		userInputDto.setGroupArtifactId("com.nfin");
+		userInputDto.setConnectionStr("testValue");
+		userInputDto.setDestinationPath("testValue");
+	
+		Assertions.assertThat(userInput.getAuthenticationInput(userInputDto, scanner)).isEqualTo(userInputDto);
+	}
+	
+	@Test
+	public void getAuthenticationInput_userInputIsValidAndAuthenticationTypeIsLdap_ReturnUserInput()
+	{
+		systemInMock.provideLines("8","3", "4", "2", "test","y","custom_user");
+	    Scanner scanner = new Scanner(System.in);
+		UserInput userInputDto = new UserInput();
 		userInputDto.setCache(false);
 		userInputDto.setGroupArtifactId("com.nfin");
 		userInputDto.setConnectionStr("testValue");

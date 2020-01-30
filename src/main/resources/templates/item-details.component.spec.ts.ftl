@@ -1,6 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from "@angular/platform-browser";
-import { MatDialogRef } from '@angular/material';
 import { of } from 'rxjs';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { Router } from '@angular/router';
@@ -9,7 +8,6 @@ import { Location } from '@angular/common';
 
 import { TestingModule, EntryComponents } from '../../testing/utils';
 import { [=IEntity], [=ClassName]Service, [=ClassName]DetailsComponent, [=ClassName]ListComponent } from './index';
-
 
 describe('[=ClassName]DetailsComponent', () => {
   let component: [=ClassName]DetailsComponent;
@@ -75,8 +73,7 @@ describe('[=ClassName]DetailsComponent', () => {
         ],
         imports: [TestingModule],
         providers: [
-        [=ClassName]Service,         
-         {provide: MatDialogRef, useValue: {close: (dialogResult: any) => { }} },
+          [=ClassName]Service,
         ],
         schemas: [NO_ERRORS_SCHEMA]  
       }).compileComponents();
@@ -148,8 +145,7 @@ describe('[=ClassName]DetailsComponent', () => {
           ])
         ],
         providers: [
-          [=ClassName]Service,
-          { provide: MatDialogRef, useValue: { close: (dialogResult: any) => { } } },
+          [=ClassName]Service
         ]
 
       }).compileComponents();

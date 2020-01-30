@@ -24,6 +24,13 @@ public class CreateUserInput {
   @Length(max = 32, message = "firstName must be less than 32 characters")
   private String firstName;
   
+  <#if AuthenticationType =="oidc">
+  @NotNull(message = "ScimId Should not be null")
+  @Length(max = 36, message = "scimId must be less than 36 characters")
+  private String scimId;
+  
+  </#if>
+  @NotNull(message = "isActive Should not be null")
   private Boolean isActive;
   
   private Boolean isEmailConfirmed;
@@ -100,6 +107,16 @@ public class CreateUserInput {
   public void setFirstName(String firstName){
   this.firstName = firstName;
   }
+  <#if AuthenticationType =="oidc">
+  
+  public String getScimId() {
+  return scimId;
+  }
+
+  public void setScimId(String scimId){
+  this.scimId = scimId;
+  }
+  </#if>
   
   public Boolean getIsActive() {
   return isActive;

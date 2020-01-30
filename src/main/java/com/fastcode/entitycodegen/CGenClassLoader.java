@@ -26,7 +26,7 @@ public class CGenClassLoader extends ClassLoader {
 			@Override
 			public FileVisitResult visitFile(
 					Path file,
-					BasicFileAttributes attrs) throws IOException {
+					BasicFileAttributes attrs) throws IOException { 
 
 				String filePath = file.toString().replace('\\', '/');
 				if(filePath.endsWith(".class") && (packagePath==null || packagePath.isEmpty() || filePath.contains(packagePath)))

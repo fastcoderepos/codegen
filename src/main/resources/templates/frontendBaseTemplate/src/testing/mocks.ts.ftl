@@ -1,7 +1,11 @@
 export { ActivatedRoute } from '@angular/router';
-import { Input, Injectable } from "@angular/core";
-import { of } from "rxjs";
+import { Input, Injectable, Directive } from "@angular/core";
+import { of, Observable } from "rxjs";
+import { ITokenDetail } from 'projects/fast-code-core/src/public_api';
 
+@Directive({
+  selector: '[routerLink]'
+})
 export class RouterLinkDirectiveStub {
   @Input('routerLink') linkParams: any;
   navigatedTo: any = null;
@@ -10,12 +14,12 @@ export class RouterLinkDirectiveStub {
   }
 }
 
-export let mockGlobal = {
+export let GlobalsMock = {
   isSmallDevice$: of({ value: true }),
   isMediumDeviceOrLess$: of({ value: true })
 };
 
-export let mockActivatedRoute = {
+export let ActivatedRouteMock = {
   snapshot: { 
     paramMap: { get: () => { return '1' } },
     queryParams: { get: () => { return '1' } }
@@ -23,9 +27,69 @@ export let mockActivatedRoute = {
 }
 
 @Injectable()
-export class MockRouter { 
+export class RouterMock { 
   navigate = (commands: any) => {}; 
 }
 
 @Injectable()
-export class MockPickerDialogService { }
+export class PickerDialogServiceMock { }
+
+<#if AuthenticationType != "none">
+@Injectable()
+export class AuthenticationServiceMock {
+
+  configure() {}
+
+  getMainUsers(): Observable<any> { return of([{id: 1, username: "user1"}]); }
+
+  get token(): string { return "sample token"; }
+
+  decodeToken(): ITokenDetail { return {sub: "sub1"} }
+  
+  // ldap, db
+  //login(user: any): Observable<any> { return of({}) }
+
+  getLoggedInUserPermissions(): Observable<any> { return of(["p1"]); }
+
+  // oidc
+  login() {}
+
+  logout() {}
+
+  getTokenExpirationDate(token: string): Date { return new Date(); }
+
+  isTokenExpired(token?: string): boolean { return true; }
+
+  hasPermissionOnEntity(entity: string, crudType: string): Boolean { return true; }
+
+}
+
+@Injectable()
+export class GlobalPermissionServiceMock {
+  hasPermissionOnEntity(entity:string, crudType:string):Boolean {
+    return true;
+  }
+
+  hasPermission(permission: string){
+    return true;
+  }
+
+  checkPermission(entity:string, crudType:string):boolean {
+    return true;
+  }
+}
+
+</#if>
+export const dialogRefMock = {
+  afterClosed: () => of(true),
+  close: (dialogResult: any) => {},
+  updateSize: () => {}
+};
+
+export class MatDialogMock {
+  // When the component calls this.dialog.open(...) we'll return an object
+  // with an afterClosed method that allows to subscribe to the dialog result observable.
+  open() {
+    return dialogRefMock;
+  }
+}

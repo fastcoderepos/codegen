@@ -10,7 +10,7 @@
           <li><a [routerLink]="['/dashboard']"><i class="material-icons">
                 home
               </i> &nbsp;Dashboard</a></li>
-          <li><a [routerLink]="['/userpermission']">Userpermission</a></li>
+          <li><a (click)="onBack()">Userpermission</a></li>
           <li><a>{{idParam}}</a></li>
         </ul>
       </div>
@@ -44,10 +44,10 @@
             </button>
           </div>
           <div class="fb-col-sm-6 fb-text-right">
-            <button mat-raised-button color="basic" [routerLink]="['/userpermission']"> Back </button>
-            <button mat-raised-button color="primary" (click)="itemNgForm.ngSubmit.emit()">
-              {{'GENERAL.ACTIONS.SAVE' | translate}}
-            </button>
+              <button name="back" mat-raised-button color="basic" (click)="onBack()"> {{'GENERAL.ACTIONS.CANCEL' | translate}} </button> 
+              <button name="save" mat-raised-button color="primary" [disabled]="!itemForm.valid || loading || !IsUpdatePermission" (click)="itemNgForm.ngSubmit.emit()">
+                {{'GENERAL.ACTIONS.SAVE' | translate}}
+              </button>
           </div>
         </div>
       </div>

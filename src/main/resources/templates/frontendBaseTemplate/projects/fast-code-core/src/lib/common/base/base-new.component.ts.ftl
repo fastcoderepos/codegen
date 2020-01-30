@@ -1,21 +1,17 @@
 import { Component, OnInit, Inject, HostListener } from '@angular/core';
 import { MatDialogRef, MatDialog, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
-import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { GenericApiService } from '../core/generic-api.service';
-//import { IUser } from './iuser';
-import { IBase } from './ibase';
 import { ActivatedRoute, Router } from "@angular/router";
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { first } from 'rxjs/operators';
-import { merge, of as observableOf, Observable } from 'rxjs';
+import { of as observableOf, Observable } from 'rxjs';
 
 import { Globals } from '../../globals';
 
 import { IAssociationEntry } from '../core/iassociationentry';
-import { PickerComponent } from '../../common/components/picker/picker.component';
-import { PickerDialogService, IFCDialogConfig } from '../../common/components/picker/picker-dialog.service';
+import { PickerDialogService } from '../../common/components/picker/picker-dialog.service';
 import { ISearchField, operatorType } from '../../common/components/list-filters/ISearchCriteria';
 import { IGlobalPermissionService } from '../core/iglobal-permission.service';
 

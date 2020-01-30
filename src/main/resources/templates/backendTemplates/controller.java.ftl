@@ -48,6 +48,24 @@ import [=PackageName].application<#if (AuthenticationType == "database" || Users
 import [=PackageName].application<#if (AuthenticationType == "database" || UsersOnly == "true") && relationValue.eName == AuthenticationTable>.authorization</#if>.[=relationValue.eName?lower_case].dto.Find[=relationValue.eName]ByIdOutput;
 </#if>
 </#list>
+<#if AuthenticationType == "oidc" && ClassName == AuthenticationTable>
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import [=PackageName].security.SecurityConstants;
+import [=PackageName].security.SecurityUtils;
+
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
+<#if UsersOnly == "true">
+import [=PackageName].domain.authorization.[=AuthenticationTable?lower_case].I[=AuthenticationTable]Manager;
+import [=PackageName].domain.model.[=AuthenticationTable]Entity;
+<#else>
+import [=PackageName].domain.model.RoleEntity;
+import [=PackageName].domain.authorization.role.IRoleManager;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
+</#if>
+</#if>
 <#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>
 import [=PackageName].domain.model.[=AuthenticationTable]permissionEntity;
 import [=PackageName].domain.model.RoleEntity;
@@ -102,6 +120,71 @@ public class [=ClassName]Controller {
  	private JWTAppService _jwtAppService;
     </#if>  
     
+    <#if AuthenticationType == "oidc" && ClassName == AuthenticationTable>
+    <#if UsersOnly == "true">
+    @Autowired
+	I[=AuthenticationTable]Manager _userMgr;
+    <#else>
+	@Autowired
+	IRoleManager _roleManager;
+    </#if>
+	@Autowired
+	SecurityUtils utils;
+
+	@Autowired 
+	HttpServletRequest request;
+
+	@RequestMapping(value = "/myPermissions", method = RequestMethod.GET)
+	public ResponseEntity GetMeInfo() throws Exception{
+
+		String token = request.getHeader(SecurityConstants.HEADER_STRING);
+		String userName = "";
+		
+		SignedJWT accessToken = null;
+		JWTClaimsSet claimSet = null;
+		
+		accessToken = SignedJWT.parse(token.replace(SecurityConstants.TOKEN_PREFIX, ""));
+		claimSet = accessToken.getJWTClaimsSet();
+		userName = claimSet.getSubject();
+		
+		<#if UsersOnly == "true">
+		// Add all the roles and permissions in a list and then convert the list into all permissions, removing duplicates
+		List<String> permissions=null;
+		[=AuthenticationTable]Entity user = _userMgr.FindBy<#if AuthenticationFields?? && AuthenticationFields.UserName??>[=AuthenticationFields.UserName.fieldName?cap_first]</#if>(userName);  
+		if(user !=null )
+		{
+			permissions = utils.getAllPermissionsFromUserAndRole(user);
+		}
+		else
+			throw new EntityNotFoundException(
+					String.format("There does not exist a user with a name=%s", userName));
+		return new ResponseEntity(permissions, HttpStatus.OK);
+		<#elseif UsersOnly != "true">
+		List<String> groups = new ArrayList<String>();
+		groups = (ArrayList<String>) claimSet.getClaims().get("groups");
+		List<String> permissionsList = new ArrayList<String>();
+		for( String item : groups)
+		{
+
+			RoleEntity role = _roleManager.FindByRoleName(item);
+			if(role != null) {
+				List<String> permissions= utils.getAllPermissionsFromRole(role);
+
+				permissionsList.addAll(permissions);
+			}
+		else
+			throw new EntityNotFoundException(
+					String.format("There does not exist a role with a name=%s", item));
+
+		}
+		permissionsList= permissionsList.stream().distinct().collect(Collectors.toList());
+
+		return new ResponseEntity(permissionsList, HttpStatus.OK);
+        </#if>
+	}
+
+    </#if>
+    
     public [=ClassName]Controller([=ClassName]AppService [=ClassName?uncap_first]AppService,<#list Relationship as relationKey,relationValue><#if ClassName != relationValue.eName && relationValue.eName !="OneToMany"> [=relationValue.eName]AppService [=relationValue.eName?uncap_first]AppService,</#if></#list>
 	<#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable><#if AuthenticationType == "database">PasswordEncoder pEncoder,</#if> [=AuthenticationTable]permissionAppService [=AuthenticationTable?uncap_first]permissionAppService, [=AuthenticationTable]roleAppService [=AuthenticationTable?uncap_first]roleAppService,JWTAppService jwtAppService,</#if> LoggingHelper helper) {
 		super();
@@ -122,6 +205,7 @@ public class [=ClassName]Controller {
 		this.logHelper = helper;
 	}
 
+   <#if AuthenticationType == "database" && ClassName == AuthenticationTable>
     <#if AuthenticationType != "none">
     @PreAuthorize("hasAnyAuthority('[=ClassName?upper_case]ENTITY_CREATE')")
     </#if>
@@ -179,7 +263,7 @@ public class [=ClassName]Controller {
 		</#list>
 		return new ResponseEntity(output, HttpStatus.OK);
 	}
-
+   
 	// ------------ Delete [=ClassName?uncap_first] ------------
 	<#if AuthenticationType != "none">
 	@PreAuthorize("hasAnyAuthority('[=ClassName?upper_case]ENTITY_DELETE')")
@@ -273,14 +357,12 @@ public class [=ClassName]Controller {
 		
 		<#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>
 		<#if AuthenticationFields??>
-		<#list AuthenticationFields as authKey,authValue>
-        <#if AuthenticationType == "database" && authKey== "Password">
-	    [=ClassName?uncap_first].set[=authValue.fieldName?cap_first](pEncoder.encode(current[=ClassName].get[=authValue.fieldName?cap_first]()));
+        <#if AuthenticationType == "database">
+	    [=ClassName?uncap_first].set[=AuthenticationFields.Password.fieldName?cap_first](pEncoder.encode(current[=ClassName].get[=AuthenticationFields.Password.fieldName?cap_first]()));
 	    </#if>
-	    <#if authKey== "UserName">
- 		_jwtAppService.deleteAllUserTokens(current[=ClassName].get[=authValue.fieldName?cap_first]());
-	    </#if>
-	    </#list>
+	    if(current[=ClassName].get[=AuthenticationFields.IsActive.fieldName?cap_first]() && ![=ClassName?uncap_first].get[=AuthenticationFields.IsActive.fieldName?cap_first]()) { 
+           _jwtAppService.deleteAllUserTokens(current[=ClassName].get[=AuthenticationFields.UserName.fieldName?cap_first]());
+        } 
         </#if>
 		</#if>
 		<#if CompositeKeyClasses?seq_contains(ClassName)>
@@ -297,7 +379,7 @@ public class [=ClassName]Controller {
 	    </#list>
 	    </#if>
 	}
-
+ </#if>
     <#if AuthenticationType != "none">
     @PreAuthorize("hasAnyAuthority('[=ClassName?upper_case]ENTITY_READ')")
     </#if>

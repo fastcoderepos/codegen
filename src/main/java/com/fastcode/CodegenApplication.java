@@ -3,7 +3,6 @@ package com.fastcode;
 import com.fastcode.codegen.ModulesGenerator;
 import com.fastcode.entitycodegen.UserInput;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,15 +16,16 @@ import org.springframework.context.ApplicationContext;
 public class CodegenApplication implements ApplicationRunner {
 	static Map<String, String> root = new HashMap<>();
 
-	public static void main(String[] args) throws ClassNotFoundException, IOException {
+	public static void main(String[] args) {
 	
 		ApplicationContext context = SpringApplication.run(CodegenApplication.class, args);
+		
 		UserInput userInput = context.getBean(UserInput.class);
 		ModulesGenerator generator = context.getBean(ModulesGenerator.class);
-		generator.generateCode(userInput.composeInput(root));
-	}
+		generator.generateCode(userInput.composeInput(root)); 
+	} 
 
-	@Override
+	@Override 
 	public void run(ApplicationArguments args) throws Exception {
 		System.out.println("# NonOptionArgs: " + args.getNonOptionArgs().size());
 
@@ -34,12 +34,14 @@ public class CodegenApplication implements ApplicationRunner {
 
 		System.out.println("# OptionArgs: " + args.getOptionNames().size());
 		System.out.println("OptionArgs:");
-
+ 
 		args.getOptionNames().forEach(optionName -> {
 			root.put(optionName, args.getOptionValues(optionName).get(0));
 			System.out.println(optionName + "=" + args.getOptionValues(optionName));
 		});
 	}
+
+
 
 
 }

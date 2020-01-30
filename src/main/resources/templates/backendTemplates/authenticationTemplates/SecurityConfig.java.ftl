@@ -1,9 +1,10 @@
 package [=PackageName];
 
 <#if AuthenticationType !="oidc">
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment; 
 </#if>
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -36,6 +37,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	private Environment env;
 </#if>
 
+	@Autowired
+    private ApplicationContext context;
+    
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 
@@ -71,9 +75,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     .anyRequest().authenticated()
                     .and()
                     <#if AuthenticationType !="oidc">
-                    .addFilter(new JWTAuthenticationFilter(authenticationManager()))
+                    .addFilter(new JWTAuthenticationFilter(authenticationManager(),context))
                     </#if>
-                    .addFilter(new JWTAuthorizationFilter(authenticationManager()));
+                    .addFilter(new JWTAuthorizationFilter(authenticationManager(),context));
       //  }
     }
 

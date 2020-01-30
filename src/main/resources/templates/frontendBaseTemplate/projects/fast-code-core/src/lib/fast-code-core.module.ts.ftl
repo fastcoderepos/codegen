@@ -20,7 +20,6 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FastCodeCoreComponent } from './fast-code-core.component';
 
 import { ConfirmDialogComponent } from './common/components/confirm-dialog/confirm-dialog.component';
-import { AddFilterFieldComponent } from './common/components/list-filters/add-filter-field/add-filter-field.component';
 import { ListFiltersComponent } from './common/components/list-filters/list-filters.component';
 import { VirtualScrollDirective } from './common/directives/virtualScroll/virtual-scroll.directive';
 import { OptionsScrollDirective } from './common/directives/options-scroll.directive';
@@ -36,7 +35,6 @@ import { IP_CONFIG } from './tokens';
 import { IForRootConf } from './IForRootConf';
 import { Globals } from './globals';
 import { CanDeactivateGuard } from './common/core/can-deactivate.guard';
-import { GlobalPermissionService } from './common/core/global-permission.service';
 
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { HttpClient } from '@angular/common/http';
@@ -88,7 +86,6 @@ export function HttpLoaderFactory(httpClient: HttpClient) {
   declarations: [
     FastCodeCoreComponent,
     ConfirmDialogComponent,
-    AddFilterFieldComponent,
     ListFiltersComponent,
     VirtualScrollDirective,
     OptionsScrollDirective,
@@ -102,7 +99,6 @@ export function HttpLoaderFactory(httpClient: HttpClient) {
     FastCodeCoreComponent,
     ConfirmDialogComponent,
     ListFiltersComponent,
-    AddFilterFieldComponent,
     VirtualScrollDirective,
     OptionsScrollDirective,
     BaseDetailsComponent,
@@ -113,7 +109,6 @@ export function HttpLoaderFactory(httpClient: HttpClient) {
     
   ],
   entryComponents: [
-    AddFilterFieldComponent,
     PickerComponent,
     ConfirmDialogComponent
   ]
@@ -130,8 +125,7 @@ export class FastCodeCoreModule {
           useValue: config
         },
         Globals,
-        CanDeactivateGuard,
-        GlobalPermissionService
+        CanDeactivateGuard
       ]
     };
   }

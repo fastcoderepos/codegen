@@ -15,16 +15,15 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.support.WebApplicationContextUtils;
+import org.springframework.context.ApplicationContext;
 <#if AuthenticationType !="oidc">
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import java.util.stream.Collectors;
+import [=PackageName].domain.model.JwtEntity;
 </#if>
 import java.net.URL;
 import org.springframework.security.core.authority.AuthorityUtils;
 import [=PackageName].domain.irepository.IJwtRepository;
-import [=PackageName].domain.model.JwtEntity;
 <#if AuthenticationType =="oidc">
 import com.nimbusds.jose.*;
 import com.nimbusds.jwt.*;
@@ -38,11 +37,11 @@ import [=PackageName].domain.authorization.[=AuthenticationTable?lower_case].I[=
 <#else>
 import [=PackageName].domain.model.RoleEntity;
 import [=PackageName].domain.authorization.role.IRoleManager;
+import java.util.stream.Collectors;
 </#if>
 </#if>
 import java.util.*;
 import javax.servlet.FilterChain;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -50,10 +49,12 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
-
-    private Environment environment;
+    
+    <#if AuthenticationType != "oidc">
     private IJwtRepository jwtRepo;
+    </#if>
     <#if AuthenticationType == "oidc">
+    private Environment environment;
     private SecurityUtils securityUtils;
     <#if UsersOnly == "true">
     private I[=AuthenticationTable]Manager _userMgr;
@@ -61,8 +62,20 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
     private IRoleManager _roleManager;
     </#if>
     </#if>
-    public JWTAuthorizationFilter(AuthenticationManager authManager) {
+    public JWTAuthorizationFilter(AuthenticationManager authManager,ApplicationContext ctx) {
         super(authManager);
+        <#if AuthenticationType == "oidc">
+        this.environment = ctx.getBean(Environment.class);
+    	this.securityUtils = ctx.getBean(SecurityUtils.class);
+    	<#if UsersOnly== "true">
+    	this._userMgr = ctx.getBean(IUserManager.class);
+    	<#else>
+    	this._roleManager = ctx.getBean(IRoleManager.class);
+    	</#if>
+    	</#if>
+    	<#if AuthenticationType != "oidc">
+		this.jwtRepo = ctx.getBean(IJwtRepository.class);
+		</#if>
     }
 
     @Override
@@ -126,32 +139,18 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
     private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) throws JwtException {
 
         String token = request.getHeader(SecurityConstants.HEADER_STRING);
-        
-        if(jwtRepo==null){
-             ServletContext servletContext = request.getServletContext();
-             WebApplicationContext webApplicationContext = WebApplicationContextUtils.getWebApplicationContext(servletContext);
-             jwtRepo = webApplicationContext.getBean(IJwtRepository.class);
-         }
  
          // Check that the token is inactive in the JwtEntity table
- 
+        <#if AuthenticationType != "oidc">
          JwtEntity jwt = jwtRepo.findByToken(token);
          ApiError apiError = new ApiError(HttpStatus.UNAUTHORIZED);
  
          if(jwt == null) {
              throw new JwtException("Token Does Not Exist");
          }
- 
-         if(!jwt.getIsActive()) {
-             throw new JwtException("Token Inactive");
-	     }
-        
+        </#if>
         Claims claims;
-        if(environment==null){
-            ServletContext servletContext = request.getServletContext();
-            WebApplicationContext webApplicationContext = WebApplicationContextUtils.getWebApplicationContext(servletContext);
-            environment = webApplicationContext.getBean(Environment.class);
-        }
+       
         if (StringUtils.isNotEmpty(token) && token.startsWith(SecurityConstants.TOKEN_PREFIX)) {
             String userName = null;
             List<GrantedAuthority> authorities = null;
@@ -165,48 +164,38 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
             authorities = scopes.stream()
                         .map(authority -> new SimpleGrantedAuthority(authority))
                         .collect(Collectors.toList());
+                        
             <#elseif AuthenticationType =="oidc">
-            if(securityUtils==null){
-            ServletContext servletContext = request.getServletContext();
-            WebApplicationContext webApplicationContext = WebApplicationContextUtils.getWebApplicationContext(servletContext);
-            securityUtils = webApplicationContext.getBean(SecurityUtils.class);
-            }
-    		<#if UsersOnly == "true">
-    		if(_userMgr==null){
-            	ServletContext servletContext = request.getServletContext();
-                WebApplicationContext webApplicationContext = WebApplicationContextUtils.getWebApplicationContext(servletContext);
-                _userMgr = webApplicationContext.getBean(I[=AuthenticationTable]Manager.class);
-             }
-    		<#else>
-    		if(_roleManager==null){
-            	ServletContext servletContext = request.getServletContext();
-                WebApplicationContext webApplicationContext = WebApplicationContextUtils.getWebApplicationContext(servletContext);
-                _roleManager = webApplicationContext.getBean(IRoleManager.class);
-             }
-             
-             List<String> groups = new ArrayList<String>();
+            String aud= null;
+    		<#if UsersOnly != "true">
+            List<String> groups = new ArrayList<String>();
     		</#if>
             
-	            SignedJWT accessToken = null;
-	            JWTClaimsSet claimSet = null;
+	        SignedJWT accessToken = null;
+	        JWTClaimsSet claimSet = null;
 	
-	            try {
+	        try {
 	              
-	                accessToken = SignedJWT.parse(token.replace(SecurityConstants.TOKEN_PREFIX, ""));
-	                String kid = accessToken.getHeader().getKeyID();
-	                JWKSet jwks = null;
-					jwks = JWKSet.load(new URL(environment.getProperty("spring.security.oauth2.client.provider.oidc.issuer-uri") + "/v1/keys"));
+	        	accessToken = SignedJWT.parse(token.replace(SecurityConstants.TOKEN_PREFIX, ""));
+	            String kid = accessToken.getHeader().getKeyID();
+	            JWKSet jwks = null;
+				jwks = JWKSet.load(new URL(environment.getProperty("spring.security.oauth2.client.provider.oidc.issuer-uri") + "/v1/keys"));
 	
-	                RSAKey jwk = (RSAKey) jwks.getKeyByKeyId(kid);
-	                JWSVerifier verifier = new RSASSAVerifier(jwk);
+	            RSAKey jwk = (RSAKey) jwks.getKeyByKeyId(kid);
+	            JWSVerifier verifier = new RSASSAVerifier(jwk);
 	
-	                if (accessToken.verify(verifier)) {
-	                    System.out.println("valid signature");
-	                    claimSet = accessToken.getJWTClaimsSet();
-	                    userName = claimSet.getSubject();
-	                    <#if UsersOnly != "true">
-	                     groups = (ArrayList<String>) claimSet.getClaims().get("groups");
-	                     </#if>
+	            if (accessToken.verify(verifier)) {
+	            	System.out.println("valid signature");
+	                claimSet = accessToken.getJWTClaimsSet();
+	                userName = claimSet.getSubject();
+	                aud = (String) claimSet.getClaims().get("aud");
+	                    if(!aud.equals(environment.getProperty("spring.security.oauth2.client.registration.oidc.client-id")))
+	                    {
+	                    	throw new JwtException("Invalid token");
+	                    }
+	                <#if UsersOnly != "true">
+	                groups = (ArrayList<String>) claimSet.getClaims().get("groups");
+	                </#if>
 	                } else {
 	                    System.out.println("invalid signature");
 	                }
@@ -221,8 +210,8 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
             	<#else>
                 [=AuthenticationTable]Entity user = _userMgr.FindByUserName(userName);
             	</#if>    
-                if (applicationUser == null) {
-					throw new UsernameNotFoundException(username);
+                if (user == null) {
+					throw new UsernameNotFoundException(userName);
 				}
 
                 List<String> permissions = securityUtils.getAllPermissionsFromUserAndRole(user);
@@ -239,6 +228,7 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
    						permissionsList.addAll(permissions);
    					}
    				}
+   				permissionsList= permissionsList.stream().distinct().collect(Collectors.toList());
             	String[] groupsArray = new String[permissionsList.size()];
             	authorities = AuthorityUtils.createAuthorityList(permissionsList.toArray(groupsArray));
                 </#if>

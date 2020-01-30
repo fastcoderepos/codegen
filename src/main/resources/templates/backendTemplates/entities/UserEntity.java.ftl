@@ -25,6 +25,9 @@ public class  UserEntity implements Serializable {
     private String passwordResetCode;
     private Boolean shouldChangePasswordOnNextLogin;
     </#if>
+    <#if AuthenticationType == "oidc">
+    private String scimId;
+    </#if>
     private String phoneNumber;
     private Long profilePictureId;
     private Date lastLoginTime;
@@ -153,6 +156,18 @@ public class  UserEntity implements Serializable {
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
+    <#if AuthenticationType == "oidc">
+   
+    @Basic
+    @Column(name = "ScimId", nullable = false, length = 36)
+    public String getScimId() {
+        return scimId;
+    }
+
+    public void setScimId(String scimId) {
+        this.scimId = scimId;
+    }
+    </#if>
 <#if AuthenticationType == "database">
 
     @Basic

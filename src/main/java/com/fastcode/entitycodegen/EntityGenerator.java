@@ -1,13 +1,15 @@
 package com.fastcode.entitycodegen;
 
 import java.io.File;
+import java.io.IOException;
+import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.*;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.fastcode.BeanConfig;
 import com.fastcode.codegen.CodeGeneratorUtils;
 import com.fastcode.logging.LoggingHelper;
 
@@ -59,25 +61,25 @@ public class EntityGenerator {
 	}
 	
 	public Map<String, EntityDetails> generateEntities(String connectionString, String schema,
-			List<String> tableList, String packageName, String destination, Map<String,String> authenticationMap) { 
+			List<String> tableList, String packageName, String destination, Map<String,String> authenticationMap) throws IllegalStateException, IOException, SQLException { 
 
 		Map<String, String> connectionProps = entityGeneratorUtils.parseConnectionString(connectionString);
 		String entityPackage = packageName + ".domain.model";
 		final String tempPackageName = entityPackage.concat(".Temp");
 		destination = destination.replace('\\', '/');
 		final String destinationPath = destination.concat("/src/main/java");
-		final String targetPath = destination.concat("/target/classes");
+		final String targetPath = destination.concat("/target/classes"); 
 		String tables = buildTablesStringFromList(tableList,schema);
 		
 		if (!tables.isEmpty()) {
 			reverseMapping.run(tempPackageName, destinationPath, tables, connectionProps);
 		} else
 			reverseMapping.run(tempPackageName, destinationPath, schema, connectionProps);
-		try {
+		try { 
 			Thread.sleep(280);
 		} catch (InterruptedException e) {
 			logHelper.getLogger().error("Error Occured : ", e.getMessage());
-			
+			System.exit(1);
 		}
 
 		try {
@@ -89,13 +91,13 @@ public class EntityGenerator {
 		
 		Map<String, EntityDetails> entityDetailsMap = processAndGenerateRelevantEntities(targetPath, tempPackageName, schema, packageName, destinationPath,authenticationMap);
 				
-		entityGeneratorUtils.deleteDirectory(destinationPath + "/" + tempPackageName.replaceAll("\\.", "/"));
+	//	entityGeneratorUtils.deleteDirectory(destinationPath + "/" + tempPackageName.replaceAll("\\.", "/"));
 		logHelper.getLogger().info("Exit");
 		return entityDetailsMap;
 	}
 	
 	
-	public Map<String, EntityDetails> processAndGenerateRelevantEntities(String targetPath, String tempPackageName,String schema,String packageName, String destinationPath, Map<String,String> authenticationInputMap)
+	public Map<String, EntityDetails> processAndGenerateRelevantEntities(String targetPath, String tempPackageName,String schema,String packageName, String destinationPath, Map<String,String> authenticationInputMap) throws IllegalStateException
 	{
 		loader.setPath(targetPath);
 
@@ -141,6 +143,8 @@ public class EntityGenerator {
 				}
 			}
 
+			if(!entityDetailsMap.isEmpty())
+			{
 			if(authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA) !=null  && authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE) != "none")
 			{
 				entityDetailsMap=validateAuthenticationTable(entityDetailsMap, authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA), authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE));
@@ -149,6 +153,12 @@ public class EntityGenerator {
 			if(authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE) !="none")
 			{
 				generateAutheticationEntities(entityDetailsMap, schema, packageName, destinationPath,authenticationInputMap);
+			}
+			}
+			else
+			{
+				
+				throw new IllegalStateException("Invalid Schema");
 			}
 
 		} catch (ClassNotFoundException ex) {
@@ -194,7 +204,7 @@ public class EntityGenerator {
 			}
 			else if(entry.getValue().getRelation().equals("ManyToOne"))
 			{
-				if(!(descriptiveFieldEntities.containsKey(entry.getValue().geteName()) || descriptiveFieldEntities.containsKey(entry.getValue().getcName())))
+				if(!(descriptiveFieldEntities.containsKey(entry.getValue().geteName())))
 				{
 					descriptiveFieldEntities = findAndSetDescriptiveField(descriptiveFieldEntities,entry.getValue());
 				}
@@ -283,7 +293,7 @@ public class EntityGenerator {
 			if(!isTableExits)
 			{
 				logHelper.getLogger().error(" INVALID AUTHORIZATION SCHEMA ");
-				System.exit(0);
+				throw new IllegalStateException("INVALID AUTHORIZATION SCHEMA");
 			}
 
 			return getAuthenticationTableFieldsMapping(entityDetailsMap, authenticationTable, authenticationType);
@@ -308,9 +318,14 @@ public class EntityGenerator {
 			index= userInput.getFieldsInput(fieldsList.size());
 	
 			FieldDetails selected=fieldsList.get(index - 1);
-			while(!selected.getFieldType().equalsIgnoreCase("String"))
+			String type = "String";
+			if(authFieldsEntry.getKey().equals("IsActive"))
 			{
-				System.out.println("Please choose valid string field : ");
+				type="Boolean";
+			}
+			while(!selected.getFieldType().equalsIgnoreCase(type))
+			{
+				System.out.println("Please choose valid "+ type +" field : ");
 				index= userInput.getFieldsInput(fieldsList.size());
 				selected=fieldsList.get(index - 1);
 			}
@@ -338,8 +353,17 @@ public class EntityGenerator {
 	{
 		Map<String,FieldDetails> authFields=new HashMap<String, FieldDetails>();
 		authFields.put("UserName", null);
+		authFields.put("IsActive", null);
 		if(authenticationType.equals("database"))
 		authFields.put("Password", null);
+		
+		if(authenticationType.equals("oidc"))
+		{
+			authFields.put("ScmId",null);
+			authFields.put("FirstName",null);
+			authFields.put("LastName",null);
+			authFields.put("EmailAddress",null);
+		}
     
 		for(Map.Entry<String,EntityDetails> entry: entityDetails.entrySet())
 		{
@@ -388,7 +412,7 @@ public class EntityGenerator {
 
 		String destinationFolder = destPath + "/" + packageName.replaceAll("\\.", "/") + "/domain/model";
 		Map<String, Object> templates = new HashMap<String, Object>();
-		System.out.println(" USERS ONLY  " + authenticationInputMap.get(AuthenticationConstants.USERS_ONLY));
+	
 		if(authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE).equals("database") || 
 				(!authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE).equals("database") && authenticationInputMap.get(AuthenticationConstants.USERS_ONLY).equals("true")))
 		{

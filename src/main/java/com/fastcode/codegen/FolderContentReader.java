@@ -1,13 +1,33 @@
 package com.fastcode.codegen;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.security.CodeSource;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -21,16 +41,16 @@ import com.fastcode.logging.LoggingHelper;
 
 @Component
 public class FolderContentReader {
-	
+
 	@Autowired
 	private LoggingHelper logHelper;
-	
+
 	public List<String> getFilesFromFolder(String folderPath) {
 
 		try {
-		//	URI uri = Resources.getResource(folderPath).toURI();
+			//	URI uri = Resources.getResource(folderPath).toURI();
 			URI uri = FolderContentReader.class.getResource(folderPath).toURI();
-			List<String> list = new ArrayList<String>();
+			List<String> list = new ArrayList<String>(); 
 			if (uri.getScheme().equals("jar")) {
 				list = getFilesFromJar(folderPath);
 			} else {
@@ -44,10 +64,10 @@ public class FolderContentReader {
 
 		}
 		catch (IOException e) {
-			logHelper.getLogger().error("IOException Occured : ", e.getMessage());
+			logHelper.getLogger().error("IO Exception Occured while reading files", e.getMessage());
 		}
 		catch (URISyntaxException e) {
-			logHelper.getLogger().error("URISyntaxException Occured : ", e.getMessage());
+			logHelper.getLogger().error("URI syntax is not valid", e.getMessage());
 		}
 		return null;
 	}
@@ -58,9 +78,84 @@ public class FolderContentReader {
 				new RegexFileFilter("^(.*?)"), 
 				DirectoryFileFilter.DIRECTORY
 				);
-		
+
 		return files;
 	}
+
+
+	public void copyFileFromJar(String fileName , String destinationPath)
+	{
+		try {
+			URI uri;
+
+			uri = FolderContentReader.class.getResource("/" + fileName).toURI();
+			if (uri.getScheme().equals("jar")) {
+				InputStream inputStream = FolderContentReader.class.getClassLoader().getResourceAsStream("classpath:/"+ fileName); 
+				if(inputStream != null)
+				{
+					Files.copy(inputStream,Paths.get(destinationPath), StandardCopyOption.REPLACE_EXISTING);
+				}
+			}
+			else 
+			{
+				Files.copy(Paths.get(uri), Paths.get(destinationPath), StandardCopyOption.REPLACE_EXISTING);
+
+			}
+
+		} catch (IOException e) {
+
+			e.printStackTrace();
+		}
+		catch (URISyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+//	public void copyDirectoryFromJar(String folder, String destinationPath)
+//	{
+//		try {
+//			URI uri;
+//			uri = FolderContentReader.class.getResource("/" +folder).toURI();
+//			Path myPath;
+//			if (uri.getScheme().equals("jar")) {
+//				FileSystem fileSystem;
+//
+//				fileSystem = FileSystems.newFileSystem(uri, Collections.<String, Object>emptyMap());
+//
+//				System.out.println(" HEre " + uri.getPath() );
+//				myPath = fileSystem.getPath("/resources"+folder);
+//				fileSystem.close();
+//			} else {
+//				System.out.println(" HEre " + uri.getPath() );
+//				myPath = Paths.get(uri);
+//
+//			}
+//			Stream<Path> walk;
+//
+//			walk = Files.walk(myPath, 1);
+//
+//			for (Iterator<Path> it = walk.iterator(); it.hasNext();) {
+//				Path p= it.next();
+//				System.out.println(p + " \nfile name " + p.getFileName());
+//				if(p.toFile().isFile())
+//				{
+//					copyFileFromJar(folder.concat("/" +p.getFileName().toString()),destinationPath);
+//				}
+//
+//			}
+//
+//			walk.close();
+//		} catch (URISyntaxException e1 ) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//
+//
+//	}
 
 	public List<String> getFilesFromJar(String path) throws IOException{
 		CodeSource src = this.getClass().getProtectionDomain().getCodeSource();
