@@ -39,7 +39,7 @@ public class FreeMarkerConfigurationTest {
 	
 	@Test
 	public void configure_folderPathIsValid_ReturnConfiguration()
-	{
+	{ 
 	    Configuration cfg = new Configuration(Configuration.VERSION_2_3_28);
 		ClassTemplateLoader ctl1 = new ClassTemplateLoader(CodegenApplication.class, "/templates/backendTemplates/");// "/templates/backendTemplates/"); 
 		MultiTemplateLoader mtl = new MultiTemplateLoader(new TemplateLoader[] { ctl1 }); 

@@ -31,6 +31,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.fastcode.codegen.CodeGenerator;
@@ -58,6 +59,9 @@ public class CodeGeneratorTest {
 	
 	@Mock
 	private CodeGeneratorUtils mockedUtils;
+	
+	@Mock
+	private FolderContentReader contentReader;
 	
 	@Mock
 	private JSONUtils jsonUtils;
@@ -203,14 +207,14 @@ public class CodeGeneratorTest {
 		list.add("Entity2");
 		
 		String connStr="jdbc:postgresql://localhost:5432/Demo?username=postgres;password=fastcode";
-	
+	 
 		Mockito.when(mockEntityGeneratorUtils.parseConnectionString(anyString())).thenReturn(new HashMap<String, String>());
 		
 		Mockito.doReturn(list).when(codeGenerator).generateAllModulesForEntities(any(HashMap.class), anyString(), anyString(), anyString(), any(Boolean.class),anyString(),anyString(),any(HashMap.class));
 		Mockito.doNothing().when(codeGenerator).updateAppRouting(anyString(),anyString(), any(List.class), anyString());
 		Mockito.doNothing().when(codeGenerator).updateAppModule(anyString(),anyString(), any(List.class));
 		Mockito.doNothing().when(codeGenerator).updateEntitiesJsonFile(anyString(),any(List.class),anyString());
-
+        Mockito.doNothing().when(contentReader).copyFileFromJar(anyString(), anyString());
 		Mockito.doReturn(new HashMap<String, Object>()).when(codeGenerator).getInfoForApplicationPropertiesFile(anyString(),anyString(), anyString(), anyString(),any(HashMap.class), any(Boolean.class));
 		Mockito.doNothing().when(codeGenerator).generateApplicationProperties(any(HashMap.class), anyString());
 		Mockito.doNothing().when(codeGenerator).generateBeanConfig(anyString(),anyString(),anyString(),anyString(),any(HashMap.class),any(Boolean.class),anyString());

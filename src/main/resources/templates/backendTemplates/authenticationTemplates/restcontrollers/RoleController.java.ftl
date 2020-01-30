@@ -58,6 +58,7 @@ public class RoleController {
 		this._rolepermissionAppService = rolepermissionAppService;
 	}
 
+   <#if AuthenticationType == "database">
     // CRUD Operations
     // ------------ Create a role ------------
     @PreAuthorize("hasAnyAuthority('ROLEENTITY_CREATE')")
@@ -104,6 +105,7 @@ public class RoleController {
 		
     return new ResponseEntity(_roleAppService.Update(Long.valueOf(id),role), HttpStatus.OK);
 	}
+	</#if>
 
     @PreAuthorize("hasAnyAuthority('ROLEENTITY_READ')")
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)

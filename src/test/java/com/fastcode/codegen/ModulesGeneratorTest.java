@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -127,7 +128,7 @@ public class ModulesGeneratorTest {
 	{ 
 		UserInput input = new UserInput();
 		input.setDestinationPath(destPath.getAbsolutePath());
-		input.setUpgrade(true);
+		input.setUpgrade(true); 
 
 		Mockito.doNothing().when(mockedGitRepositoryManager).setDestinationPath(anyString());
 		Mockito.doReturn(true).when(mockedGitRepositoryManager).isGitInstalled();
@@ -143,7 +144,7 @@ public class ModulesGeneratorTest {
 	}
 	
 	@Test
-	public void generateCode_gitUpgradeIsFalseCopyGitFilesAuthenticationTypeIsNone_returnNothing() throws IOException
+	public void generateCode_gitUpgradeIsFalseCopyGitFilesAuthenticationTypeIsNone_returnNothing() throws Exception
 	{
 		Map<String,String> authenticationInputMap = new HashMap<String, String>();
 		//authenticationInputMap.put(AuthenticationConstants.AUTHENTICATION_SCHEMA, entityName);
@@ -185,7 +186,7 @@ public class ModulesGeneratorTest {
 	}
 	
 	@Test
-	public void generateCode_gitUpgradeIsFalseCopyGitFilesAuthenticationTypeIsNotNone_returnNothing() throws IOException
+	public void generateCode_gitUpgradeIsFalseCopyGitFilesAuthenticationTypeIsNotNone_returnNothing() throws IOException, IllegalStateException, SQLException
 	{
 		Map<String,String> authenticationInputMap = new HashMap<String, String>();
 		//authenticationInputMap.put(AuthenticationConstants.AUTHENTICATION_SCHEMA, entityName);

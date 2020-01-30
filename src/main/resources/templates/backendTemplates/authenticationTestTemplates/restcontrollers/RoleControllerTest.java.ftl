@@ -192,7 +192,7 @@ public class RoleControllerTest {
 	    		  .andExpect(status().isNotFound());
 	
 	}    
-
+<#if AuthenticationType == "database">
 	@Test
 	public void CreateRole_RoleAlreadyExists_ThrowEntityExistsException() throws Exception {
 
@@ -293,7 +293,7 @@ public class RoleControllerTest {
         e.setId(id);
         role_repository.delete(e);
 	}    
-	
+	</#if>
 	@Test
 	public void FindAll_SearchIsNotNullAndPropertyIsValid_ReturnStatusOk() throws Exception {
 		

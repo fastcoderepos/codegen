@@ -38,6 +38,10 @@ public class CodeGenerator {
 
 	@Autowired
 	private LoggingHelper logHelper;
+	
+	@Autowired
+	private FolderContentReader contentReader;
+
 
 	//Build root map with all information required for templates
 	public Map<String, Object> buildEntityInfo(String entityName,String packageName,
@@ -105,12 +109,13 @@ public class CodeGenerator {
 	// Generate all components of the desired application
 	public void generateAll(String backEndRootFolder, String clientRootFolder, String sourcePackageName,
 			Boolean cache, String destPath,Map<String,EntityDetails> details, String connectionString,
-			String schema, Map<String,String> authenticationInputMap) throws IOException {
+			String schema, Map<String,String> authenticationInputMap) {
 
 		String appName = sourcePackageName.substring(sourcePackageName.lastIndexOf(".") + 1);
 		//to generate all modules for list of entities
 		List<String> entityNames = generateAllModulesForEntities(details, backEndRootFolder, clientRootFolder, sourcePackageName, cache, destPath,schema, authenticationInputMap);
-		FileUtils.copyFile(new File("src/main/resources/keystore.p12"), new File(destPath + "/" + backEndRootFolder + "/src/main/resources/keystore.p12"));
+
+		contentReader.copyFileFromJar("keystore.p12", destPath + "/" + backEndRootFolder + "/src/main/resources/keystore.p12");
 
 		//update front end modules
 		updateAppRouting(destPath,appName, entityNames, authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE));

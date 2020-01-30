@@ -45,13 +45,13 @@ public class CommandUtils {
         	logHelper.getLogger().error("Error Occured : ", e.getMessage());
             throw new InternalError(e);
         }
-    }
+    } 
 
     public String runProcess(String command, String path) {
         String[] builderCommand = getBuilderCommand(command);
         return runProcess(builderCommand, path, true);
     }
-
+ 
     public String runGitProcess(String args, String path) {
         String command = "git " + args;
         String[] builderCommand = getBuilderCommand(command);

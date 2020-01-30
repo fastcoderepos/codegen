@@ -9,7 +9,6 @@ public class JoinDetails {
 	String mappedBy;
 	String joinEntityName;
 	
-	
 	public String getJoinEntityName() {
 		return joinEntityName;
 	}

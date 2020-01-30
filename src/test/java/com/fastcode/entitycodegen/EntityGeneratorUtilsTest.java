@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.assertj.core.api.Assertions;
 import org.junit.After;
@@ -43,7 +44,7 @@ public class EntityGeneratorUtilsTest {
 	@After
 	public void tearDown() throws Exception {
 
-	}
+	} 
 	
 	@Test
 	public void parseConnectionString_connectionStringIsvalid_returnMap()
@@ -53,8 +54,48 @@ public class EntityGeneratorUtilsTest {
 		connectionStringMap.put("url", "jdbc:postgresql://localhost:5432/Demo");
 		connectionStringMap.put("username", "postgres");
 		connectionStringMap.put("password", "fastcode");
+		connectionStringMap.put("database", "postgresql");
+		connectionStringMap.put("driverName", "org.postgresql.Driver");
 		
 		Assertions.assertThat(entityGeneratorUtils.parseConnectionString(conn)).isEqualTo(connectionStringMap);
+	}
+	
+	@Test
+	public void parseConnectionString_connectionStringContainsInvalidDatabase_returnNull()
+	{
+		String conn = "jdbc:post://localhost:5432/Demo?username=postgres;password=fastcode";
+//		Map<String, String> connectionStringMap = new HashMap<String, String>();
+//		connectionStringMap.put("url", "jdbc:postgresql://localhost:5432/Demo");
+//		connectionStringMap.put("username", "postgres");
+//		connectionStringMap.put("password", "fastcode");
+//		connectionStringMap.put("database", "postgresql");
+//		connectionStringMap.put("driverName", "org.postgresql.Driver");
+		
+		Assertions.assertThat(entityGeneratorUtils.parseConnectionString(conn)).isEqualTo(null);
+	}
+	
+	@Test
+	public void parseConnectionString_connectionStringIsInvalid_returnNull()
+	{
+		String conn = "jdbc:postgresql://localhost:5432/Demo?usernamepostgres;password=fastcode";
+//		Map<String, String> connectionStringMap = new HashMap<String, String>();
+//		connectionStringMap.put("url", "jdbc:postgresql://localhost:5432/Demo");
+//		connectionStringMap.put("username", "postgres");
+//		connectionStringMap.put("password", "fastcode");
+//		connectionStringMap.put("database", "postgresql");
+//		connectionStringMap.put("driverName", "org.postgresql.Driver");
+		
+		Assertions.assertThat(entityGeneratorUtils.parseConnectionString(conn)).isEqualTo(null);
+	}
+	
+	@Test
+	public void findCompositePrimaryKeyClasses_listIsNotEmpty_returnFilteredList() throws ClassNotFoundException, IOException
+	{
+		EntityDetailsTest detailsTest = new EntityDetailsTest();
+		ArrayList<Class<?>> classes = detailsTest.loadClasses();
+		List<String> list = new ArrayList<String>();
+		list.add("Cust");
+		Assertions.assertThat(entityGeneratorUtils.findCompositePrimaryKeyClasses(classes)).isEqualTo(list);
 	}
 	
 	@Test

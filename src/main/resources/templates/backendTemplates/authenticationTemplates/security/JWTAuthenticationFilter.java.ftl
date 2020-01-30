@@ -13,6 +13,7 @@ import [=PackageName].domain.model.[=AuthenticationTable]Entity;
 import [=PackageName].domain.authorization.user.I[=AuthenticationTable]Manager;
 <#else>
 import [=PackageName].domain.authorization.role.IRoleManager;
+import java.util.stream.Collectors;
 </#if>
 </#if>
 <#if AuthenticationType != "none">
@@ -150,6 +151,8 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 			permissionsList.addAll(permissions);
 			}
 		}
+		
+		permissionsList= permissionsList.stream().distinct().collect(Collectors.toList());
 		</#if>
 
 		String[] groupsArray = new String[permissionsList.size()];
