@@ -31,7 +31,7 @@
         </mat-form-field> 
       </form>
     </mat-card-content>
-    <mat-card-actions class="fb-text-right">
+    <mat-card-actions class="fc-text-right">
       <button name="save" mat-raised-button color="primary" (click)="itemNgForm.ngSubmit.emit()"
         [disabled]="!itemForm.valid || loading || !IsCreatePermission">{{'GENERAL.ACTIONS.SAVE' | translate}}</button>
     </mat-card-actions>

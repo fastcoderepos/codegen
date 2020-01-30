@@ -2,11 +2,11 @@
   <mat-spinner></mat-spinner>
 </section>
 <div *ngIf="item" class="list-container">
-  <div class="top-breadcum">
+  <div class="top-breadcrumb">
     <h1 class="template-title">{{title}}</h1>
-    <div class="fb-row">
-      <div class="fb-col-sm-12">
-        <ul class="breadcum">
+    <div class="fc-row">
+      <div class="fc-col-sm-12">
+        <ul class="breadcrumb">
           <li><a [routerLink]="['/dashboard']"><i class="material-icons">
                 home
               </i> &nbsp;Dashboard</a></li>
@@ -36,14 +36,14 @@
       <br>
       <br>
       <div class="association-div full-width">
-        <div class="fb-row">
-          <div class="fb-col-sm-6">
+        <div class="fc-row">
+          <div class="fc-col-sm-6">
             <button mat-button *ngFor="let association of childAssociations" (click)="openChildDetails(association)"
               class="btn btn-link">
               {{association.table}}&nbsp;<mat-icon>link</mat-icon>
             </button>
           </div>
-          <div class="fb-col-sm-6 fb-text-right">
+          <div class="fc-col-sm-6 fc-text-right">
               <button name="back" mat-raised-button color="basic" (click)="onBack()"> {{'GENERAL.ACTIONS.CANCEL' | translate}} </button> 
               <button name="save" mat-raised-button color="primary" [disabled]="!itemForm.valid || loading || !IsUpdatePermission" (click)="itemNgForm.ngSubmit.emit()">
                 {{'GENERAL.ACTIONS.SAVE' | translate}}

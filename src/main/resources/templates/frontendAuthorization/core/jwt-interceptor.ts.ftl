@@ -13,7 +13,7 @@ export class JwtInterceptor implements HttpInterceptor {
     // add authorization header with jwt token if available
 
     <#if AuthenticationType == "oidc">
-    if (request.url != environment.tokenEndpoint) {
+    if (request.url.search(environment.tokenEndpoint) == -1) {
       let token = this.authService.token;
 			token = token ? ("Bearer " + token) : token;
 

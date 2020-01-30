@@ -23,7 +23,7 @@ public class AuthenticationClassesTemplateGenerator {
 
 	private static final String BACKEND_TEMPLATE_FOLDER = "/templates/backendTemplates";
 	private static final String AUTHORIZATION_TEMPLATE_FOLDER = "/templates/backendTemplates/authenticationTemplates";
-	private static final String FRONTEND_AUTHORIZATION_TEMPLATE_FOLDER = "/templates/frontendAuthorization/";
+	private static final String FRONTEND_AUTHORIZATION_TEMPLATE_FOLDER = "/templates/frontendAuthorization";
 	private static final String AUTHORIZATION_TEST_TEMPLATE_FOLDER = "/templates/backendTemplates/authenticationTestTemplates";
 
 	public void generateAutheticationClasses(String destination, String packageName, Boolean cache,String schemaName,Map<String, String> authenticationInputMap,Map<String,EntityDetails> details) {
@@ -238,16 +238,16 @@ public class AuthenticationClassesTemplateGenerator {
 		}
 
 		for(String entity: authorizationEntities) {
-
+			String entityPath = FRONTEND_AUTHORIZATION_TEMPLATE_FOLDER + "/" + entity;
 			if(entity == "userpermission" && authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA) != null ) {
-				generateFrontendAuthorizationComponents(appFolderPath + codeGeneratorUtils.camelCaseToKebabCase(authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA)) + "permission", FRONTEND_AUTHORIZATION_TEMPLATE_FOLDER + entity, authenticationInputMap, root);
+				generateFrontendAuthorizationComponents(appFolderPath + codeGeneratorUtils.camelCaseToKebabCase(authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA)) + "permission", entityPath, authenticationInputMap, root);
 			}
 			else if(entity == "userrole" && authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA) != null ) {
-				generateFrontendAuthorizationComponents(appFolderPath + codeGeneratorUtils.camelCaseToKebabCase(authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA)) + "role", FRONTEND_AUTHORIZATION_TEMPLATE_FOLDER + entity, authenticationInputMap, root);
+				generateFrontendAuthorizationComponents(appFolderPath + codeGeneratorUtils.camelCaseToKebabCase(authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA)) + "role", entityPath, authenticationInputMap, root);
 			}
 			else 
 			{
-				generateFrontendAuthorizationComponents(appFolderPath + entity, FRONTEND_AUTHORIZATION_TEMPLATE_FOLDER + entity, authenticationInputMap, root);
+				generateFrontendAuthorizationComponents(appFolderPath + entity, entityPath, authenticationInputMap, root);
 			}
 		}
 
