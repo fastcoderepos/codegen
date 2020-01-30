@@ -63,9 +63,8 @@ fastCode.ldap.logon.name = [=LogonName]
 </#if>
 #fastCode.ldap.ldiffilename=C:/Program Files/Apache Directory Studio/users.ldif
 <#elseif AuthenticationType == "oidc">
-spring.security.oauth2.client.registration.oidc.client-id=0oa1dpe6xa5SKvHR0357
-spring.security.oauth2.client.provider.oidc.issuer-uri=https://nfinityllc-usman.okta.com/oauth2/default
-#spring.security.oauth2.client.registration.oidc.client-secret=tS23X8Cipe9G7XmfZk-VesHqdXzJRiGmz4DtXP5a
+spring.security.oauth2.client.registration.oidc.client-id=0oa2ilsqcabubcWPX357
+spring.security.oauth2.client.provider.oidc.issuer-uri=https://dev-145947.okta.com/oauth2/default
 </#if>
 
 spring.main.allow-bean-definition-overriding=true

@@ -318,9 +318,14 @@ public class EntityGenerator {
 			index= userInput.getFieldsInput(fieldsList.size());
 	
 			FieldDetails selected=fieldsList.get(index - 1);
-			while(!selected.getFieldType().equalsIgnoreCase("String"))
+			String type = "String";
+			if(authFieldsEntry.getKey().equals("IsActive"))
 			{
-				System.out.println("Please choose valid string field : ");
+				type="Boolean";
+			}
+			while(!selected.getFieldType().equalsIgnoreCase(type))
+			{
+				System.out.println("Please choose valid "+ type +" field : ");
 				index= userInput.getFieldsInput(fieldsList.size());
 				selected=fieldsList.get(index - 1);
 			}
@@ -348,8 +353,17 @@ public class EntityGenerator {
 	{
 		Map<String,FieldDetails> authFields=new HashMap<String, FieldDetails>();
 		authFields.put("UserName", null);
+		authFields.put("IsActive", null);
 		if(authenticationType.equals("database"))
 		authFields.put("Password", null);
+		
+		if(authenticationType.equals("oidc"))
+		{
+			authFields.put("ScmId",null);
+			authFields.put("FirstName",null);
+			authFields.put("LastName",null);
+			authFields.put("EmailAddress",null);
+		}
     
 		for(Map.Entry<String,EntityDetails> entry: entityDetails.entrySet())
 		{

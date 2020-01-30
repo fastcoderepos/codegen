@@ -7,14 +7,14 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.security.authentication.AuthenticationManager;
-<#if AuthenticationType == "ldap">
-<#if UsersOnly== "true">
+import org.apache.http.auth.InvalidCredentialsException;
+<#if AuthenticationType == "database" || (AuthenticationType == "ldap" && UsersOnly== "true")>
 import [=PackageName].domain.model.[=AuthenticationTable]Entity;
 import [=PackageName].domain.authorization.user.I[=AuthenticationTable]Manager;
-<#else>
+</#if>
+<#if AuthenticationType == "ldap" && UsersOnly != "true">
 import [=PackageName].domain.authorization.role.IRoleManager;
 import java.util.stream.Collectors;
-</#if>
 </#if>
 <#if AuthenticationType != "none">
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,11 +30,9 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.support.WebApplicationContextUtils;
+import org.springframework.context.ApplicationContext;
 
 import javax.servlet.FilterChain;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -54,13 +52,29 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     private IRoleManager _roleManager;
     </#if>
     </#if>
+    <#if AuthenticationType == "database">
+    private I[=AuthenticationTable]Manager _userManager;
+    </#if>
     private IJwtRepository jwtRepo;
 	
     private AuthenticationManager authenticationManager;
 
-    public JWTAuthenticationFilter(AuthenticationManager authenticationManager) {
+    public JWTAuthenticationFilter(AuthenticationManager authenticationManager,ApplicationContext ctx) {
         this.authenticationManager = authenticationManager;
+        <#if AuthenticationType == "ldap">
+    	this.securityUtils = ctx.getBean(SecurityUtils.class);
+    	<#if UsersOnly== "true">
+    	this._userManager = ctx.getBean(IUserManager.class);
+    	<#else>
+    	this._roleManager = ctx.getBean(IRoleManager.class);
+    	</#if>
+    	</#if>
+    	<#if AuthenticationType == "database">
+    	this._userManager = ctx.getBean(IUserManager.class);
+    	</#if>
+		this.jwtRepo = ctx.getBean(IJwtRepository.class);
     }
+    
     <#if AuthenticationType != "none">
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request,
@@ -70,59 +84,47 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             LoginUserInput creds = new ObjectMapper()
                     .readValue(request.getInputStream(), LoginUserInput.class);
 
-            return authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            creds.getUserName(),
-                            creds.getPassword(),
-                            new ArrayList<>())
-            );
-        } catch (IOException e) {
+        <#if UserInput?? && AuthenticationFields??>
+        [=AuthenticationTable]Entity user = _userManager.FindBy[=AuthenticationFields.UserName.fieldName?cap_first](creds.getUserName());       
+        if(user != null && user.get[=AuthenticationFields.IsActive.fieldName?cap_first]())
+        <#else>
+        [=AuthenticationTable]Entity user = _userManager.FindByUserName(creds.getUserName());
+        if(user != null && user.getIsActive())
+        </#if>   
+		{
+			return authenticationManager.authenticate(
+			new UsernamePasswordAuthenticationToken(creds.getUserName(),creds.getPassword(),new ArrayList<>()));
+		}
+		else
+			throw new InvalidCredentialsException("Invalid Credentials");
+
+		} catch (IOException | InvalidCredentialsException e) {
             throw new RuntimeException(e);
         }
     }
     </#if>
+    
     @Override
     protected void successfulAuthentication(HttpServletRequest request,
                                             HttpServletResponse res,
                                             FilterChain chain,
                                             Authentication auth) throws IOException, ServletException {
 
-        <#if AuthenticationType == "ldap">
-        if(securityUtils==null){
-			ServletContext servletContext = request.getServletContext();
-			WebApplicationContext webApplicationContext = WebApplicationContextUtils.getWebApplicationContext(servletContext);
-			securityUtils = webApplicationContext.getBean(SecurityUtils.class);
-		}
-		
-        <#if UsersOnly == "true">
-        if(_userManager==null){
-            ServletContext servletContext = request.getServletContext();
-            WebApplicationContext webApplicationContext = WebApplicationContextUtils.getWebApplicationContext(servletContext);
-            _userManager = webApplicationContext.getBean(I[=AuthenticationTable?cap_first]Manager.class);
-        }
-        
-        <#else>
-         // We cannot autowire RolesManager, but need to use the code below to set it
-          if(_roleManager==null){
-            ServletContext servletContext = request.getServletContext();
-            WebApplicationContext webApplicationContext = WebApplicationContextUtils.getWebApplicationContext(servletContext);
-            _roleManager = webApplicationContext.getBean(IRoleManager.class);
-        }
-        
-        </#if>
-        </#if>
         Claims claims = Jwts.claims();
         String userName = "";
         if (auth != null) {
+        <#if AuthenticationType == "database">
             if (auth.getPrincipal() instanceof org.springframework.security.core.userdetails.User) {
                 userName = ((User) auth.getPrincipal()).getUsername();
                 claims.setSubject(userName);
             }
-            else if (auth.getPrincipal() instanceof LdapUserDetailsImpl) {
+        </#if>    
+        <#if AuthenticationType == "ldap">
+            if (auth.getPrincipal() instanceof LdapUserDetailsImpl) {
                 userName = ((LdapUserDetailsImpl) auth.getPrincipal()).getUsername();
                 claims.setSubject(userName);
             }
-            
+        </#if>   
         }
         <#if AuthenticationType == "database">
         claims.put("scopes", (auth.getAuthorities().stream().map(s -> s.toString()).collect(Collectors.toList())));
@@ -170,14 +172,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         JwtEntity jt = new JwtEntity(); 
         jt.setToken("Bearer "+ token); 
         jt.setUserName(userName); 
-        jt.setIsActive(true); 
- 
-        if(jwtRepo==null){ 
-            ServletContext servletContext = request.getServletContext(); 
-            WebApplicationContext webApplicationContext = WebApplicationContextUtils.getWebApplicationContext(servletContext); 
-            jwtRepo = webApplicationContext.getBean(IJwtRepository.class); 
-        } 
- 
+        
         jwtRepo.save(jt); 
         
         res.addHeader(SecurityConstants.HEADER_STRING, SecurityConstants.TOKEN_PREFIX + token);

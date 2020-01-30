@@ -16,6 +16,9 @@ public class Find[=AuthenticationTable]By<#if AuthenticationFields??><#list Auth
 	private String firstName;
 	private String phoneNumber;
 	private Long profilePictureId;
+	<#if AuthenticationType =="oidc">
+    private String scimId;
+    </#if>
 	<#if AuthenticationType =="database">
 	private Boolean shouldChangePasswordOnNextLogin;
 	</#if>
@@ -125,6 +128,16 @@ public class Find[=AuthenticationTable]By<#if AuthenticationFields??><#list Auth
 	public void setProfilePictureId(Long profilePictureId) {
 		this.profilePictureId = profilePictureId;
 	}
+	<#if AuthenticationType =="oidc">
+  
+  	public String getScimId() {
+  		return scimId;
+  	}
+
+  	public void setScimId(String scimId){
+  		this.scimId = scimId;
+  	}
+  	</#if>
 <#if AuthenticationType =="database">
 	public Boolean isShouldChangePasswordOnNextLogin() {
 		return shouldChangePasswordOnNextLogin;

@@ -369,7 +369,7 @@ public class [=ClassName]ControllerTest {
 		.andExpect(status().isNotFound());
 
 	}    
-	
+	<#if AuthenticationType == "database" && ClassName == AuthenticationTable>
 	<#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>
 	public void Create[=AuthenticationTable]_[=AuthenticationTable]DoesNotExist_ReturnStatusOk() throws Exception {
 	    <#if AuthenticationFields??>
@@ -390,7 +390,7 @@ public class [=ClassName]ControllerTest {
 		 
 		 [=ClassName?uncap_first]_repository.delete(createNewEntity());
 	}  
-<#if AuthenticationType == "database">
+    
 	@Test
 	public void Create[=ClassName]_[=ClassName]AlreadyExists_ThrowEntityExistsException() throws Exception {
 	    Find[=ClassName]By<#if AuthenticationFields??>[=AuthenticationFields["UserName"].fieldName?cap_first]</#if>Output output= new Find[=ClassName]By<#if AuthenticationFields??>[=AuthenticationFields["UserName"].fieldName?cap_first]</#if>Output();
