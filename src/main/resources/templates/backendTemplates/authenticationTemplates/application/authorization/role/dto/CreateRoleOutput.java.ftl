@@ -29,5 +29,15 @@ public class CreateRoleOutput {
         this.name = name;
     }
 
+    <#if (AuthenticationType == "oidc" && UsersOnly == "false")>
+    public String getScimId() {
+        return scimId;
+    }
+
+    public void setScimId(String scimId) {
+        this.scimId = scimId;
+    }
+    
+    </#if>
 }
 

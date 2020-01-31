@@ -121,7 +121,7 @@ public class CodeGenerator {
 		updateAppRouting(destPath,appName, entityNames, authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE));
 		updateAppModule(destPath,appName, entityNames);
 		updateEntitiesJsonFile(destPath + "/" + appName + "Client/src/app/common/components/main-nav/entities.json",entityNames,authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA));
-
+ 
 		Map<String,Object> propertyInfo = getInfoForApplicationPropertiesFile(destPath,sourcePackageName, connectionString, schema,authenticationInputMap,cache);
 
 		//generate configuration files for backend

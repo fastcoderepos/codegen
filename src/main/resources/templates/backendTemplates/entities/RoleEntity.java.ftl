@@ -12,6 +12,9 @@ public class RoleEntity implements Serializable {
     private Long id;
     private String displayName;
     private String name;
+    <#if (AuthenticationType == "oidc" && UsersOnly == "false")>
+    private String scimId;
+    </#if>
 
     @Id
     @Column(name = "Id", nullable = false)
@@ -24,8 +27,20 @@ public class RoleEntity implements Serializable {
         this.id = id;
     }
 
+ 	<#if (AuthenticationType == "oidc" && UsersOnly == "false")>
+ 	@Basic
+    @Column(name = "ScimId", nullable = false, length = 36, unique = true)
+    public String ScimId() {
+        return scimId;
+    }
+
+    public void setScimId(String scimId) {
+        this.scimId = scimId;
+    }
+    
+    </#if>
     @Basic
-    @Column(name = "DisplayName", nullable = true, length = 64)
+    @Column(name = "DisplayName", nullable = false, length = 128)
     public String getDisplayName() {
         return displayName;
     }
@@ -35,7 +50,7 @@ public class RoleEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "Name", nullable = false, length = 32)
+    @Column(name = "Name", nullable = false, length = 128)
     public String getName() {
         return name;
     }

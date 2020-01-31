@@ -12,7 +12,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 
-@SpringBootApplication
+@SpringBootApplication 
 public class CodegenApplication implements ApplicationRunner {
 	static Map<String, String> root = new HashMap<>();
 

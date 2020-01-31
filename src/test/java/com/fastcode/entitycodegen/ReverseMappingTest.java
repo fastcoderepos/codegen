@@ -14,6 +14,7 @@ import java.util.Map;
 import org.apache.openjpa.jdbc.conf.JDBCConfiguration;
 import org.apache.openjpa.jdbc.conf.JDBCConfigurationImpl;
 import org.apache.openjpa.jdbc.meta.ReverseMappingTool;
+import org.apache.openjpa.jdbc.sql.DBDictionary;
 import org.apache.openjpa.lib.util.Options;
 import org.assertj.core.api.Assertions;
 import org.junit.After;
@@ -81,6 +82,10 @@ public class ReverseMappingTest {
 		conf.setConnectionUserName(connectionProps.get("username"));
 		conf.setConnectionPassword(connectionProps.get("password"));
 		conf.setConnectionDriverName("org.postgresql.Driver");
+		DBDictionary dc = conf.getDBDictionaryInstance();
+		dc.supportsNullTableForGetPrimaryKeys = false;
+		dc.supportsNullTableForGetIndexInfo = false;
+		conf.setDBDictionary(dc);
 		
 		Assertions.assertThat(reverseMapping.configureJdbc(connectionProps)).isEqualTo(conf);
 	}

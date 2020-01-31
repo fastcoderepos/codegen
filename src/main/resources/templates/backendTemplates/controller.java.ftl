@@ -205,7 +205,7 @@ public class [=ClassName]Controller {
 		this.logHelper = helper;
 	}
 
-   <#if AuthenticationType == "database" && ClassName == AuthenticationTable>
+   <#if !((AuthenticationType == "ldap" || AuthenticationType == "oidc") && ClassName == AuthenticationTable)>
     <#if AuthenticationType != "none">
     @PreAuthorize("hasAnyAuthority('[=ClassName?upper_case]ENTITY_CREATE')")
     </#if>

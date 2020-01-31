@@ -35,7 +35,7 @@ public class PermissionEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "DisplayName", nullable = true)
+    @Column(name = "DisplayName", nullable = false, length = 128)
     public String getDisplayName() {
         return displayName;
     }
@@ -45,7 +45,7 @@ public class PermissionEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "Name", nullable = false, length = 128)
+    @Column(name = "Name", nullable = false, length = 128,unique = true)
     public String getName() {
         return name;
     }
@@ -78,8 +78,7 @@ public class PermissionEntity implements Serializable {
  
     private Set<RolepermissionEntity> rolepermissionSet = new HashSet<RolepermissionEntity>(); 
   
-
-   <#if AuthenticationType == "database" || (AuthenticationType != "database" && (UsersOnly?? && UsersOnly == "true"))>
+    <#if AuthenticationType == "database" || (AuthenticationType != "database" && (UsersOnly?? && UsersOnly == "true"))>
     @OneToMany(mappedBy = "permission", cascade = CascadeType.ALL, orphanRemoval = true) 
     public Set<[=AuthenticationTable]permissionEntity> get[=AuthenticationTable]permissionSet() { 
       return [=AuthenticationTable?uncap_first]permissionSet; 
