@@ -61,24 +61,38 @@ import { BottomTabNavComponent } from './common/components/bottom-tab-nav/bottom
 import { environment } from '../environments/environment';
 import { Globals } from './globals';
 
+<#list EntityNames as module,entity>
+<#if !(entity == AuthenticationTable && ExcludeUserNew) && !(entity == "Role" && ExcludeRoleNew)>
+import { [=entity]ListComponent, [=entity]DetailsComponent, [=entity]NewComponent } from './[=module]/index';
+<#else>
+import { [=entity]ListComponent, [=entity]DetailsComponent } from './[=module]/index';
+</#if>
+</#list>
+
 export function HttpLoaderFactory(httpClient: HttpClient) {
   return new TranslateHttpLoader(httpClient);
 }
 
 @NgModule({
-  declarations: [
-    ErrorPageComponent,
-  	HomeComponent,
-  	DashboardComponent,
-  	
+	declarations: [
+		ErrorPageComponent,
+		HomeComponent,
+		DashboardComponent,
 		<#if AuthenticationType == "oidc">
 		CallbackComponent,
 		<#elseif AuthenticationType == "ldap" || AuthenticationType == "database">
 		LoginComponent,
 		</#if>
-    AppComponent,
-    MainNavComponent,
-    BottomTabNavComponent,
+		AppComponent,
+		MainNavComponent,
+		BottomTabNavComponent,
+    <#list EntityNames as module,entity>
+		[=entity]ListComponent,
+		[=entity]DetailsComponent,
+		<#if !(entity == AuthenticationTable && ExcludeUserNew) && !(entity == "Role" && ExcludeRoleNew)>
+		[=entity]NewComponent,
+		</#if>
+		</#list>
   ],
   imports: [
     BrowserModule,

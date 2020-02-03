@@ -4,7 +4,9 @@ import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material';
 import { [=IEntity] } from './[=IEntityFile]';
 import { [=ClassName]Service } from './[=ModuleName].service';
 import { Router, ActivatedRoute } from '@angular/router';
+<#if !ExcludeUserNew>
 import { [=ClassName]NewComponent } from './[=ModuleName]-new.component';
+</#if>
 import { BaseListComponent, Globals, IListColumn, listColumnType, PickerDialogService, ErrorService } from 'projects/fast-code-core/src/public_api';
 
 <#if Relationship?has_content>
@@ -201,9 +203,9 @@ export class [=ClassName]ListComponent extends BaseListComponent<[=IEntity]> imp
 		this.selectedColumns = this.columns;
 		this.displayedColumns = this.columns.map((obj) => { return obj.column });
   	}
-  
+  <#if !ExcludeUserNew>
 	addNew() {
 		super.addNew([=ClassName]NewComponent);
-	}
+	}</#if>
   
 }

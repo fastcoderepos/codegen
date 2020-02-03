@@ -45,7 +45,7 @@ export class PermissionNewComponent extends BaseNewComponent<IPermission> implem
   
   setForm(){
     this.itemForm = this.formBuilder.group({
-      displayName: [''],
+      displayName: ['', Validators.required],
       name: ['', Validators.required],
     });
   }

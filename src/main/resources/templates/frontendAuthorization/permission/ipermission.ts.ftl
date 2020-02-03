@@ -1,6 +1,6 @@
 export interface IPermission {  
 
-      displayName?: string;
+      displayName: string;
       id: number;
       name: string;
   }

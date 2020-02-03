@@ -16,7 +16,7 @@
         </ul>
       </div>
       <div class="fc-col-md-4 fc-text-right">
-        <button name="add" mat-raised-button color="primary"  (click)="addNew()"><i
+        <button name="add" mat-raised-button color="primary" [disabled]=<#if ExcludeUserNew>"true"<#else>"!IsCreatePermission"</#if> (click)="addNew()"><i
             class="material-icons">
             add_circle_outline
           </i> &nbsp;{{'GENERAL.ACTIONS.ADD' | translate}}</button>
@@ -41,12 +41,23 @@
             {{ item.firstName }}
           </mat-cell>
         </ng-container>
+        
         <ng-container matColumnDef="id">
           <mat-header-cell mat-sort-header *matHeaderCellDef [disabled]="!isColumnSortable('id')"> {{getFieldLabel("Id")}}</mat-header-cell>
           <mat-cell *matCellDef="let item">
             {{ item.id }}
           </mat-cell>
         </ng-container>
+        
+				<#if AuthenticationType == "oidc">
+        <ng-container matColumnDef="scimId">
+          <mat-header-cell mat-sort-header *matHeaderCellDef [disabled]="!isColumnSortable('scimId')"> {{getFieldLabel("scimId")}}</mat-header-cell>
+          <mat-cell *matCellDef="let item">
+            {{ item.scimId }}
+          </mat-cell>
+        </ng-container>
+        
+        </#if>
         <ng-container matColumnDef="isActive">
           <mat-header-cell mat-sort-header *matHeaderCellDef [disabled]="!isColumnSortable('isActive')"> {{getFieldLabel("IsActive")}}</mat-header-cell>
           <mat-cell *matCellDef="let item">

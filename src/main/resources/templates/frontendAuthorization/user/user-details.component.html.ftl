@@ -21,23 +21,31 @@
     <mat-card-content>
       <form [formGroup]="itemForm" #itemNgForm="ngForm" (ngSubmit)="onSubmit()" class="item-form">
         <mat-form-field>
-          <input formControlName="firstName" matInput placeholder="Enter firstName">
+          <input formControlName="firstName" matInput placeholder="First name">
           <mat-error *ngIf="!itemForm.get('firstName').valid && itemForm.get('firstName').touched">
             {{'GENERAL.ERRORS.REQUIRED' | translate}}</mat-error>
         </mat-form-field>
 
         <mat-form-field>
-          <input formControlName="lastName" matInput placeholder="Enter lastName">
+          <input formControlName="lastName" matInput placeholder="Last name">
           <mat-error *ngIf="!itemForm.get('lastName').valid && itemForm.get('lastName').touched">
             {{'GENERAL.ERRORS.REQUIRED' | translate}}</mat-error>
         </mat-form-field>
 
         <mat-form-field>
-          <input formControlName="userName" matInput placeholder="Enter userName">
+          <input formControlName="userName" matInput placeholder="Username">
           <mat-error *ngIf="!itemForm.get('userName').valid && itemForm.get('userName').touched">
             {{'GENERAL.ERRORS.REQUIRED' | translate}}</mat-error>
         </mat-form-field>
 
+   			<#if AuthenticationType == "oidc">
+	      <mat-form-field>
+          <input formControlName="scimId" matInput placeholder="scim Id">
+          <mat-error *ngIf="!itemForm.get('scimId').valid && itemForm.get('scimId').touched">
+            {{'GENERAL.ERRORS.REQUIRED' | translate}}</mat-error>
+        </mat-form-field>
+        
+				</#if>
         <mat-form-field>
           <input formControlName="emailAddress" matInput placeholder="Enter emailAddress">
           <mat-error *ngIf="!itemForm.get('emailAddress').valid && itemForm.get('emailAddress').touched">
@@ -82,7 +90,7 @@
           </div>
           <div class="fc-col-sm-6 fc-text-right">
               <button name="back" mat-raised-button color="basic" (click)="onBack()"> {{'GENERAL.ACTIONS.CANCEL' | translate}} </button> 
-              <button name="save" mat-raised-button color="primary" [disabled]="!itemForm.valid || loading || !IsUpdatePermission" (click)="itemNgForm.ngSubmit.emit()">
+              <button name="save" mat-raised-button color="primary" [disabled]="<#if !ExcludeUserNew>!itemForm.valid || loading || !IsUpdatePermission<#else>true</#if>" (click)="itemNgForm.ngSubmit.emit()">
                 {{'GENERAL.ACTIONS.SAVE' | translate}}
               </button>
           </div>

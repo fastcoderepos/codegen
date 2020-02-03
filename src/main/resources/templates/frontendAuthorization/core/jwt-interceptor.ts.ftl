@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from 'src/environments/environment';
+import { AuthOidcConfig } from 'src/environments/environment';
 import { AuthenticationService } from './authentication.service';
 
 @Injectable()
@@ -13,7 +13,7 @@ export class JwtInterceptor implements HttpInterceptor {
     // add authorization header with jwt token if available
 
     <#if AuthenticationType == "oidc">
-    if (request.url.search(environment.tokenEndpoint) == -1) {
+    if (request.url.search(AuthOidcConfig.stsServer) == -1) {
       let token = this.authService.token;
 			token = token ? ("Bearer " + token) : token;
 

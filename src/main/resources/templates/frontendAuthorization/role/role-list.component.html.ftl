@@ -16,7 +16,7 @@
         </ul>
       </div>
       <div class="fc-col-md-4 fc-text-right">
-        <button name="add" mat-raised-button color="primary" (click)="addNew()"><i class="material-icons">
+        <button name="add" mat-raised-button color="primary" [disabled]=<#if ExcludeRoleNew>"true"<#else>"!IsCreatePermission"</#if> (click)="addNew()"><i class="material-icons">
             add_circle_outline
           </i> &nbsp;{{'GENERAL.ACTIONS.ADD' | translate}}</button>
       </div>
@@ -42,6 +42,16 @@
           </mat-cell>
         </ng-container>
 
+	    <#if (AuthenticationType == "oidc" && UsersOnly == "false")>
+        <ng-container matColumnDef="scimId">
+          <mat-header-cell mat-sort-header *matHeaderCellDef [disabled]="!isColumnSortable('scimId')">
+            {{getFieldLabel("ScimId")}}</mat-header-cell>
+          <mat-cell *matCellDef="let item">
+            {{ item.scimId }}
+          </mat-cell>
+        </ng-container>
+			
+			</#if>
         <ng-container matColumnDef="name">
           <mat-header-cell mat-sort-header *matHeaderCellDef [disabled]="!isColumnSortable('name')">
             {{getFieldLabel("Name")}}</mat-header-cell>

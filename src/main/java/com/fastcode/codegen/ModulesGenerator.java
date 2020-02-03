@@ -122,7 +122,7 @@ public class ModulesGenerator {
 		commonModule.generateCommonModuleClasses(input.getDestinationPath()+ "/" + artifactId, groupArtifactId);
 		baseAppGen.CompileApplication(input.getDestinationPath() + "/" + artifactId);
  
-		frontendGenerator.generate(input.getDestinationPath(), artifactId, input.getAuthenticationMap().get(AuthenticationConstants.AUTHENTICATION_TYPE),input.getAuthenticationMap().get(AuthenticationConstants.AUTHENTICATION_SCHEMA));
+		frontendGenerator.generate(input.getDestinationPath(), artifactId, input.getAuthenticationMap(), details);
 
 		if(!input.getAuthenticationMap().get(AuthenticationConstants.AUTHENTICATION_TYPE).equals("none"))
 		{

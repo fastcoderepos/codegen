@@ -22,12 +22,19 @@
       <form [formGroup]="itemForm" #itemNgForm="ngForm" (ngSubmit)="onSubmit()" class="item-form">
         <mat-form-field>
           <input formControlName="displayName" matInput placeholder="Display name">
+          <mat-error *ngIf="!itemForm.get('displayName').valid && itemForm.get('displayName').touched">{{'GENERAL.ERRORS.REQUIRED' | translate}}</mat-error>
         </mat-form-field>
+        
         <mat-form-field>
           <input formControlName="name" matInput placeholder="Name">
           <mat-error *ngIf="!itemForm.get('name').valid && itemForm.get('name').touched">{{'GENERAL.ERRORS.REQUIRED' | translate}}</mat-error>
         </mat-form-field>
-      
+        <#if (AuthenticationType == "oidc" && UsersOnly == "false")>
+        <mat-form-field>
+          <input formControlName="scimId" matInput placeholder="SCIM Id">
+          <mat-error *ngIf="!itemForm.get('scimId').valid && itemForm.get('scimId').touched">{{'GENERAL.ERRORS.REQUIRED' | translate}}</mat-error>
+        </mat-form-field>
+      	</#if>
         <mat-form-field *ngFor="let association of parentAssociations">
           <input type="text" matInput formControlName="{{association.descriptiveField}}"
             placeholder="{{association.table}}" aria-label="Number" [matAutocomplete]="auto"
@@ -52,7 +59,7 @@
             </div>
             <div class="fc-col-sm-6 fc-text-right">
                 <button name="back" mat-raised-button color="basic" (click)="onBack()"> {{'GENERAL.ACTIONS.CANCEL' | translate}} </button> 
-                <button name="save" mat-raised-button color="primary" [disabled]="!itemForm.valid || loading || !IsUpdatePermission" (click)="itemNgForm.ngSubmit.emit()">
+                <button name="save" mat-raised-button color="primary" [disabled]="<#if !ExcludeRoleNew>!itemForm.valid || loading || !IsUpdatePermission<#else>true</#if>" (click)="itemNgForm.ngSubmit.emit()">
                   {{'GENERAL.ACTIONS.SAVE' | translate}}
                 </button>
             </div>

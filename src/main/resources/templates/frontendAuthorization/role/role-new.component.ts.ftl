@@ -45,7 +45,7 @@ export class RoleNewComponent extends BaseNewComponent<IRole> implements OnInit 
     
   setForm(){
     this.itemForm = this.formBuilder.group({
-      displayName: [''],
+      displayName: ['', Validators.required],
       name: ['', Validators.required],
     });
   }

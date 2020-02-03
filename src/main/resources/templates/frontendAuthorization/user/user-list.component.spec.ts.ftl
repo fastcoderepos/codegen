@@ -8,7 +8,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { ListFiltersComponent, ServiceUtils } from 'projects/fast-code-core/src/public_api';
 
 import { EntryComponents, TestingModule } from 'src/testing/utils';
-import { IUser, UserService, UserDetailsComponent, UserListComponent, UserNewComponent } from './index';
+import { IUser, UserService, UserDetailsComponent, UserListComponent<#if !ExcludeUserNew>, UserNewComponent</#if> } from './index';
 
 describe('UserListComponent', () => {
   let fixture:ComponentFixture<UserListComponent>;
@@ -35,6 +35,8 @@ describe('UserListComponent', () => {
       profilePictureId: 1,
       twoFactorEnabled: true,
       userName: 'userName1',
+	    <#if AuthenticationType == "oidc">
+	    scimId: 'scimId1',</#if>
     },
     {   
       accessFailedCount: 2,
@@ -56,6 +58,8 @@ describe('UserListComponent', () => {
       profilePictureId: 2,
       twoFactorEnabled: true,
       userName: 'userName2',
+	    <#if AuthenticationType == "oidc">
+	    scimId: 'scimId2',</#if>
     },
   ];
   let data: IUser[] = [... constData];
@@ -108,6 +112,7 @@ describe('UserListComponent', () => {
 
     });
 
+		<#if !ExcludeUserNew>
     it('should run #addNew()', async () => {
       component.IsCreatePermission = true;
       fixture.detectChanges();
@@ -116,7 +121,7 @@ describe('UserListComponent', () => {
       el.click();
       expect(component.addNew).toHaveBeenCalled();
     });
-
+		</#if>
     it('should run #delete()', async () => {
       component.IsDeletePermission = true;
       component.items = data;
@@ -175,7 +180,9 @@ describe('UserListComponent', () => {
         declarations: [
           UserListComponent,
           UserDetailsComponent,
+          <#if !ExcludeUserNew>
           UserNewComponent
+          </#if>
         ].concat(EntryComponents),
         imports: [
           TestingModule,
@@ -221,6 +228,7 @@ describe('UserListComponent', () => {
       expect(component.displayedColumns.length).toBeGreaterThan(0);
     });
 
+		<#if !ExcludeUserNew>
     it('should open new dialog for new entry', async () => {
       component.IsCreatePermission = true;
       fixture.detectChanges();
@@ -230,7 +238,8 @@ describe('UserListComponent', () => {
 
       expect(component.dialog.open).toHaveBeenCalled();
     });
-
+    
+		</#if>
     it('should delete the item from list', async () => {
       component.IsDeletePermission = true;
       component.items = data;

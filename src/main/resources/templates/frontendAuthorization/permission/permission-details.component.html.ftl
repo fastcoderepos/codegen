@@ -22,6 +22,7 @@
       <form [formGroup]="itemForm" #itemNgForm="ngForm" (ngSubmit)="onSubmit()" class="item-form">
         <mat-form-field>
           <input formControlName="displayName" matInput placeholder="Display name">
+          <mat-error *ngIf="!itemForm.get('displayName').valid && itemForm.get('displayName').touched">{{'GENERAL.ERRORS.REQUIRED' | translate}}</mat-error>
         </mat-form-field>
         <mat-form-field>
           <input formControlName="name" matInput placeholder="name">

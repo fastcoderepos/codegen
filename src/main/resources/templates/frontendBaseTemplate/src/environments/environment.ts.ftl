@@ -1,15 +1,16 @@
 // This file can be replaced during build by using the `fileReplacements` array.
 // `ng build ---prod` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
+<#if AuthenticationType == "oidc">
 import { OpenIdConfiguration } from 'angular-auth-oidc-client';
+</#if>
 
 export const environment = {
-  production: false,
-  apiUrl:  '/api', //'https://localhost:5555',
-  authUrl: '/api', //'http://localhost:5555',
+	production: false,
+	apiUrl:  '/api', //'https://localhost:5555',
+	authUrl: '/api', //'http://localhost:5555',
   <#if AuthenticationType == "oidc">
-  wellKnownUrlsOidc: "https://dev-145947.okta.com/.well-known/openid-configuration",
-  tokenEndpoint: 'https://dev-145947.okta.com/oauth2/v1/token'
+	wellKnownUrlsOidc: "https://dev-145947.okta.com/oauth2/default/.well-known/openid-configuration"
   </#if>
 };
 <#if AuthenticationType == "oidc">
