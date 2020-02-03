@@ -51,7 +51,7 @@ public class UserInput {
 		return usersOnly;
 	}
 	public void setUsersOnly(Boolean usersOnly) {
-		this.usersOnly = usersOnly;
+		this.usersOnly = usersOnly; 
 	}
 	public Boolean getCache() {
 		return cache;

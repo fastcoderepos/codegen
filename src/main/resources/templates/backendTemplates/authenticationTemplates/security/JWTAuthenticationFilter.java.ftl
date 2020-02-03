@@ -10,7 +10,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.apache.http.auth.InvalidCredentialsException;
 <#if AuthenticationType == "database" || (AuthenticationType == "ldap" && UsersOnly== "true")>
 import [=PackageName].domain.model.[=AuthenticationTable]Entity;
-import [=PackageName].domain.authorization.user.I[=AuthenticationTable]Manager;
+import [=PackageName].domain.authorization.[=AuthenticationTable?lower_case].I[=AuthenticationTable]Manager;
 </#if>
 <#if AuthenticationType == "ldap" && UsersOnly != "true">
 import [=PackageName].domain.authorization.role.IRoleManager;
@@ -64,13 +64,13 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         <#if AuthenticationType == "ldap">
     	this.securityUtils = ctx.getBean(SecurityUtils.class);
     	<#if UsersOnly== "true">
-    	this._userManager = ctx.getBean(IUserManager.class);
+    	this._userManager = ctx.getBean(I[=AuthenticationTable]Manager.class);
     	<#else>
     	this._roleManager = ctx.getBean(IRoleManager.class);
     	</#if>
     	</#if>
     	<#if AuthenticationType == "database">
-    	this._userManager = ctx.getBean(IUserManager.class);
+    	this._userManager = ctx.getBean(I[=AuthenticationTable]Manager.class);
     	</#if>
 		this.jwtRepo = ctx.getBean(IJwtRepository.class);
     }
@@ -83,7 +83,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             System.out.println("I am here ...");
             LoginUserInput creds = new ObjectMapper()
                     .readValue(request.getInputStream(), LoginUserInput.class);
-
+   <#if AuthenticationType == "database">
         <#if UserInput?? && AuthenticationFields??>
         [=AuthenticationTable]Entity user = _userManager.FindBy[=AuthenticationFields.UserName.fieldName?cap_first](creds.getUserName());       
         if(user != null && user.get[=AuthenticationFields.IsActive.fieldName?cap_first]())
@@ -93,12 +93,15 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         </#if>   
 		{
 			return authenticationManager.authenticate(
-			new UsernamePasswordAuthenticationToken(creds.getUserName(),creds.getPassword(),new ArrayList<>()));
+				new UsernamePasswordAuthenticationToken(creds.getUserName(),creds.getPassword(),new ArrayList<>()));
 		}
 		else
 			throw new InvalidCredentialsException("Invalid Credentials");
-
-		} catch (IOException | InvalidCredentialsException e) {
+    <#else>
+    		return authenticationManager.authenticate(
+				new UsernamePasswordAuthenticationToken(creds.getUserName(),creds.getPassword(),new ArrayList<>()));
+    </#if>
+		} catch (IOException<#if AuthenticationType == "database"> | InvalidCredentialsException</#if> e) {
             throw new RuntimeException(e);
         }
     }

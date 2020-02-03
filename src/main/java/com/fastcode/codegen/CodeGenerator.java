@@ -38,21 +38,20 @@ public class CodeGenerator {
 
 	@Autowired
 	private LoggingHelper logHelper;
-	
+
 	@Autowired
 	private FolderContentReader contentReader;
 
-
 	//Build root map with all information required for templates
-	public Map<String, Object> buildEntityInfo(String entityName,String packageName,
+	public Map<String, Object> buildEntityInfo(String className,String packageName,
 			EntityDetails details, Map<String,String> authenticationInputMap,String schema,Boolean cache) {
-		
+
 		String authType = authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE);
 		String customAuthTable = authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA);
-		String usersOnly = authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA);
-
-		Map<String, Object> root = new HashMap<>();
-		String className = entityName.substring(entityName.lastIndexOf(".") + 1);
+		String usersOnly = authenticationInputMap.get(AuthenticationConstants.USERS_ONLY);
+      
+        Map<String, Object> root = new HashMap<>();
+		//String className = entityName.substring(entityName.lastIndexOf(".") + 1);
 		String entityClassName = className.concat("Entity");
 		String instanceName = className.substring(0, 1).toLowerCase() + className.substring(1);
 		String moduleName = codeGeneratorUtils.camelCaseToKebabCase(className);
@@ -75,13 +74,6 @@ public class CodeGenerator {
 		root.put("AuthenticationType", authType);
 		root.put("ApiPath", className.substring(0, 1).toLowerCase() + className.substring(1));
 		root.put("FrontendUrlPath", className.toLowerCase());
-		
-		if(customAuthTable.equals(className) && (authType.equals("oidc") || authType.equals("ldap"))) {
-			root.put("ExcludeUserNew", true);
-		}
-		else {
-			root.put("ExcludeUserNew", false);
-		}
 
 		if(customAuthTable != null) {
 			root.put("UserInput","true");
@@ -92,6 +84,13 @@ public class CodeGenerator {
 			root.put("UserInput",null);
 			root.put("AuthenticationTable", "User");	
 		}	
+
+		if((customAuthTable != null && customAuthTable.equals(className)) && (authType.equals("oidc") || authType.equals("ldap"))) {
+			root.put("ExcludeUserNew", true);
+		}
+		else {
+			root.put("ExcludeUserNew", false);
+		}
 
 		root.put("PrimaryKeys", details.getPrimaryKeys());
 		root.put("Fields", details.getFieldsMap());
@@ -108,8 +107,8 @@ public class CodeGenerator {
 		List<String> entityNames=new ArrayList<String>();
 		for(Map.Entry<String,EntityDetails> entry : details.entrySet())
 		{
-			String className=entry.getKey().substring(entry.getKey().lastIndexOf(".") + 1);
-			entityNames.add(className);
+			//String className=entry.getKey().substring(entry.getKey().lastIndexOf(".") + 1);
+			entityNames.add(entry.getKey());
 			generate(entry.getKey(), sourcePackageName, backEndRootFolder, clientRootFolder, sourcePackageName,
 					destPath,entry.getValue(),authenticationInputMap, cache, schema);
 		}
@@ -129,7 +128,7 @@ public class CodeGenerator {
 		contentReader.copyFileFromJar("keystore.p12", destPath + "/" + backEndRootFolder + "/src/main/resources/keystore.p12");
 
 		updateEntitiesJsonFile(destPath + "/" + appName + "Client/src/app/common/components/main-nav/entities.json",entityNames,authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA));
- 
+
 		Map<String,Object> propertyInfo = getInfoForApplicationPropertiesFile(destPath,sourcePackageName, connectionString, schema,authenticationInputMap,cache);
 
 		//generate configuration files for backend
@@ -145,7 +144,7 @@ public class CodeGenerator {
 
 		String backendAppFolder = backEndRootFolder + "/src/main/java";
 
-		Map<String, Object> root = getInfoForAuditControllerAndBeanConfig(details, packageName, authenticationType, authenticationTable);
+		Map<String, Object> root = getInfoForBeanConfig(details, packageName, authenticationType, authenticationTable);
 		Map<String, Object> template = new HashMap<>();
 		template.put("backendTemplates/BeanConfig.java.ftl", "BeanConfig.java");
 		String destFolder = destPath + "/" + backendAppFolder + "/" + packageName.replace(".", "/");
@@ -173,7 +172,7 @@ public class CodeGenerator {
 	}
 
 	// build root map for bean configuration and audit controller
-	public Map<String,Object> getInfoForAuditControllerAndBeanConfig(Map<String, EntityDetails> details,String packageName,String authenticationType,String authenticationTable) {
+	public Map<String,Object> getInfoForBeanConfig(Map<String, EntityDetails> details,String packageName,String authenticationType,String authenticationTable) {
 
 		Map<String, Object> entitiesMap = new HashMap<String,Object>();
 		//set details for each entity in root map
@@ -211,21 +210,6 @@ public class CodeGenerator {
 		return root;
 	}
 
-	// generate audit controller required to maintain history 
-	public void generateAuditorController(Map<String, EntityDetails> details,String packageName,String backEndRootFolder, String destPath,String authenticationType,String authenticationTable ) {
-
-		String backendAppFolder = backEndRootFolder + "/src/main/java";
-
-		Map<String, Object> root = getInfoForAuditControllerAndBeanConfig(details, packageName, authenticationType, authenticationTable);
-		Map<String, Object> template = new HashMap<>();
-		template.put("backendTemplates/AuditController.java.ftl", "AuditController.java");
-
-		String destFolder = destPath + "/" + backendAppFolder + "/" + packageName.replace(".", "/") + "/restcontrollers";
-		new File(destFolder).mkdirs();
-		codeGeneratorUtils.generateFiles(template, root, destFolder,TEMPLATE_FOLDER);
-
-	}
-
 	// generate all required code and layers against single entity
 	public void generate(String entityName, String appName, String backEndRootFolder,String clientRootFolder,String packageName,
 			String destPath, EntityDetails details, Map<String,String> authenticationInputMap, Boolean cache,String schema) {
@@ -251,9 +235,12 @@ public class CodeGenerator {
 
 	public void generateBackendFiles(Map<String, Object> root, String destPath,Map<String, String> authenticationInputMap) {
 		String className = root.get("ClassName").toString();
+		String authSchema = authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA);
+		String authType = authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE);
+		Boolean usersOnly = authenticationInputMap.get(AuthenticationConstants.USERS_ONLY).equals("true");
 		String destFolderBackend = destPath + "/application/" + className.toLowerCase();
-		if((authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE).equals("database") ||
-				authenticationInputMap.get(AuthenticationConstants.USERS_ONLY).equals("true")) && className.equalsIgnoreCase(authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA)))
+		
+		if((authType.equals("database") || usersOnly) && className.equalsIgnoreCase(authSchema))
 		{
 			destFolderBackend = destPath + "/application/authorization/" + className.toLowerCase();
 		}
@@ -261,8 +248,7 @@ public class CodeGenerator {
 		codeGeneratorUtils.generateFiles(getApplicationTemplates(className), root, destFolderBackend,TEMPLATE_FOLDER);
 
 		destFolderBackend = destPath + "/application/" + className.toLowerCase() + "/dto";
-		if((authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE).equals("database") ||
-				authenticationInputMap.get(AuthenticationConstants.USERS_ONLY).equals("true")) && className.equalsIgnoreCase(authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA)))
+		if((authType.equals("database") || usersOnly) && className.equalsIgnoreCase(authSchema))
 		{
 			destFolderBackend = destPath + "/application/authorization/" + className.toLowerCase() + "/dto";
 		}
@@ -271,8 +257,7 @@ public class CodeGenerator {
 		codeGeneratorUtils.generateFiles(getDtos(className,authenticationInputMap,authFields), root, destFolderBackend,TEMPLATE_FOLDER);
 
 		destFolderBackend = destPath + "/domain/" + className.toLowerCase();
-		if((authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE).equals("database") ||
-				authenticationInputMap.get(AuthenticationConstants.USERS_ONLY).equals("true")) && className.equalsIgnoreCase(authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA)))
+		if((authType.equals("database") || usersOnly) && className.equalsIgnoreCase(authSchema))
 		{
 			destFolderBackend = destPath + "/domain/authorization/" + className.toLowerCase();
 		}
@@ -290,14 +275,16 @@ public class CodeGenerator {
 
 	public void generateBackendUnitAndIntegrationTestFiles(Map<String, Object> root, String destPath, Map<String,String> authenticationInputMap) {
 		String className = root.get("ClassName").toString();
+		String authSchema = authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA);
+		String authType = authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE);
+		Boolean usersOnly = authenticationInputMap.get(AuthenticationConstants.USERS_ONLY).equals("true");
 		String destFolderBackend = destPath + "/restcontrollers";
 
 		new File(destFolderBackend).mkdirs();
 		codeGeneratorUtils.generateFiles(getControllerTestTemplates(className), root, destFolderBackend,TEMPLATE_FOLDER);
 
 		destFolderBackend = destPath + "/application/" + className.toLowerCase();
-		if((authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE).equals("database") ||
-				authenticationInputMap.get(AuthenticationConstants.USERS_ONLY).equals("true")) && className.equalsIgnoreCase(authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA)))
+		if((authType.equals("database") || usersOnly ) && className.equalsIgnoreCase(authSchema))
 		{
 			destFolderBackend = destPath + "/application/authorization/" + className.toLowerCase();
 		}
@@ -305,8 +292,7 @@ public class CodeGenerator {
 		codeGeneratorUtils.generateFiles(getApplicationTestTemplates(className), root, destFolderBackend,TEMPLATE_FOLDER);
 
 		destFolderBackend = destPath + "/domain/" + className.toLowerCase();
-		if((authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE).equals("database") ||
-				authenticationInputMap.get(AuthenticationConstants.USERS_ONLY).equals("true")) && className.equalsIgnoreCase(authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA)))
+		if((authType.equals("database") || usersOnly ) && className.equalsIgnoreCase(authSchema))
 		{
 			destFolderBackend = destPath + "/domain/authorization/" + className.toLowerCase();
 		}
@@ -318,7 +304,7 @@ public class CodeGenerator {
 	public Map<String, Object> getUITemplates(String moduleName, String className, Map<String,String> authenticationInputMap) {
 		String authType = authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE);
 		String customAuthTable = authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA);
-		
+
 		Map<String, Object> uiTemplate = new HashMap<>();
 		uiTemplate.put("iitem.ts.ftl", "i" + moduleName + ".ts");
 		uiTemplate.put("index.ts.ftl", "index.ts");
@@ -328,9 +314,9 @@ public class CodeGenerator {
 		uiTemplate.put("item-list.component.html.ftl", moduleName + "-list.component.html");
 		uiTemplate.put("item-list.component.scss.ftl", moduleName + "-list.component.scss");
 		uiTemplate.put("item-list.component.spec.ts.ftl", moduleName + "-list.component.spec.ts");
-		
+
 		// should not create new component if entity is custom user and auth type is either ldap or oidc
-		if(!(customAuthTable.equals(className) && (authType.equals("oidc") || authType.equals("ldap")))) {
+		if(!(className.equals(customAuthTable) && (authType.equals("oidc") || authType.equals("ldap")))) {
 			uiTemplate.put("item-new.component.ts.ftl", moduleName + "-new.component.ts");
 			uiTemplate.put("item-new.component.html.ftl", moduleName + "-new.component.html");
 			uiTemplate.put("item-new.component.scss.ftl", moduleName + "-new.component.scss");
@@ -407,25 +393,29 @@ public class CodeGenerator {
 	public Map<String, Object> getDtos(String className,Map<String,String> authenticationInputMap,Map<String,FieldDetails> authFields) {
 
 		Map<String, Object> backEndTemplate = new HashMap<>();
+		String authSchema = authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA);
+		String authType = authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE);
+		Boolean usersOnly = authenticationInputMap.get(AuthenticationConstants.USERS_ONLY).equals("true");
 
 		backEndTemplate.put("backendTemplates/Dto/createInput.java.ftl", "Create" + className + "Input.java");
 		backEndTemplate.put("backendTemplates/Dto/createOutput.java.ftl", "Create" + className + "Output.java");
 		backEndTemplate.put("backendTemplates/Dto/updateInput.java.ftl", "Update" + className + "Input.java");
 		backEndTemplate.put("backendTemplates/Dto/updateOutput.java.ftl", "Update" + className + "Output.java");
 		backEndTemplate.put("backendTemplates/Dto/findByIdOutput.java.ftl", "Find" + className + "ByIdOutput.java");
-		if((authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE).equals("database") ||
-				authenticationInputMap.get(AuthenticationConstants.USERS_ONLY).equals("true")) && 
-				authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA) !=null && className.equalsIgnoreCase(authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA)))
+		
+		if((authType.equals("database") ||
+				usersOnly) && 
+				authSchema !=null && className.equalsIgnoreCase(authSchema))
 		{
 			if(authFields !=null && authFields.containsKey("UserName")) {
-				backEndTemplate.put("backendTemplates/Dto/customUserDto/userDto/FindCustomUserByNameOutput.java.ftl", "Find"+authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA)+"By"+authFields.get("UserName").getFieldName().substring(0, 1).toUpperCase() + authFields.get("UserName").getFieldName().substring(1)+"Output.java");
+				backEndTemplate.put("backendTemplates/Dto/customUserDto/userDto/FindCustomUserByNameOutput.java.ftl", "Find"+ authSchema +"By"+authFields.get("UserName").getFieldName().substring(0, 1).toUpperCase() + authFields.get("UserName").getFieldName().substring(1)+"Output.java");
 			}
 			else
-				backEndTemplate.put("backendTemplates/authenticationTemplates/application/authorization/user/dto/FindUserByNameOutput.java.ftl", "Find"+authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA)+"ByNameOutput.java");
+				backEndTemplate.put("backendTemplates/authenticationTemplates/application/authorization/user/dto/FindUserByNameOutput.java.ftl", "Find"+ authSchema +"ByNameOutput.java");
 
 			backEndTemplate.put("backendTemplates/authenticationTemplates/application/authorization/user/dto/GetRoleOutput.java.ftl", "GetRoleOutput.java");
 			//	backEndTemplate.put("backendTemplates/authenticationTemplates/application/authorization/user/dto/LoginUserInput.java.ftl", "LoginUserInput.java");
-			backEndTemplate.put("backendTemplates/Dto/customUserDto/userDto/FindCustomUserWithAllFieldsByIdOutput.java.ftl", "Find"+authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA)+"WithAllFieldsByIdOutput.java");
+			backEndTemplate.put("backendTemplates/Dto/customUserDto/userDto/FindCustomUserWithAllFieldsByIdOutput.java.ftl", "Find"+ authSchema +"WithAllFieldsByIdOutput.java");
 		}
 		return backEndTemplate;
 	}

@@ -56,7 +56,7 @@ public class ModulesGenerator {
 	
 		File dir = new File(input.getDestinationPath());
 		if(!dir.exists()) {
-			dir.mkdirs();
+			dir.mkdirs(); 
 		};
 
 		dependenciesIdentifier.setDestinationPath(input.getDestinationPath());

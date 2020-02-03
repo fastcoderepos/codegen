@@ -87,14 +87,16 @@ public class AppStartupRunner implements ApplicationRunner {
 		</#list>
 		
 		for(String entity: entityList) {
-			<#if !UserInput??>
+			<#if (AuthenticationType == "database" || UsersOnly == "true") && !UserInput??>
 			if(!environment.getProperty("fastCode.auth.method").equals("database") && (entity.equals("role") || entity.equals("user")))
-        	<#elseif UserInput??>
+        	<#elseif (AuthenticationType == "database" || UsersOnly == "true") && UserInput??>
         	if(!environment.getProperty("fastCode.auth.method").equals("database") && (entity.equals("role") || entity.equals("[=AuthenticationTable?lower_case]")))
+        	<#else>
+        	if(!environment.getProperty("fastCode.auth.method").equals("database") && entity.equals("role"))
         	</#if>
-        	addEntityPermissions(entity, role.getId(),true);
+        		addEntityPermissions(entity, role.getId(),true);
 			else
-			addEntityPermissions(entity, role.getId(),false);
+				addEntityPermissions(entity, role.getId(),false);
         }
       
         loggingHelper.getLogger().info("Completed creating the data in the database");

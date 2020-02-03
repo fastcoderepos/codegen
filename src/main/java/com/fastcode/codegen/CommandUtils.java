@@ -21,7 +21,7 @@ public class CommandUtils {
 
             File cmdDirectory = new File(path);
 
-            Process process;
+            Process process; 
             builder.command(command);
             builder.directory(cmdDirectory);
 

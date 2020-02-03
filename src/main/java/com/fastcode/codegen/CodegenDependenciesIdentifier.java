@@ -13,7 +13,7 @@ public class CodegenDependenciesIdentifier {
 	private static String SPRING_VERSION = "2.1.4";
 	private static String MAVEN_VERSION = "3.5.4";
 	private static String NODE_VERSION = "10.7.0";
-	private static String PSQL_VERSION = "10.5";
+	private static String PSQL_VERSION = "10.5"; 
 	private static String ANGULAR_VERSION = "6.1.1";
 	private static String JAVA_VERSION = "1.8";
 	private static String destinationPath = null;

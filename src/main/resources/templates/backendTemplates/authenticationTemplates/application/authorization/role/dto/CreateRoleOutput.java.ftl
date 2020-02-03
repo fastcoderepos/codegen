@@ -4,6 +4,9 @@ public class CreateRoleOutput {
     private Long id;
     private String displayName;
     private String name;
+    <#if (AuthenticationType == "oidc" && UsersOnly == "false")>
+    private String scimId;
+    </#if>
 
     public Long getId() {
         return id;

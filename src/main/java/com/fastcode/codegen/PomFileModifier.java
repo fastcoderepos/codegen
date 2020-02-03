@@ -37,7 +37,7 @@ public class PomFileModifier {
 		Dependency querydsljpa = new Dependency("com.querydsl", "querydsl-jpa", "4.2.1");
 		Dependency querydslapt= new Dependency("com.querydsl", "querydsl-apt", "4.2.1");
 		Dependency apache_commons = new Dependency("org.apache.commons", "commons-lang3", "3.8.1");
-		Dependency h2 = new Dependency("com.h2database","h2",""); 
+		Dependency h2 = new Dependency("com.h2database","h2","");  
 		Dependency springFoxSwagger = new Dependency("io.springfox","springfox-swagger2","2.7.0");
 		Dependency springFoxSwaggerUI = new Dependency("io.springfox","springfox-swagger-ui","2.7.0");
 		Dependency springFoxDataRest = new Dependency("io.springfox","springfox-data-rest","2.8.0");

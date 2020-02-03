@@ -88,7 +88,7 @@ public class CodeGeneratorUtils {
 				if(destPath.split("/").length > 1 && entryPath.split("/").length > 1) {
 					dirPath = dirPath + entryPath.substring(0, entryPath.lastIndexOf('/'));
 				}
-				File dir = new File(dirPath);
+				File dir = new File(dirPath); 
 				if(!dir.exists()) {
 					dir.mkdirs();
 				};

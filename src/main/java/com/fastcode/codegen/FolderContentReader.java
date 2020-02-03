@@ -52,7 +52,7 @@ public class FolderContentReader {
 			URI uri = FolderContentReader.class.getResource(folderPath).toURI();
 			List<String> list = new ArrayList<String>(); 
 			if (uri.getScheme().equals("jar")) {
-				list = getFilesFromJar(folderPath);
+				list = getFilesFromJar(folderPath); 
 			} else {
 				Collection<File> files = getFilesFromFileSystem(new File(System.getProperty("user.dir").replace("\\", "/") + "/src/main/resources/"+ folderPath));
 				for(File file:files) {

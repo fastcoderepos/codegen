@@ -68,7 +68,7 @@ public class EntityGenerator {
 		final String tempPackageName = entityPackage.concat(".Temp"); 
 		destination = destination.replace('\\', '/');
 		final String destinationPath = destination.concat("/src/main/java");
-		final String targetPath = destination.concat("/target/classes"); 
+		final String targetPath = destination.concat("/target/classes");  
 //		String tables = buildTablesStringFromList(tableList,schema);
 		
 //		if (!tables.isEmpty()) {

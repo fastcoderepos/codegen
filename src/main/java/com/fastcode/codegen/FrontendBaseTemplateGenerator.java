@@ -34,7 +34,7 @@ public class FrontendBaseTemplateGenerator {
 	private CommandUtils commandUtils;
 	
 	@Autowired
-	private JSONUtils jsonUtils;
+	private JSONUtils jsonUtils; 
 	
 	@Autowired
 	private LoggingHelper logHelper;
