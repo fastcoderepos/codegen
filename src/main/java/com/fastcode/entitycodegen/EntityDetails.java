@@ -263,16 +263,13 @@ public class EntityDetails {
 
 					if (a.annotationType().toString().equals("interface javax.persistence.JoinColumn")) {
 
-						System.out.println(" JOIN COLL " + a);
 						JoinColumn joinCol= (javax.persistence.JoinColumn) a;
-						//String referenceCol=CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, joinCol.referencedColumnName()); 
-
+						
 						joinDetails.setJoinColumn(
 								CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, joinCol.name()));
 						joinDetails.setIsJoinColumnOptional(joinCol.nullable());
 
 						String columnType = joinCol.columnDefinition();
-						System.out.println("JOIN COL NAME " + joinDetails.getJoinColumn() + " -- JOIN COL TYPE " + columnType);
 						if (columnType.equals("bigserial") || columnType.equals("int8"))
 							joinDetails.setJoinColumnType("Long");
 						else if(columnType.equals("serial") || columnType.equals("int4"))
@@ -291,8 +288,6 @@ public class EntityDetails {
 
 							for(Map.Entry<String, String> pk : pKeyMap.entrySet())
 							{
-								System.out.println(" REFERENCE COL  " + pk.getKey());
-								System.out.println(" REFERENCE COL TYPE  " + pk.getValue());
 								String referenceColumn = pk.getKey();
 								if(columnType.isEmpty())
 									joinDetails.setJoinColumnType(pk.getValue());

@@ -28,10 +28,11 @@ public class EntityGeneratorUtils {
 		{
 			if(urlArr[0].contains(":")) {
 			String[] paramsArr = urlArr[0].split("\\:");
-			if(!paramsArr[1].isEmpty() && checkDriverName(paramsArr[1]) !=null)
-			{
+			if(!paramsArr[1].isEmpty() && getDriverName(paramsArr[1]) !=null)
+			{ 
 			connectionStringMap.put("database", paramsArr[1]);
-			connectionStringMap.put("driverName", checkDriverName(paramsArr[1]));
+			connectionStringMap.put("driverName", getDriverName(paramsArr[1]));
+			connectionStringMap.put("dialect", getHibernateDialect(paramsArr[1]));
 			}
 			else return null;
 			}
@@ -63,7 +64,7 @@ public class EntityGeneratorUtils {
 		return connectionStringMap;
 	}
 	
-	public String checkDriverName(String name)
+	public String getDriverName(String name)
 	{
 		if(name.equals("postgresql"))
 			return "org.postgresql.Driver";
@@ -73,6 +74,20 @@ public class EntityGeneratorUtils {
 			return "oracle.jdbc.driver.OracleDriver";
 		else if(name.equals("h2")) 
 			return "org.h2.Driver";
+		else
+			return null;
+	}
+	
+	public String getHibernateDialect(String name)
+	{
+		if(name.equals("postgresql"))
+			return "org.hibernate.dialect.PostgreSQLDialect";
+		else if(name.equals("mysql")) 
+			return "org.hibernate.dialect.MySQLDialect";
+		else if(name.equals("oracle")) 
+			return "org.hibernate.dialect.OracleDialect";
+		else if(name.equals("h2")) 
+			return "org.hibernate.dialect.H2Dialect";
 		else
 			return null;
 	}

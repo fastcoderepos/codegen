@@ -15,6 +15,9 @@ public class CreateUserOutput {
     private Date lastLoginTime;
     private Date lockoutEndDateUtc;
     private String firstName;
+    <#if AuthenticationType =="oidc">
+    private String scimId;
+    </#if>
     <#if AuthenticationType =="database">
     private String passwordResetCode;
     private Boolean shouldChangePasswordOnNextLogin;
@@ -116,7 +119,17 @@ public class CreateUserOutput {
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
-<#if AuthenticationType =="database">
+    <#if AuthenticationType =="oidc">
+  
+  	public String getScimId() {
+  		return scimId;
+  	}
+
+  	public void setScimId(String scimId){
+  		this.scimId = scimId;
+  	}
+  	</#if>
+	<#if AuthenticationType =="database">
     public String getPasswordResetCode() {
         return passwordResetCode;
     }
@@ -132,7 +145,7 @@ public class CreateUserOutput {
     public void setShouldChangePasswordOnNextLogin(Boolean shouldChangePasswordOnNextLogin) {
         this.shouldChangePasswordOnNextLogin = shouldChangePasswordOnNextLogin;
     }
-</#if>
+	</#if>
     public String getPhoneNumber() {
         return phoneNumber;
     }

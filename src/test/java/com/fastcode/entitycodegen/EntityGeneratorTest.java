@@ -82,7 +82,7 @@ public class EntityGeneratorTest {
 	List<String> tableList= new ArrayList<String>();
 
 	final static String SCHEMA_NAME = "demo";
-	final static String CONNECTION_STRING = "jdbc:postgresql://localhost:5432/Demo?username=postgres;password=fastcode";
+	//final static String CONNECTION_STRING = "jdbc:postgresql://localhost:5432/Demo?username=postgres;password=fastcode";
 	final static String PACKAGE_NAME = "com.nfinity.test";
 	final static String AUTHENTICATION_TABLE = "user";
 	final static String AUTHENTICATION_TYPE = "database";
@@ -104,18 +104,18 @@ public class EntityGeneratorTest {
 
 	}
 
-	@Test
-	public void buildTablesStringFromList_listIsNotEmpty_returnString()
-	{
-		String tables = "demo.user,demo.blog,demo.tag";
-		Assertions.assertThat(entityGenerator.buildTablesStringFromList(tableList, SCHEMA_NAME)).isEqualTo(tables);
-	}
+//	@Test
+//	public void buildTablesStringFromList_listIsNotEmpty_returnString()
+//	{
+//		String tables = "demo.user,demo.blog,demo.tag";
+//		Assertions.assertThat(entityGenerator.buildTablesStringFromList(tableList, SCHEMA_NAME)).isEqualTo(tables);
+//	}
 
 	@Test
 	public void generateEntities_parametersAreValid_returnMap() throws SQLException, IOException
 	{
 		Mockito.doReturn(new HashMap<String, String>()).when(mockedEntityGeneratorUtils).parseConnectionString(anyString());
-		Mockito.doReturn("").when(entityGenerator).buildTablesStringFromList(any(List.class), any(String.class));
+	//	Mockito.doReturn("").when(entityGenerator).buildTablesStringFromList(any(List.class), any(String.class));
 		Mockito.doNothing().when(reverseMapping).run(anyString(), anyString(), anyString(), any(HashMap.class));
 		Mockito.doNothing().when(mockedBaseAppGen).CompileApplication(anyString());
 		Mockito.doNothing().when(mockedEntityGeneratorUtils).deleteFile(anyString());
@@ -124,7 +124,7 @@ public class EntityGeneratorTest {
 		Map<String,String> authMap = new HashMap<String, String>();
 		authMap.put("authenticationSchema", AUTHENTICATION_TABLE);
 		authMap.put("authenticationType", AUTHENTICATION_TYPE);
-		entityGenerator.generateEntities(CONNECTION_STRING, SCHEMA_NAME, tableList, PACKAGE_NAME, destPath.getAbsolutePath(), authMap);
+		entityGenerator.generateEntities(new HashMap<String,String>(), SCHEMA_NAME, PACKAGE_NAME, destPath.getAbsolutePath(), authMap);
 		Mockito.verify(mockedBaseAppGen,Mockito.times(1)).CompileApplication(anyString());
 		Mockito.verify(entityGenerator,Mockito.times(1)).processAndGenerateRelevantEntities(anyString(),anyString(),anyString(),anyString(),anyString(),any(HashMap.class));
 

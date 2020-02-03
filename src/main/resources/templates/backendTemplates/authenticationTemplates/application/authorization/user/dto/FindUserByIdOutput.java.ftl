@@ -17,6 +17,9 @@ public class FindUserByIdOutput {
     private String firstName;
     private String phoneNumber;
     private Long profilePictureId;
+    <#if AuthenticationType =="oidc">
+    private String scimId;
+    </#if>
     <#if AuthenticationType =="database">
     private Boolean shouldChangePasswordOnNextLogin;
     </#if>
@@ -127,7 +130,17 @@ public class FindUserByIdOutput {
     public void setProfilePictureId(Long profilePictureId) {
         this.profilePictureId = profilePictureId;
     }
-<#if AuthenticationType =="database">
+    <#if AuthenticationType =="oidc">
+  
+  	public String getScimId() {
+  		return scimId;
+  	}
+
+  	public void setScimId(String scimId){
+  		this.scimId = scimId;
+  	}
+  	</#if>
+	<#if AuthenticationType =="database">
     public Boolean isShouldChangePasswordOnNextLogin() {
         return shouldChangePasswordOnNextLogin;
     }
@@ -135,7 +148,7 @@ public class FindUserByIdOutput {
     public void setShouldChangePasswordOnNextLogin(Boolean shouldChangePasswordOnNextLogin) {
         this.shouldChangePasswordOnNextLogin = shouldChangePasswordOnNextLogin;
     }
-</#if>
+	</#if>
     public String getLastName() {
         return lastName;
     }

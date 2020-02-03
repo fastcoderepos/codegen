@@ -129,7 +129,35 @@ public class UserInputTest {
 	}
 	
 	@Test
-	public void composeInput_rootMapIsNotNull_ReturnUserInput()
+	public void composeInput_rootMapIsNotNullAndConnectionStringIsNull_ReturnUserInput()
+	{
+		Map<String, String> root = new HashMap<String, String>();
+		systemInMock.provideLines("n");
+		root.put("upgrade", "true");
+		//root.put("conn", "jdbc:h2:mem:testdb?username=sa;password=sa");
+		root.put("a", "com");
+		root.put("t", "all");
+		root.put("d", "testValue");
+		root.put("s", "testValue");
+		root.put("c", "true");
+		
+		UserInput userInputDto = new UserInput();
+		userInputDto.setCache(false);
+		userInputDto.setGroupArtifactId("com.nfin");
+		userInputDto.setConnectionStr("jdbc:h2:mem:testdb?username=sa;password=sa");
+		userInputDto.setDestinationPath("testValue");
+		
+		Mockito.doReturn("jdbc:h2:mem:testdb?username=sa;password=sa","com.nfin").when(userInput).getInput(any(Scanner.class), anyString());
+		Mockito.doReturn(new HashMap<String, String> ()).when(entityGeneratorUtils).parseConnectionString(anyString());
+		Mockito.doReturn(userInputDto).when(userInput).getAuthenticationInput(any(UserInput.class),any(Scanner.class));
+		//systemInMock.provideLines("1");
+		
+		
+		Assertions.assertThat(userInput.composeInput(root)).isEqualTo(userInputDto);
+	}
+	
+	@Test
+	public void composeInput_rootMapIsNotNullAndConnectionStringIsNotNull_ReturnUserInput()
 	{
 		Map<String, String> root = new HashMap<String, String>();
 		root.put("upgrade", "true");
@@ -146,7 +174,7 @@ public class UserInputTest {
 		userInputDto.setConnectionStr("jdbc:h2:mem:testdb?username=sa;password=sa");
 		userInputDto.setDestinationPath("testValue");
 		
-		Mockito.doReturn("com.nfin").when(userInput).getInput(any(Scanner.class), anyString());
+		Mockito.doReturn("jdbc:h2:mem:testdb?username=sa;password=sa","com.nfin").when(userInput).getInput(any(Scanner.class), anyString());
 		Mockito.doReturn(new HashMap<String, String> ()).when(entityGeneratorUtils).parseConnectionString(anyString());
 		Mockito.doReturn(userInputDto).when(userInput).getAuthenticationInput(any(UserInput.class),any(Scanner.class));
 		//systemInMock.provideLines("1");

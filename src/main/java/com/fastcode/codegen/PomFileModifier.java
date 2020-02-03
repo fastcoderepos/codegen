@@ -30,16 +30,14 @@ public class PomFileModifier {
 	@Autowired
 	private LoggingHelper logHelper;
 
-	public void updatePomFile(String path,String authenticationType,Boolean cache) {
+	public void updatePomFile(String path,String authenticationType,String database,Boolean cache) {
 		List<Dependency> dependencies = new ArrayList<Dependency>();
 
 		Dependency mapstruct = new Dependency("org.mapstruct", "mapstruct", "1.2.0.Final");
 		Dependency querydsljpa = new Dependency("com.querydsl", "querydsl-jpa", "4.2.1");
 		Dependency querydslapt= new Dependency("com.querydsl", "querydsl-apt", "4.2.1");
 		Dependency apache_commons = new Dependency("org.apache.commons", "commons-lang3", "3.8.1");
-		Dependency postgres = new Dependency("org.postgresql","postgresql","42.2.5");
-		Dependency h2 = new Dependency("com.h2database","h2","");
-
+		Dependency h2 = new Dependency("com.h2database","h2",""); 
 		Dependency springFoxSwagger = new Dependency("io.springfox","springfox-swagger2","2.7.0");
 		Dependency springFoxSwaggerUI = new Dependency("io.springfox","springfox-swagger-ui","2.7.0");
 		Dependency springFoxDataRest = new Dependency("io.springfox","springfox-data-rest","2.8.0");
@@ -69,7 +67,6 @@ public class PomFileModifier {
 		dependencies.add(querydsljpa);
 		dependencies.add(querydslapt);
 		dependencies.add(apache_commons);
-		dependencies.add(postgres);
 		dependencies.add(h2);
 		dependencies.add(springFoxSwagger);
 		dependencies.add(springFoxSwaggerUI);
@@ -77,7 +74,25 @@ public class PomFileModifier {
 		dependencies.add(httpComponents);
 		dependencies.add(gson);
 		
+		Dependency databaseDependency = getDatabaseDependency(database);
+		if(databaseDependency !=null)
+		{
+			dependencies.add(databaseDependency);
+		}
+		
 		addDependenciesAndPluginsToPom(path,dependencies);
+	}
+	
+	public Dependency getDatabaseDependency(String database)
+	{
+		if(database.equals("postgresql"))
+			return new Dependency("org.postgresql","postgresql","42.2.5");
+		else if(database.equals("mysql")) 
+			return new Dependency("mysql","mysql-connector-java","8.0.15");
+		else if(database.equals("oracle")) 
+			return new Dependency("com.oracle","ojdbc8","19.3.0.0");
+		else
+			return null;
 	}
 	
 	public void addDependenciesAndPluginsToPom(String path, List<Dependency> dependencies) {
@@ -98,7 +113,8 @@ public class PomFileModifier {
 				String scope = dependency.getScope();
 				String type = dependency.getType();
 
-				if(!groupId.isEmpty()){
+				if(!groupId.isEmpty()) {
+					
 					Element elem = doc.createElement("groupId");
 					elem.appendChild(doc.createTextNode(groupId));
 					dependencyNode.appendChild(elem);

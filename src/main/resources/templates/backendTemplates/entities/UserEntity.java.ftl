@@ -25,6 +25,9 @@ public class  UserEntity implements Serializable {
     private String passwordResetCode;
     private Boolean shouldChangePasswordOnNextLogin;
     </#if>
+    <#if AuthenticationType == "oidc">
+    private String scimId;
+    </#if>
     private String phoneNumber;
     private Long profilePictureId;
     private Date lastLoginTime;
@@ -44,7 +47,7 @@ public class  UserEntity implements Serializable {
     public Long getId() {
         return id;
     }
-
+F
     public void setId(Long id) {
         this.id = id;
     }
@@ -153,7 +156,19 @@ public class  UserEntity implements Serializable {
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
-<#if AuthenticationType == "database">
+    <#if AuthenticationType == "oidc">
+   
+    @Basic
+    @Column(name = "ScimId", nullable = false, length = 36, unique = true)
+    public String getScimId() {
+        return scimId;
+    }
+
+    public void setScimId(String scimId) {
+        this.scimId = scimId;
+    }
+    </#if>
+    <#if AuthenticationType == "database">
 
     @Basic
     @Column(name = "Password", nullable = true, length = 128)
@@ -219,7 +234,7 @@ public class  UserEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "UserName", nullable = false, length = 32)
+    @Column(name = "UserName", nullable = false, length = 32, unique = true)
     @NotNull
     @Length(max = 32, message = "The field must be less than 32 characters")
     public String getUserName() {

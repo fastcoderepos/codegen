@@ -150,7 +150,7 @@ public class [=ClassName]Controller {
 		<#if UsersOnly == "true">
 		// Add all the roles and permissions in a list and then convert the list into all permissions, removing duplicates
 		List<String> permissions=null;
-		[=AuthenticationTable]Entity user = _userMgr.FindBy<#if AuthenticationFields?? && AuthenticationFields.UserName.fieldName>[=AuthenticationFields.UserName.fieldName]</#if>(userName);  
+		[=AuthenticationTable]Entity user = _userMgr.FindBy<#if AuthenticationFields?? && AuthenticationFields.UserName??>[=AuthenticationFields.UserName.fieldName?cap_first]</#if>(userName);  
 		if(user !=null )
 		{
 			permissions = utils.getAllPermissionsFromUserAndRole(user);
@@ -205,7 +205,7 @@ public class [=ClassName]Controller {
 		this.logHelper = helper;
 	}
 
-   <#if AuthenticationType == "database" && ClassName == AuthenticationTable>
+   <#if !((AuthenticationType == "ldap" || AuthenticationType == "oidc") && ClassName == AuthenticationTable)>
     <#if AuthenticationType != "none">
     @PreAuthorize("hasAnyAuthority('[=ClassName?upper_case]ENTITY_CREATE')")
     </#if>
@@ -357,14 +357,12 @@ public class [=ClassName]Controller {
 		
 		<#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>
 		<#if AuthenticationFields??>
-		<#list AuthenticationFields as authKey,authValue>
-        <#if AuthenticationType == "database" && authKey== "Password">
-	    [=ClassName?uncap_first].set[=authValue.fieldName?cap_first](pEncoder.encode(current[=ClassName].get[=authValue.fieldName?cap_first]()));
+        <#if AuthenticationType == "database">
+	    [=ClassName?uncap_first].set[=AuthenticationFields.Password.fieldName?cap_first](pEncoder.encode(current[=ClassName].get[=AuthenticationFields.Password.fieldName?cap_first]()));
 	    </#if>
-	    <#if authKey== "UserName">
- 		_jwtAppService.deleteAllUserTokens(current[=ClassName].get[=authValue.fieldName?cap_first]());
-	    </#if>
-	    </#list>
+	    if(current[=ClassName].get[=AuthenticationFields.IsActive.fieldName?cap_first]() && ![=ClassName?uncap_first].get[=AuthenticationFields.IsActive.fieldName?cap_first]()) { 
+           _jwtAppService.deleteAllUserTokens(current[=ClassName].get[=AuthenticationFields.UserName.fieldName?cap_first]());
+        } 
         </#if>
 		</#if>
 		<#if CompositeKeyClasses?seq_contains(ClassName)>

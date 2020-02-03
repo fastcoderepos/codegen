@@ -22,8 +22,7 @@ public class JwtEntity implements Serializable {
     private Long id; 
     private String userName; 
     private <#if Cache!false>@Indexed</#if>String token; 
-    private Boolean isActive; 
- 
+    
     @Id 
     @Column(name = "Id", nullable = false) 
     @GeneratedValue(strategy = GenerationType.IDENTITY) 
@@ -54,16 +53,6 @@ public class JwtEntity implements Serializable {
     } 
     public void setToken(String token) { 
         this.token = token; 
-    } 
- 
-    @Basic 
-    @Column(name = "IsActive", nullable = false) 
-    public Boolean getIsActive() { 
-        return isActive; 
-    } 
- 
-    public void setIsActive(Boolean active) { 
-        isActive = active; 
     } 
  
     @Override 

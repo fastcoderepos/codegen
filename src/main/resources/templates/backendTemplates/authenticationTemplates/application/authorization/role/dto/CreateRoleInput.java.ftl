@@ -8,8 +8,15 @@ public class CreateRoleInput {
 	@NotNull(message = "Display Name Should not be null")
     @Length(max = 128, message = "Display Name must be less than 128 characters")
     private String displayName;
-	
+    
+    <#if (AuthenticationType == "oidc" && UsersOnly == "false")>
+    @NotNull(message = "ScimId Should not be null")
+    @Length(max = 36, message = "ScimId must be less than 36 characters")
+    private String scimId;
+    
+    </#if>
 	@NotNull(message = "Name Should not be null")
+	@Length(max = 128, message = "Name must be less than 128 characters")
     private String name;
 
     public String getDisplayName() {
@@ -19,8 +26,17 @@ public class CreateRoleInput {
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
+    
+    <#if (AuthenticationType == "oidc" && UsersOnly == "false")>
+    public String getScimId() {
+        return scimId;
+    }
 
-
+    public void setScimId(String scimId) {
+        this.scimId = scimId;
+    }
+    
+    </#if>
     public String getName() {
         return name;
     }

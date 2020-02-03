@@ -13,6 +13,7 @@ public class UpdatePermissionInput {
     private String displayName;
     
     @NotNull(message = "Name Should not be null")
+    @Length(max = 128, message = "Name must be less than 128 characters")
     private String name;
 
     public Long getId() {

@@ -13,9 +13,15 @@ public class UpdateRoleInput {
     private String displayName;
     
     @NotNull(message = "Name Should not be null")
+    @Length(max = 128, message = "Name must be less than 128 characters")
     private String name;
 
-
+    <#if (AuthenticationType == "oidc" && UsersOnly == "false")>
+    @NotNull(message = "ScimId Should not be null")
+    @Length(max = 36, message = "ScimId must be less than 36 characters")
+    private String scimId;
+    
+    </#if>
     public Long getId() {
         return id;
     }
@@ -39,5 +45,15 @@ public class UpdateRoleInput {
     public void setName(String name) {
         this.name = name;
     }
+    
+    <#if (AuthenticationType == "oidc" && UsersOnly == "false")>
+    public String getScimId() {
+        return scimId;
+    }
 
+    public void setScimId(String scimId) {
+        this.scimId = scimId;
+    }
+    
+    </#if>
 }

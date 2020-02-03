@@ -131,7 +131,7 @@ public class UserInput {
 	}
 	
 	public FieldDetails getEntityDescriptionField(String entityName, List<FieldDetails> fields) {
-		int index = 1;
+		int index = 1; 
 		StringBuilder builder = new StringBuilder(MessageFormat.format(
 				"\nSelect a descriptive field of {0} entity by typing their corresponding number: ", entityName));
 
@@ -143,8 +143,14 @@ public class UserInput {
 		}
 		System.out.println(builder.toString());
 		index= getFieldsInput(fieldsList.size());
-
+        
 		FieldDetails selected = fieldsList.get(index - 1);
+		while(!selected.getFieldType().equalsIgnoreCase("String") || !selected.getIsNullable())
+		{
+			System.out.println("Please choose valid required String field");
+			index= getFieldsInput(fieldsList.size());
+			selected=fieldsList.get(index - 1);
+		}
 		return selected;
 	}
 	
@@ -220,6 +226,7 @@ public class UserInput {
 		}
 		if (value == 1) {
 			authMap.put(AuthenticationConstants.AUTHENTICATION_TYPE, "none");
+			authMap.put(AuthenticationConstants.USERS_ONLY, "false");
 		} 
 		else if (value>1) {
 			scanner.nextLine();

@@ -43,37 +43,37 @@ public class EntityGenerator {
 	@Autowired
 	private LoggingHelper logHelper;
 
-	public String buildTablesStringFromList(List<String> tableList, String schema)
-	{
-		String tables = "";
-		if (tableList != null) {
-			for (int i = 0; i < tableList.size(); i++) {
-				if (!tableList.get(i).isEmpty()) {
-					if (i < tableList.size() - 1)
-						tables = tables + schema.concat("." + tableList.get(i) + ",");
-					else
-						tables = tables + schema.concat("." + tableList.get(i));
-				}
-			}
-		}
-		
-		return tables;
-	}
+//	public String buildTablesStringFromList(List<String> tableList, String schema)
+//	{
+//		String tables = "";
+//		if (tableList != null) {
+//			for (int i = 0; i < tableList.size(); i++) {
+//				if (!tableList.get(i).isEmpty()) {
+//					if (i < tableList.size() - 1)
+//						tables = tables + schema.concat("." + tableList.get(i) + ",");
+//					else
+//						tables = tables + schema.concat("." + tableList.get(i));
+//				}
+//			}
+//		}
+//		
+//		return tables;
+//	}
 	
-	public Map<String, EntityDetails> generateEntities(String connectionString, String schema,
-			List<String> tableList, String packageName, String destination, Map<String,String> authenticationMap) throws IllegalStateException, IOException, SQLException { 
+	public Map<String, EntityDetails> generateEntities(Map<String,String> connectionProps, String schema,
+			String packageName, String destination, Map<String,String> authenticationMap) throws IllegalStateException, IOException, SQLException { 
 
-		Map<String, String> connectionProps = entityGeneratorUtils.parseConnectionString(connectionString);
+		
 		String entityPackage = packageName + ".domain.model";
-		final String tempPackageName = entityPackage.concat(".Temp");
+		final String tempPackageName = entityPackage.concat(".Temp"); 
 		destination = destination.replace('\\', '/');
 		final String destinationPath = destination.concat("/src/main/java");
 		final String targetPath = destination.concat("/target/classes"); 
-		String tables = buildTablesStringFromList(tableList,schema);
+//		String tables = buildTablesStringFromList(tableList,schema);
 		
-		if (!tables.isEmpty()) {
-			reverseMapping.run(tempPackageName, destinationPath, tables, connectionProps);
-		} else
+//		if (!tables.isEmpty()) {
+//			reverseMapping.run(tempPackageName, destinationPath, tables, connectionProps);
+//		} else
 			reverseMapping.run(tempPackageName, destinationPath, schema, connectionProps);
 		try { 
 			Thread.sleep(280);
@@ -91,7 +91,7 @@ public class EntityGenerator {
 		
 		Map<String, EntityDetails> entityDetailsMap = processAndGenerateRelevantEntities(targetPath, tempPackageName, schema, packageName, destinationPath,authenticationMap);
 				
-	//	entityGeneratorUtils.deleteDirectory(destinationPath + "/" + tempPackageName.replaceAll("\\.", "/"));
+		entityGeneratorUtils.deleteDirectory(destinationPath + "/" + tempPackageName.replaceAll("\\.", "/"));
 		logHelper.getLogger().info("Exit");
 		return entityDetailsMap;
 	}
@@ -318,9 +318,14 @@ public class EntityGenerator {
 			index= userInput.getFieldsInput(fieldsList.size());
 	
 			FieldDetails selected=fieldsList.get(index - 1);
-			while(!selected.getFieldType().equalsIgnoreCase("String"))
+			String type = "String";
+			if(authFieldsEntry.getKey().equals("IsActive"))
 			{
-				System.out.println("Please choose valid string field : ");
+				type="Boolean";
+			}
+			while(!selected.getFieldType().equalsIgnoreCase(type) || !selected.getIsNullable())
+			{
+				System.out.println("Please choose valid required "+ type +" field");
 				index= userInput.getFieldsInput(fieldsList.size());
 				selected=fieldsList.get(index - 1);
 			}
@@ -348,8 +353,17 @@ public class EntityGenerator {
 	{
 		Map<String,FieldDetails> authFields=new HashMap<String, FieldDetails>();
 		authFields.put("UserName", null);
+		authFields.put("IsActive", null);
 		if(authenticationType.equals("database"))
 		authFields.put("Password", null);
+		
+//		if(authenticationType.equals("oidc"))
+//		{
+//			authFields.put("ScmId",null);
+//			authFields.put("FirstName",null);
+//			authFields.put("LastName",null);
+//			authFields.put("EmailAddress",null);
+//		}
     
 		for(Map.Entry<String,EntityDetails> entry: entityDetails.entrySet())
 		{
