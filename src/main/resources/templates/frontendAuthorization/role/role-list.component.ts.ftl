@@ -6,7 +6,9 @@ import { BaseListComponent, Globals, IListColumn, listColumnType, PickerDialogSe
 
 import { IRole } from './irole';
 import { RoleService } from './role.service';
-import { RoleNewComponent } from './role-new.component';
+<#if !ExcludeRoleNew>
+export { RoleNewComponent } from './role-new.component';
+</#if>
 import { GlobalPermissionService } from '../core/global-permission.service';
 
 @Component({
@@ -36,7 +38,7 @@ export class RoleListComponent extends BaseListComponent<IRole> implements OnIni
 		this.entityName = 'Role';
 		this.setAssociation();
 		this.setColumns();
-		this.primaryKeys = [ "id",  ]
+		this.primaryKeys = [ "id" ];
 		super.ngOnInit();
 	}
   
@@ -69,6 +71,14 @@ export class RoleListComponent extends BaseListComponent<IRole> implements OnIni
 				filter: true,
 				type: listColumnType.String
 			},
+			<#if (AuthenticationType == "oidc" && UsersOnly == "false")>
+			{
+				column: 'scimId',
+				label: 'scimId',
+				sort: true,
+				filter: true,
+				type: listColumnType.String
+			},</#if>
 		  {
 				column: 'actions',
 				label: 'Actions',
@@ -81,8 +91,10 @@ export class RoleListComponent extends BaseListComponent<IRole> implements OnIni
 		this.displayedColumns = this.columns.map((obj) => { return obj.column });
   }
   
+  <#if !ExcludeRoleNew>
 	addNew() {
 		super.addNew(RoleNewComponent);
 	}
+	</#if>
   
 }

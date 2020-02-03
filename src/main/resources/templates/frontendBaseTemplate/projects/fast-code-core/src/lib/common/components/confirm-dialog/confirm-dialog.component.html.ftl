@@ -13,7 +13,7 @@
     </h4>
     <br>
   </div>
-  <div mat-dialog-actions class="fb-text-right">
+  <div mat-dialog-actions class="fc-text-right">
     <button mat-raised-button color="warn" (click)="dialogRef.close(true)">{{action}}</button>
   </div>
 </div>

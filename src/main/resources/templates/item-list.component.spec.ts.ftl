@@ -8,7 +8,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { ListFiltersComponent, ServiceUtils } from 'projects/fast-code-core/src/public_api';
 
 import { EntryComponents, TestingModule } from 'src/testing/utils';
-import { [=IEntity], [=ClassName]Service, [=ClassName]DetailsComponent, [=ClassName]ListComponent, [=ClassName]NewComponent } from './index';
+import { [=IEntity], [=ClassName]Service, [=ClassName]DetailsComponent, [=ClassName]ListComponent<#if !ExcludeUserNew>, [=ClassName]NewComponent</#if> } from './index';
 
 describe('[=ClassName]ListComponent', () => {
   let fixture:ComponentFixture<[=ClassName]ListComponent>;
@@ -65,7 +65,7 @@ describe('[=ClassName]ListComponent', () => {
       </#if>
       </#if>
       </#list>
-      </#if> 
+      </#if>
     },
     </#list> 
   ];
@@ -119,13 +119,15 @@ describe('[=ClassName]ListComponent', () => {
 
     });
 
+		<#if !ExcludeUserNew>
     it('should run #addNew()', async () => {
       spyOn(component, "addNew").and.returnValue();
       el = fixture.debugElement.query(By.css('button[name=add]')).nativeElement;
       el.click();
       expect(component.addNew).toHaveBeenCalled();
     });
-
+    
+    </#if>
     it('should run #delete()', async () => {
 
       component.items = data;
@@ -183,7 +185,9 @@ describe('[=ClassName]ListComponent', () => {
       TestBed.configureTestingModule({
         declarations: [
           [=ClassName]ListComponent,
+          <#if !ExcludeUserNew>
           [=ClassName]NewComponent,
+          </#if>
           [=ClassName]DetailsComponent
         ].concat(EntryComponents),
         imports: [
@@ -230,6 +234,7 @@ describe('[=ClassName]ListComponent', () => {
       expect(component.displayedColumns.length).toBeGreaterThan(0);
     });
 
+		<#if !ExcludeUserNew>
     it('should open new dialog for new entry', async () => {
       component.IsCreatePermission = true;
       fixture.detectChanges();
@@ -239,7 +244,8 @@ describe('[=ClassName]ListComponent', () => {
 
       expect(component.dialog.open).toHaveBeenCalled();
     });
-
+    
+		</#if>
     it('should delete the item from list', async () => {
       component.items = data;
       fixture.detectChanges();

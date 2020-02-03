@@ -18,6 +18,9 @@ describe('RoleDetailsComponent', () => {
     displayName: 'displayName1',
     id: 1,
     name: 'name1',
+    <#if (AuthenticationType == "oidc" && UsersOnly == "false")>
+		scimId: 'scimId1',
+    </#if>
   };
   
   describe('Unit Tests', () => {

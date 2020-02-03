@@ -1,8 +1,8 @@
 <div *ngIf="!noFilterableFields">
   <form [formGroup]="basicFilterForm" class="filter-form" [hidden]="showFilters">
 
-    <div class="fb-row full-width">
-      <div class="fb-col-md-6 fb-col-lg-2">
+    <div class="fc-row full-width">
+      <div class="fc-col-md-6 fc-col-lg-2">
         <mat-form-field class="example-full-width full-width"  style="width:100%">
           <input type="text" placeholder="{{'LIST-FILTERS.ADD-FILTER-PLACEHOLDER' | translate}}" aria-label="Number" matInput [formControl]="filterCtrl" [matAutocomplete]="auto">
           <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selected($event)">
@@ -12,7 +12,7 @@
           </mat-autocomplete>
         </mat-form-field>
       </div>
-      <div class="fb-col-md-12 fb-col-lg-10">
+      <div class="fc-col-md-12 fc-col-lg-10">
         <div *ngIf="mySelector" class="div-input-container">
           <div class="field-div">
             <mat-form-field class="full-width">
@@ -91,7 +91,7 @@
         </div>
       </div>
 
-      <div class="fb-col-sm-12">
+      <div class="fc-col-sm-12">
         <mat-chip *ngFor="let field of selectedDisplayFilterFields; let i = index" (removed)="remove(field,i)">
           {{field}}
           <mat-icon matTooltip="remove" matChipRemove>cancel</mat-icon>

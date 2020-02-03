@@ -19,4 +19,7 @@ export interface IUser {
       profilePictureId?: number;
       twoFactorEnabled?: boolean;
       userName: string;
+			<#if AuthenticationType == "oidc">
+			scimId: string;
+			</#if>
   }

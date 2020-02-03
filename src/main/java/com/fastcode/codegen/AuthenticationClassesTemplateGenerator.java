@@ -23,7 +23,7 @@ public class AuthenticationClassesTemplateGenerator {
 
 	private static final String BACKEND_TEMPLATE_FOLDER = "/templates/backendTemplates";
 	private static final String AUTHORIZATION_TEMPLATE_FOLDER = "/templates/backendTemplates/authenticationTemplates";
-	private static final String FRONTEND_AUTHORIZATION_TEMPLATE_FOLDER = "/templates/frontendAuthorization/";
+	private static final String FRONTEND_AUTHORIZATION_TEMPLATE_FOLDER = "/templates/frontendAuthorization";
 	private static final String AUTHORIZATION_TEST_TEMPLATE_FOLDER = "/templates/backendTemplates/authenticationTestTemplates";
 
 	public void generateAutheticationClasses(String destination, String packageName, Boolean cache,String schemaName,Map<String, String> authenticationInputMap,Map<String,EntityDetails> details) {
@@ -37,13 +37,13 @@ public class AuthenticationClassesTemplateGenerator {
 		generateFrontendAuthorization(destination, packageName,authenticationInputMap, root);
 		generateAppStartupRunner(details, backendAppFolder,root);
 	}
-	
+
 	public void generateBackendFiles(Map<String, String> authenticationInputMap, Map<String, Object> root,String backendAppFolder, String backendTestFolder )
 	{
-		
-        Map<String, Object> templates = new HashMap<String, Object>();
-        Map<String, Object> testTemplates = new HashMap<String, Object>();
-		
+
+		Map<String, Object> templates = new HashMap<String, Object>();
+		Map<String, Object> testTemplates = new HashMap<String, Object>();
+
 		if(authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE).equals("database") || 
 				(!authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE).equals("database") && authenticationInputMap.get(AuthenticationConstants.USERS_ONLY).equals("true")))
 		{
@@ -109,10 +109,10 @@ public class AuthenticationClassesTemplateGenerator {
 			String outputFileName = filePath.substring(0, filePath.lastIndexOf('.'));
 			if(!(outputFileName.toLowerCase().contains("user") && !((outputFileName.contains("UserDetailsServiceImpl") && authenticationType == "database") || outputFileName.contains("LoginUser"))))
 			{ 	
-                if(!(outputFileName.contains("JWTAuthentication") && authenticationType.equals("oidc")))
-                {
-				templates.put(filePath, outputFileName);
-                }
+				if(!(outputFileName.contains("JWTAuthentication") && authenticationType.equals("oidc")))
+				{
+					templates.put(filePath, outputFileName);
+				}
 			}
 		}
 
@@ -142,7 +142,7 @@ public class AuthenticationClassesTemplateGenerator {
 					outputFileName = outputFileName.replace("User", authenticationTable);
 					outputFileName = outputFileName.replace("user", authenticationTable.toLowerCase());
 				}
-			
+
 				if(!(outputFileName.toLowerCase().contains("user") && !((outputFileName.contains("UserDetailsServiceImpl") && authenticationType == "database") || outputFileName.contains("LoginUser") || outputFileName.toLowerCase().contains(authenticationTable.toLowerCase()+"permission") || outputFileName.toLowerCase().contains(authenticationTable.toLowerCase()+"role"))))
 				{ 	
 					if(!outputFileName.contains("GetUser") && !(outputFileName.contains("JWTAuthentication") && authenticationType.equals("oidc"))  )
@@ -151,7 +151,7 @@ public class AuthenticationClassesTemplateGenerator {
 						{
 							outputFileName = outputFileName.replace("CU", authenticationTable);
 						}
-					
+
 						templates.put(filePath, outputFileName);
 					}
 
@@ -194,6 +194,13 @@ public class AuthenticationClassesTemplateGenerator {
 
 	public void generateFrontendAuthorization(String destPath, String packageName, Map<String,String> authenticationInputMap, Map<String, Object> root) {
 
+		String customUser = authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA);
+		String authType = authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE);
+		Boolean usersOnly = authenticationInputMap.get(AuthenticationConstants.USERS_ONLY) == "true";
+		
+		root.put("ExcludeRoleNew", !authType.equals("database") && !usersOnly);
+		root.put("ExcludeUserNew", !authType.equals("database"));
+		
 		String appName =packageName.substring(packageName.lastIndexOf(".") + 1);
 		String appFolderPath = destPath + "/" + appName + "Client/src/app/";
 		List<String> authorizationEntities = new ArrayList<String>();
@@ -207,10 +214,7 @@ public class AuthenticationClassesTemplateGenerator {
 		entityList.add("Permission");
 		entityList.add("Rolepermission");
 
-		codeGenerator.updateAppModule(destPath, appName, entityList);
-		codeGenerator.updateAppRouting(destPath, appName, entityList, authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE));
-
-		if(authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE) == "oidc") {
+		if(authType.equals("oidc")) {
 			authorizationEntities.add("callback");
 			generateSilentRefreshFile(destPath + "/" + appName + "Client/src/assets/");
 		}
@@ -219,35 +223,34 @@ public class AuthenticationClassesTemplateGenerator {
 		}
 		authorizationEntities.add("core");
 
-		if(authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE).equals("database") || 
-				(!authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE).equals("database") && authenticationInputMap.get(AuthenticationConstants.USERS_ONLY).equals("true")))
+		if(authType.equals("database") || (!authType.equals("database") && usersOnly) )
 		{
-			if(authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA) == null) {
+			if(customUser == null) {
 				authorizationEntities.add("user");
 				entityList.add("User");
 				entityList.add("Userpermission");
 				entityList.add("Userrole");
 			} else {
-				entityList.add(authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA) + "permission");
-				entityList.add(authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA) + "role");
+				entityList.add(customUser + "permission");
+				entityList.add(customUser + "role");
 			}
 
 			authorizationEntities.add("userpermission");
 			authorizationEntities.add("userrole");
 
 		}
-
+		
 		for(String entity: authorizationEntities) {
-
-			if(entity == "userpermission" && authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA) != null ) {
-				generateFrontendAuthorizationComponents(appFolderPath + codeGeneratorUtils.camelCaseToKebabCase(authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA)) + "permission", FRONTEND_AUTHORIZATION_TEMPLATE_FOLDER + entity, authenticationInputMap, root);
+			String entityPath = FRONTEND_AUTHORIZATION_TEMPLATE_FOLDER + "/" + entity;
+			if(entity == "userpermission" && customUser != null ) {
+				generateFrontendAuthorizationComponents(appFolderPath + codeGeneratorUtils.camelCaseToKebabCase(customUser) + "permission", entityPath, authenticationInputMap, root);
 			}
-			else if(entity == "userrole" && authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA) != null ) {
-				generateFrontendAuthorizationComponents(appFolderPath + codeGeneratorUtils.camelCaseToKebabCase(authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA)) + "role", FRONTEND_AUTHORIZATION_TEMPLATE_FOLDER + entity, authenticationInputMap, root);
+			else if(entity == "userrole" && customUser != null ) {
+				generateFrontendAuthorizationComponents(appFolderPath + codeGeneratorUtils.camelCaseToKebabCase(customUser) + "role", entityPath, authenticationInputMap, root);
 			}
 			else 
 			{
-				generateFrontendAuthorizationComponents(appFolderPath + entity, FRONTEND_AUTHORIZATION_TEMPLATE_FOLDER + entity, authenticationInputMap, root);
+				generateFrontendAuthorizationComponents(appFolderPath + entity, entityPath, authenticationInputMap, root);
 			}
 		}
 
@@ -256,37 +259,45 @@ public class AuthenticationClassesTemplateGenerator {
 	public void generateFrontendAuthorizationComponents(String destination, String templatePath, Map<String,String> authenticationInputMap, Map<String,Object> root) {
 		List<String> filesList = codeGeneratorUtils.readFilesFromDirectory(templatePath);
 		filesList = codeGeneratorUtils.replaceFileNames(filesList, templatePath);
+		String customUser = authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA);
 
 		Map<String, Object> templates = new HashMap<>();
 
 		for (String filePath : filesList) {
 			String outputFileName = filePath.substring(0, filePath.lastIndexOf('.'));
-			if(authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA)==null)
-			{
-				templates.put(filePath, outputFileName);
+			if(shouldExcludeTemplate(outputFileName, authenticationInputMap)){		
+				continue;
 			}
-			else
-			{
-				if(outputFileName.toLowerCase().contains("userpermission") || outputFileName.toLowerCase().contains("userrole"))
-				{
-					outputFileName = outputFileName.replace("user", codeGeneratorUtils.camelCaseToKebabCase(authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA)));
-				}
 
-				if(!(outputFileName.toLowerCase().contains("user") && !(outputFileName.toLowerCase().contains(authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA).toLowerCase()+"permission") || outputFileName.toLowerCase().contains(authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA).toLowerCase()+"role"))))
-				{ 		
-					templates.put(filePath, outputFileName);
-				}
+			if(customUser != null && (outputFileName.toLowerCase().contains("userpermission") || outputFileName.toLowerCase().contains("userrole")))
+			{
+				outputFileName = outputFileName.replace("user", codeGeneratorUtils.camelCaseToKebabCase( customUser ));
 			}
+			
+			templates.put(filePath, outputFileName);
 		}
 
-		if(authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA) != null) {
-			root.put("moduleName", codeGeneratorUtils.camelCaseToKebabCase(authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA)));
+		if(customUser != null) {
+			root.put("moduleName", codeGeneratorUtils.camelCaseToKebabCase(customUser));
 		}
 		else {
 			root.put("moduleName", "user");
 		}
 
 		codeGeneratorUtils.generateFiles(templates, root, destination,templatePath);
+	}
+	
+	public Boolean shouldExcludeTemplate(String outputFileName, Map<String,String> authenticationInputMap ) {
+		String authType = authenticationInputMap.get("authenticationType");
+		Boolean usersOnly = authenticationInputMap.get("usersOnly") == "true";
+		
+		Boolean isUserNewFile = outputFileName.contains("user-new");
+		Boolean isRoleNewFile = outputFileName.startsWith("/role-new");
+		
+		Boolean excludeRoleNew = !authType.equals("database") && !usersOnly && isRoleNewFile;
+		Boolean excludeUserNew = !authType.equals("database") && isUserNewFile;
+		
+		return excludeRoleNew || excludeUserNew;
 	}
 
 	public void generateAppStartupRunner(Map<String, EntityDetails> details, String backEndRootFolder,Map<String, Object> root){
@@ -313,9 +324,9 @@ public class AuthenticationClassesTemplateGenerator {
 		codeGeneratorUtils.generateFiles(template, root, backEndRootFolder,BACKEND_TEMPLATE_FOLDER);
 
 	}
-	
+
 	public void generateSilentRefreshFile(String destination){
-		
+
 		Map<String, Object> template = new HashMap<>();
 		template.put("silent-refresh.html.ftl", "silent-refresh.html");
 		new File(destination).mkdirs();

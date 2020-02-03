@@ -44,7 +44,7 @@ export class PermissionDetailsComponent extends BaseDetailsComponent<IPermission
 	
 	setForm(){
     this.itemForm = this.formBuilder.group({
-      displayName: [''],
+      displayName: ['', Validators.required],
       id: [{value: '', disabled: true}, Validators.required],
       name: ['', Validators.required],
     });

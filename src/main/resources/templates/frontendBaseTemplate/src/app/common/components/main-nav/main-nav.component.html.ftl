@@ -86,7 +86,7 @@
     </mat-nav-list>
   </mat-sidenav>
   <mat-sidenav-content #navContent class="fc-sidenav-content">
-    <mat-toolbar class="fc-tool-bar" color="primary" [ngClass]="!authenticationService.token?'no-header':''" *ngIf="authenticationService.token">
+    <mat-toolbar class="fc-tool-bar" color="primary" <#if AuthenticationType == "oidc">[ngClass]="!authenticationService.token?'no-header':''" *ngIf="authenticationService.token"</#if>>
       <figure class="loggo mob-logo">
         <img src="../../../../assets/images/logo.png" alt="logo"/>
       </figure>
