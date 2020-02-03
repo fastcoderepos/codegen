@@ -1,7 +1,7 @@
 package [=PackageName].domain.model;
 
 import [=PackageName].domain.model.RoleEntity;
-
+import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.HashSet;
@@ -25,7 +25,8 @@ public class PermissionEntity implements Serializable {
 
     @Id
     @Column(name = "Id", nullable = false)
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
+    @GenericGenerator(name = "native", strategy = "native")
     public Long getId() {
         return id;
     }

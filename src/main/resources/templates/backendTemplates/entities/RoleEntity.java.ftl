@@ -1,6 +1,7 @@
 package [=PackageName].domain.model;
 
 import javax.persistence.*;
+import org.hibernate.annotations.GenericGenerator;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
@@ -18,7 +19,8 @@ public class RoleEntity implements Serializable {
 
     @Id
     @Column(name = "Id", nullable = false)
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
+    @GenericGenerator(name = "native", strategy = "native")
     public Long getId() {
         return id;
     }

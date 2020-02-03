@@ -2,7 +2,7 @@ package [=PackageName].domain.model;
 
 import [=PackageName].domain.model.RoleEntity;
 import org.hibernate.validator.constraints.Length;
-
+import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
@@ -43,11 +43,12 @@ public class  UserEntity implements Serializable {
 
     @Id
     @Column(name = "Id", nullable = false)
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
+    @GenericGenerator(name = "native", strategy = "native")
     public Long getId() {
         return id;
     }
-F
+
     public void setId(Long id) {
         this.id = id;
     }
