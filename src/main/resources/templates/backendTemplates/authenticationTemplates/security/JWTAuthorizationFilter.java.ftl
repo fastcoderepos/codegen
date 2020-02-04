@@ -167,7 +167,7 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
                         
             <#elseif AuthenticationType =="oidc">
             String aud= null;
-    		<#if !UsersOnly>
+    		<#if !UserOnly>
             List<String> groups = new ArrayList<String>();
     		</#if>
             

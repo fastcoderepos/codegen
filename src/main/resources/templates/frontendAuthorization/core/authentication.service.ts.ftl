@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
+import { throwError<#if AuthenticationType == "oidc">, Subject<#else>, Observable</#if> } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment<#if AuthenticationType == "oidc">, AuthOidcConfig</#if> } from 'src/environments/environment';
 import { JwtHelperService } from "@auth0/angular-jwt";
@@ -18,7 +18,7 @@ const helper = new JwtHelperService();
 export class AuthenticationService {
   private decodedToken: ITokenDetail; 
   <#if AuthenticationType == "oidc">
-  private oidcPermissions: string[] = [];
+  permissionsChange: Subject<string> = new Subject<string>();
   public authUrl = environment.authUrl;
   
   constructor(
@@ -47,6 +47,7 @@ export class AuthenticationService {
   }
 
   logout() {
+  	localStorage.removeItem('permissions');
     this.oidcSecurityService.logoff();
   }
 
@@ -56,13 +57,13 @@ export class AuthenticationService {
 
   decodeToken(): ITokenDetail {
     if (this.decodedToken) {
-      this.decodedToken.scopes = this.oidcPermissions || [];
+      this.decodedToken.scopes = JSON.parse(localStorage.getItem("permissions")) || [];
       return this.decodedToken;
     }
     else {
       if (this.token) {
         let decodedToken: ITokenDetail = helper.decodeToken(this.token) as ITokenDetail;
-        decodedToken.scopes = this.oidcPermissions || [];
+        decodedToken.scopes = JSON.parse(localStorage.getItem("permissions")) || [];
         this.decodedToken = decodedToken;
         return this.decodedToken;
       }
@@ -73,9 +74,10 @@ export class AuthenticationService {
 
   setLoggedInUserPermissions() {
     if (this.token) {
-      this.http.get<any>(this.authUrl + '/user/myPermissions').subscribe(res => {
-        this.oidcPermissions = res;
-      }, this.handleError)
+      this.http.get<any>(this.authUrl + '/auth/myPermissions').subscribe( (permissions: string[] ) => {
+        localStorage.setItem('permissions', JSON.stringify(permissions));
+        this.permissionsChange.next();
+      }, this.handleError);
     }
   }
 

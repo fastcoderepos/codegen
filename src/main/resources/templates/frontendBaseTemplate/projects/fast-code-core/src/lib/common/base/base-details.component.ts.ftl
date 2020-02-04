@@ -26,7 +26,11 @@ import { ServiceUtils } from '../utils/serviceUtils';
 })
 export class BaseDetailsComponent<E> implements OnInit, CanDeactivateGuard {
 
-  // Guard against browser refresh, close, etc.
+  /** 
+   * Guard against browser refresh, close, etc.
+   * Checks if user has some unsaved changes 
+   * before leaving the page.
+   */
   @HostListener('window:beforeunload')
   canDeactivate(): Observable<boolean> | boolean {
     // returning true will navigate without confirmation
@@ -65,9 +69,6 @@ export class BaseDetailsComponent<E> implements OnInit, CanDeactivateGuard {
   largerDeviceDialogWidthSize: string = "65%";
   largerDeviceDialogHeightSize: string = "75%";
 
-  /*constructor(private route: ActivatedRoute, private userService: UserService) { 
-     this.route.params.subscribe( params => this.user$ = params.id );
-  }*/
   constructor(
     public formBuilder: FormBuilder,
     public router: Router,
@@ -80,8 +81,12 @@ export class BaseDetailsComponent<E> implements OnInit, CanDeactivateGuard {
 
   ) {
   }
-  setPermissions = () => {
 
+  /**
+   * Sets CRUD permissions for entity for
+   * currently logged in user.
+   */
+  setPermissions = () => {
     if (this.globalPermissionService) {
       let entityName = this.entityName.startsWith("I") ? this.entityName.substr(1) : this.entityName;
       this.IsCreatePermission = this.globalPermissionService.hasPermissionOnEntity(entityName, "CREATE");
@@ -95,24 +100,16 @@ export class BaseDetailsComponent<E> implements OnInit, CanDeactivateGuard {
         this.IsReadPermission = (this.IsDeletePermission || this.IsUpdatePermission) ? true : this.globalPermissionService.hasPermissionOnEntity(entityName, "READ");
       }
     }
-    //});
   }
+
   ngOnInit() {
     this.setPermissions();
     this.idParam = this.route.snapshot.paramMap.get('id');
-    this.manageScreenResizing();
-
   }
 
-  manageScreenResizing() {
-    // this.global.isMediumDeviceOrLess$.subscribe(value => {
-    //   this.isMediumDeviceOrLess = value;
-    //   if (this.dialogRef)
-    //     this.dialogRef.updateSize(value ? this.mediumDeviceOrLessDialogSize : this.largerDeviceDialogWidthSize,
-    //       value ? this.mediumDeviceOrLessDialogSize : this.largerDeviceDialogHeightSize);
-    // });
-  }
-
+  /**
+   * Fetches item details from service
+   */
   getItem(): Observable<E> {
     if (this.idParam) {
       this.dataService.getById(this.idParam).subscribe(x => this.onItemFetched(x), (error) => {
@@ -128,23 +125,22 @@ export class BaseDetailsComponent<E> implements OnInit, CanDeactivateGuard {
     this.itemForm.patchValue(item);
   }
 
+  /**
+   * Gets data from item form and call service method to update the item.
+   */
   onSubmit() {
-    // stop here if form is invalid
     if (this.itemForm.invalid) {
       return;
     }
-    
+
     this.submitted = true;
     this.loading = true;
     this.dataService.update(this.itemForm.getRawValue(), this.idParam)
       .pipe(first())
       .subscribe(
         data => {
-          // this.alertService.success('Registration successful', true);
           this.loading = false;
-          // this.router.navigate([this.parentUrl]);
           this.router.navigate([this.parentUrl], { relativeTo: this.route.parent });
-          //  this.dialogRef.close(data);
         },
         error => {
           this.errorService.showError("Error Occured while updating");
@@ -152,11 +148,17 @@ export class BaseDetailsComponent<E> implements OnInit, CanDeactivateGuard {
         });
   }
 
+  /**
+   * Redirects back to entity list page.
+   */
   onBack(): void {
-    //  this.router.navigate([this.parentUrl]);
     this.router.navigate([this.parentUrl], { relativeTo: this.route.parent });
   }
 
+  /**
+   * Loads records of given association from service.
+   * @param association 
+   */
   selectAssociation(association: IAssociationEntry) {
     this.initializePickerPageInfo();
     association.data = [];
@@ -183,6 +185,10 @@ export class BaseDetailsComponent<E> implements OnInit, CanDeactivateGuard {
   searchValuePicker: ISearchField[] = [];
   pickerItemsObservable: Observable<any>;
 
+  /**
+   * Initializes/Resets paging information of data list 
+   * showing in autocomplete options.
+   */
   initializePickerPageInfo() {
     this.hasMoreRecordsPicker = true;
     this.pickerPageSize = 30;
@@ -190,7 +196,11 @@ export class BaseDetailsComponent<E> implements OnInit, CanDeactivateGuard {
     this.currentPickerPage = 0;
   }
 
-  //manage pages for virtual scrolling
+  /**
+   * Manages paging for virtual scrolling for data list 
+   * showing in autocomplete options.
+   * @param data Item data from the last service call.
+   */
   updatePickerPageInfo(data) {
     if (data.length > 0) {
       this.currentPickerPage++;
@@ -201,6 +211,11 @@ export class BaseDetailsComponent<E> implements OnInit, CanDeactivateGuard {
     }
   }
 
+  /**
+   * Loads more data of given association when 
+   * list is scrolled to the bottom (virtual scrolling).
+   * @param association 
+   */
   onPickerScroll(association: IAssociationEntry) {
     if (!this.isLoadingPickerResults && this.hasMoreRecordsPicker && this.lastProcessedOffsetPicker < association.data.length) {
       this.isLoadingPickerResults = true;
@@ -218,6 +233,7 @@ export class BaseDetailsComponent<E> implements OnInit, CanDeactivateGuard {
     }
   }
 
+  // load the data meeting given criteria of given association
   onPickerSearch(searchValue: string, association: IAssociationEntry) {
 
     let searchField: ISearchField = {
@@ -231,7 +247,7 @@ export class BaseDetailsComponent<E> implements OnInit, CanDeactivateGuard {
 
   setPickerSearchListener() {
     this.associations.forEach(association => {
-      if(!association.isParent){
+      if (!association.isParent) {
         this.itemForm.get(association.descriptiveField).valueChanges.subscribe(value => this.onPickerSearch(value, association));
       }
     })
@@ -253,6 +269,7 @@ export class BaseDetailsComponent<E> implements OnInit, CanDeactivateGuard {
     return queryParam;
   }
 
+  // redirect to the list(if relationship is oneToMany) or details(if oneToOne) page of given association.
   openChildDetails(association: IAssociationEntry) {
     if (association.type == "OneToMany") {
       this.router.navigate(['/' + association.table.toLowerCase()], { queryParams: this.getQueryParams(association) });

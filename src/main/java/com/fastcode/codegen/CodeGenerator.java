@@ -128,8 +128,6 @@ public class CodeGenerator {
 
 		contentReader.copyFileFromJar("keystore.p12", destPath + "/" + backEndRootFolder + "/src/main/resources/keystore.p12");
 
-		updateEntitiesJsonFile(destPath + "/" + appName + "Client/src/app/common/components/main-nav/entities.json",entityNames,authenticationInfo.getAuthenticationTable());
-
 		Map<String,Object> propertyInfo = getInfoForApplicationPropertiesFile(destPath,sourcePackageName, connectionString, schema,authenticationInfo,cache);
 
 		//generate configuration files for backend
@@ -494,29 +492,5 @@ public class CodeGenerator {
 			logHelper.getLogger().error("Error Occured : ", e.getMessage());
 		}
 	}
-
-	public void updateEntitiesJsonFile(String path, List<String> entityNames, String authenticationTable) {
-		try {
-			JSONArray entityArray = (JSONArray) jsonUtils.readJsonFile(path);
-			for(String entityName: entityNames)
-			{
-				if(!entityName.equalsIgnoreCase(authenticationTable)) {
-					entityArray.add(entityName.toLowerCase());
-				}
-			}
-
-			String prettyJsonString = jsonUtils.beautifyJson(entityArray, "Array");
-			jsonUtils.writeJsonToFile(path,prettyJsonString);
-
-		} catch (FileNotFoundException e) {
-			logHelper.getLogger().error("File Not Found Exception : ", e.getMessage());
-		} catch (IOException e) {
-			logHelper.getLogger().error("IOException : ", e.getMessage());
-		} catch (ParseException e) {
-			logHelper.getLogger().error("Parsing Exception: ", e.getMessage());
-		}
-
-	}
-
 
 }

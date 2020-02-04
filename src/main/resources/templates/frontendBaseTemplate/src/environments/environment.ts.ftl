@@ -23,7 +23,7 @@ export const AuthOidcConfig: OpenIdConfiguration = {
   silent_renew: true,
   silent_renew_url: 'https://localhost:4200/assets/silent-refresh.html',
   // silent_renew_url: 'https://localhost:4200/callback',
-  log_console_debug_active: true,
+  //log_console_debug_active: true,
   post_logout_redirect_uri: 'https://localhost:4200',
   start_checksession: false,
   post_login_route: '/dashboard',
@@ -35,7 +35,7 @@ export const AuthOidcConfig: OpenIdConfiguration = {
   // id_token C8: The iat Claim can be used to reject tokens that were issued too far away from the current time,
   // limiting the amount of time that nonces need to be stored to prevent attacks.The acceptable range is Client specific.
   max_id_token_iat_offset_allowed_in_seconds: 10,
-  silent_renew_offset_in_seconds: 3500,
+  //silent_renew_offset_in_seconds: 3500,
   isauthorizedrace_timeout_in_seconds: 15
 };
 </#if>
