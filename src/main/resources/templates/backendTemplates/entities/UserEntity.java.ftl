@@ -2,7 +2,7 @@ package [=PackageName].domain.model;
 
 import [=PackageName].domain.model.RoleEntity;
 import org.hibernate.validator.constraints.Length;
-
+import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
@@ -43,7 +43,8 @@ public class  UserEntity implements Serializable {
 
     @Id
     @Column(name = "Id", nullable = false)
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
+    @GenericGenerator(name = "native", strategy = "native")
     public Long getId() {
         return id;
     }
@@ -159,7 +160,7 @@ public class  UserEntity implements Serializable {
     <#if AuthenticationType == "oidc">
    
     @Basic
-    @Column(name = "ScimId", nullable = false, length = 36)
+    @Column(name = "ScimId", nullable = false, length = 36, unique = true)
     public String getScimId() {
         return scimId;
     }
@@ -168,7 +169,7 @@ public class  UserEntity implements Serializable {
         this.scimId = scimId;
     }
     </#if>
-<#if AuthenticationType == "database">
+    <#if AuthenticationType == "database">
 
     @Basic
     @Column(name = "Password", nullable = true, length = 128)
@@ -234,7 +235,7 @@ public class  UserEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "UserName", nullable = false, length = 32)
+    @Column(name = "UserName", nullable = false, length = 32, unique = true)
     @NotNull
     @Length(max = 32, message = "The field must be less than 32 characters")
     public String getUserName() {

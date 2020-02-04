@@ -12,6 +12,7 @@ import com.fastcode.entitycodegen.AuthenticationConstants;
 import com.fastcode.entitycodegen.BaseAppGen;
 import com.fastcode.entitycodegen.EntityDetails;
 import com.fastcode.entitycodegen.EntityGenerator;
+import com.fastcode.entitycodegen.EntityGeneratorUtils;
 import com.fastcode.entitycodegen.UserInput;
 import com.fastcode.logging.LoggingHelper;
 
@@ -46,13 +47,16 @@ public class ModulesGenerator {
 	private LoggingHelper logHelper;
 	
 	@Autowired
+	private EntityGeneratorUtils entityGeneratorUtils;
+	
+	@Autowired
 	private CodegenDependenciesIdentifier dependenciesIdentifier;
 	
 	public void generateCode(UserInput input) { 
 	
 		File dir = new File(input.getDestinationPath());
 		if(!dir.exists()) {
-			dir.mkdirs();
+			dir.mkdirs(); 
 		};
 
 		dependenciesIdentifier.setDestinationPath(input.getDestinationPath());
@@ -64,7 +68,7 @@ public class ModulesGenerator {
 
 		gitRepositoryManager.setDestinationPath(input.getDestinationPath());
 		String sourceBranch = "";
-		if(gitRepositoryManager.isGitInstalled()) {
+		if(gitRepositoryManager.isGitInstalled()) { 
 			if(!gitRepositoryManager.isGitInitialized()) {
 				gitRepositoryManager.initializeGit();
 				logHelper.getLogger().info("Git repository initialized.");
@@ -114,15 +118,15 @@ public class ModulesGenerator {
 		baseAppGen.CreateBaseApplication(input.getDestinationPath(), artifactId, groupId, dependencies,
 				true, "-n=" + artifactId + "  -j=1.8 ");
 		try { 
-		Map<String, EntityDetails> details = entityGenerator.generateEntities(input.getConnectionStr(),
-				input.getSchemaName(), null, groupArtifactId, input.getDestinationPath() + "/" + artifactId,input.getAuthenticationMap());
+		Map<String, String> connectionProps = entityGeneratorUtils.parseConnectionString(input.getConnectionStr());
+		Map<String, EntityDetails> details = entityGenerator.generateEntities(connectionProps,
+				input.getSchemaName(), groupArtifactId, input.getDestinationPath() + "/" + artifactId,input.getAuthenticationMap());
 
-
-		pomFileModifier.updatePomFile(input.getDestinationPath() + "/" + artifactId + "/pom.xml",input.getAuthenticationMap().get(AuthenticationConstants.AUTHENTICATION_TYPE),input.getCache());
+		pomFileModifier.updatePomFile(input.getDestinationPath() + "/" + artifactId + "/pom.xml",input.getAuthenticationMap().get(AuthenticationConstants.AUTHENTICATION_TYPE),connectionProps.get("database"),input.getCache());
 		commonModule.generateCommonModuleClasses(input.getDestinationPath()+ "/" + artifactId, groupArtifactId);
 		baseAppGen.CompileApplication(input.getDestinationPath() + "/" + artifactId);
  
-		frontendGenerator.generate(input.getDestinationPath(), artifactId, input.getAuthenticationMap().get(AuthenticationConstants.AUTHENTICATION_TYPE),input.getAuthenticationMap().get(AuthenticationConstants.AUTHENTICATION_SCHEMA));
+		frontendGenerator.generate(input.getDestinationPath(), artifactId, input.getAuthenticationMap(), details);
 
 		if(!input.getAuthenticationMap().get(AuthenticationConstants.AUTHENTICATION_TYPE).equals("none"))
 		{

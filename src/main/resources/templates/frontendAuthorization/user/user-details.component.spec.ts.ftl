@@ -34,6 +34,8 @@ describe('UserDetailsComponent', () => {
     profilePictureId: 1,
     twoFactorEnabled: true,
     userName: 'userName1',
+    <#if AuthenticationType == "oidc">
+    scimId: 'scimId1',</#if>
   };
   
   describe('Unit Tests', () => {

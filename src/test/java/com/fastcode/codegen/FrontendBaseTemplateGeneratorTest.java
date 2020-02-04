@@ -87,7 +87,7 @@ public class FrontendBaseTemplateGeneratorTest {
 	@Test
 	public void generate_ParametersAreValid_ReturnNothing() {
 	
-	//	Mockito.doNothing().when(frontendBaseTemplateGenerator).editTsConfigJsonFile(anyString());
+		Mockito.doNothing().when(frontendBaseTemplateGenerator).editTsConfigJsonFile(anyString());
 		Mockito.doNothing().when(frontendBaseTemplateGenerator).editAngularJsonFile(anyString(),anyString());
 		
 		Mockito.doReturn("").when(mockedCommandUtils).runProcess(anyString(), anyString());

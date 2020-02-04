@@ -41,7 +41,7 @@ class GitRepositoryManager {
            
             return false;
         }
-        return true;
+        return true; 
     }
 
     public Boolean isGitInitialized() {

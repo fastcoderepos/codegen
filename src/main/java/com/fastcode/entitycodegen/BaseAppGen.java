@@ -18,7 +18,7 @@ public class BaseAppGen {
     @Autowired
 	private LoggingHelper logHelper;
 
-    public void CompileApplication(String destDirectory)  {
+    public void CompileApplication(String destDirectory)  { 
 
         boolean isWindows = System.getProperty("os.name").toLowerCase().startsWith("windows");
 

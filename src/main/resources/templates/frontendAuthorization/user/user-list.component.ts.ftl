@@ -2,7 +2,9 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { MatDialog } from '@angular/material';
 
 import { Router, ActivatedRoute } from '@angular/router';
+<#if !ExcludeUserNew>
 import { UserNewComponent } from './user-new.component';
+</#if>
 import { BaseListComponent, Globals, listColumnType, PickerDialogService, ErrorService } from 'projects/fast-code-core/src/public_api';
 
 import { IUser } from './iuser';
@@ -36,7 +38,7 @@ export class UserListComponent extends BaseListComponent<IUser> implements OnIni
 		this.entityName = "User";
 		this.setAssociation();
 		this.setColumns();
-		this.primaryKeys = [ "id",  ]
+		this.primaryKeys = [ "id" ];
 		super.ngOnInit();
 	}
   
@@ -70,6 +72,21 @@ export class UserListComponent extends BaseListComponent<IUser> implements OnIni
   			type: listColumnType.String
   		},
   		{
+  			column: 'id',
+  			label: 'id',
+  			sort: true,
+  			filter: false,
+  			type: listColumnType.Number
+  		},
+	    <#if AuthenticationType == "oidc">
+  		{
+  			column: 'scimId',
+  			label: 'scimId',
+  			sort: true,
+  			filter: true,
+  			type: listColumnType.String
+  		},</#if>
+  		{
   			column: 'emailAddress',
   			label: 'emailAddress',
   			sort: true,
@@ -95,8 +112,10 @@ export class UserListComponent extends BaseListComponent<IUser> implements OnIni
   	this.displayedColumns = this.columns.map((obj) => { return obj.column });
 	}
   
+  <#if !ExcludeUserNew>
 	addNew() {
 		super.addNew(UserNewComponent);
 	}
-  
+	
+	</#if>
 }

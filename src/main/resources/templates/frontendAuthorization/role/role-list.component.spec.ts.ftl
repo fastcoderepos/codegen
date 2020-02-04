@@ -8,7 +8,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { ListFiltersComponent, ServiceUtils } from 'projects/fast-code-core/src/public_api';
 
 import { EntryComponents, TestingModule } from 'src/testing/utils';
-import { IRole, RoleService, RoleDetailsComponent, RoleListComponent, RoleNewComponent } from './index';
+import { IRole, RoleService, RoleDetailsComponent, RoleListComponent<#if !ExcludeRoleNew>, RoleNewComponent</#if> } from './index';
 
 describe('RoleListComponent', () => {
   let fixture:ComponentFixture<RoleListComponent>;
@@ -19,11 +19,17 @@ describe('RoleListComponent', () => {
       displayName: 'displayName1',
       id: 1,
       name: 'name1',
+	    <#if (AuthenticationType == "oidc" && UsersOnly == "false")>
+			scimId: 'scimId1',
+	    </#if>
     },
     {   
       displayName: 'displayName2',
       id: 2,
       name: 'name2',
+	    <#if (AuthenticationType == "oidc" && UsersOnly == "false")>
+			scimId: 'scimId2',
+	    </#if>
     },
   ];
   let data: IRole[] = [... constData];
@@ -76,6 +82,7 @@ describe('RoleListComponent', () => {
 
     });
 
+		<#if !ExcludeRoleNew>
     it('should run #addNew()', async () => {
       component.IsCreatePermission = true;
       fixture.detectChanges();
@@ -84,7 +91,8 @@ describe('RoleListComponent', () => {
       el.click();
       expect(component.addNew).toHaveBeenCalled();
     });
-
+    
+		</#if>
     it('should run #delete()', async () => {
       component.IsDeletePermission = true;
       component.items = data;
@@ -142,7 +150,9 @@ describe('RoleListComponent', () => {
       TestBed.configureTestingModule({
         declarations: [
           RoleListComponent,
+          <#if !ExcludeRoleNew>
           RoleNewComponent,
+          </#if>
           RoleDetailsComponent
         ].concat(EntryComponents),
         imports: [
@@ -188,7 +198,8 @@ describe('RoleListComponent', () => {
       expect(component.selectedColumns.length).toBeGreaterThan(0);
       expect(component.displayedColumns.length).toBeGreaterThan(0);
     });
-
+    
+		<#if !ExcludeRoleNew>
     it('should open new dialog for new entry', async () => {
       component.IsCreatePermission = true;
       fixture.detectChanges();
@@ -198,7 +209,8 @@ describe('RoleListComponent', () => {
 
       expect(component.dialog.open).toHaveBeenCalled();
     });
-
+    
+		</#if>
     it('should delete the item from list', async () => {
       component.IsDeletePermission = true;
       component.items = data;

@@ -1,7 +1,7 @@
 package [=PackageName].domain.model;
 
 import [=PackageName].domain.model.RoleEntity;
-
+import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.HashSet;
@@ -25,7 +25,8 @@ public class PermissionEntity implements Serializable {
 
     @Id
     @Column(name = "Id", nullable = false)
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
+    @GenericGenerator(name = "native", strategy = "native")
     public Long getId() {
         return id;
     }
@@ -35,7 +36,7 @@ public class PermissionEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "DisplayName", nullable = true)
+    @Column(name = "DisplayName", nullable = false, length = 128)
     public String getDisplayName() {
         return displayName;
     }
@@ -45,7 +46,7 @@ public class PermissionEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "Name", nullable = false, length = 128)
+    @Column(name = "Name", nullable = false, length = 128,unique = true)
     public String getName() {
         return name;
     }
@@ -78,8 +79,7 @@ public class PermissionEntity implements Serializable {
  
     private Set<RolepermissionEntity> rolepermissionSet = new HashSet<RolepermissionEntity>(); 
   
-
-   <#if AuthenticationType == "database" || (AuthenticationType != "database" && (UsersOnly?? && UsersOnly == "true"))>
+    <#if AuthenticationType == "database" || (AuthenticationType != "database" && (UsersOnly?? && UsersOnly == "true"))>
     @OneToMany(mappedBy = "permission", cascade = CascadeType.ALL, orphanRemoval = true) 
     public Set<[=AuthenticationTable]permissionEntity> get[=AuthenticationTable]permissionSet() { 
       return [=AuthenticationTable?uncap_first]permissionSet; 

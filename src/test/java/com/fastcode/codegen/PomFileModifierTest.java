@@ -71,7 +71,8 @@ public class PomFileModifierTest {
 	public void updatePomFile_parametersAreValid_ReturnNothing() throws IOException {
 		
 		Mockito.doNothing().when(pomFileModifier).addDependenciesAndPluginsToPom(anyString(),any(List.class));
-		pomFileModifier.updatePomFile(destPath.getAbsolutePath(), "database", true);
+		Mockito.doReturn(new Dependency("", "", "")).when(pomFileModifier).getDatabaseDependency(anyString());
+		pomFileModifier.updatePomFile(destPath.getAbsolutePath(), "database", "postgresql", true);
 		
 		Mockito.verify(pomFileModifier,Mockito.times(1)).addDependenciesAndPluginsToPom(anyString(),any(List.class));
 

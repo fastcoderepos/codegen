@@ -24,7 +24,7 @@ public class JSONUtils {
 		Object obj = parser.parse(fr);
 		fr.close(); 
 		return obj;
-	}
+	} 
 
 	// type: "Object" , "Array"
 	public String beautifyJson(Object jsonObject, String type)  {

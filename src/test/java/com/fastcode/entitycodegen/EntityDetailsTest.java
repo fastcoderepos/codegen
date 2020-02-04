@@ -154,9 +154,10 @@ public class EntityDetailsTest {
 	@Test
 	public void findPrimaryKey_parametersAreValid_returnSring() throws ClassNotFoundException, IOException
 	{
-		String pKey = "id";
+		Map<String, String> pkMap = new HashMap<String, String>();
+		pkMap.put("id", "Integer");
 		ArrayList<Class<?>> classes =loadClasses();
-		Assertions.assertThat(entityDetails.findPrimaryKey("com.nfin.test.domain.model.Temp.Ord", classes)).isEqualTo(pKey);
+		Assertions.assertThat(entityDetails.findPrimaryKey("com.nfin.test.domain.model.Temp.Ord", classes)).isEqualTo(pkMap);
 	}
 
 	@Test
@@ -289,12 +290,14 @@ public class EntityDetailsTest {
 		details.setEntityTableName("cust");
 		details.setIdClass("CustId");
 
+		Map<String, String> pkMap = new HashMap<String, String>();
+		pkMap.put("id", "Integer");
 		Mockito.doReturn("cust").when(entityDetails).getTableName(any(Annotation[].class));
 		Mockito.doReturn("ords").when(entityDetails).camelCaseToKebabCase(anyString());
-		Mockito.doReturn("id").when(entityDetails).findPrimaryKey(any(String.class), any(List.class));
+		Mockito.doReturn(pkMap).when(entityDetails).findPrimaryKey(any(String.class), any(List.class));
 		Mockito.doReturn(new ArrayList<FieldDetails>()).when(entityDetails).getFields(anyString(), any(List.class));
 
-
+ 
 		EntityDetails actual = entityDetails.retreiveEntityFieldsAndRships(classes.get(4), "com.nfin.test.domain.model.Temp.Cust", classes );
 		Assertions.assertThat(actual.getRelationsMap()).isEqualToComparingFieldByFieldRecursively(details.getRelationsMap());
 		Assertions.assertThat(actual.getEntityTableName()).isEqualTo(details.getEntityTableName());
@@ -388,10 +391,11 @@ public class EntityDetailsTest {
 		details.setRelationsMap(relationsMap);
 		details.setEntityTableName("ord");
 		details.setIdClass("OrdId");
-
+		Map<String, String> pkMap = new HashMap<String, String>();
+		pkMap.put("id", "Integer");
 		Mockito.doReturn("ord").when(entityDetails).getTableName(any(Annotation[].class));
 		Mockito.doReturn("cust").when(entityDetails).camelCaseToKebabCase(anyString());
-		Mockito.doReturn("id").when(entityDetails).findPrimaryKey(any(String.class), any(List.class));
+		Mockito.doReturn(pkMap).when(entityDetails).findPrimaryKey(any(String.class), any(List.class));
 		Mockito.doReturn(new ArrayList<FieldDetails>()).when(entityDetails).getFields(anyString(), any(List.class));
 
 
@@ -488,9 +492,11 @@ public class EntityDetailsTest {
 		details.setEntityTableName("addresses");
 		details.setIdClass("AddressesId");
 
+		Map<String, String> pkMap = new HashMap<String, String>();
+		pkMap.put("id", "Integer");
 		Mockito.doReturn("addresses").when(entityDetails).getTableName(any(Annotation[].class));
 		Mockito.doReturn("users").when(entityDetails).camelCaseToKebabCase(anyString());
-		Mockito.doReturn("id").when(entityDetails).findPrimaryKey(any(String.class), any(List.class));
+		Mockito.doReturn(pkMap).when(entityDetails).findPrimaryKey(any(String.class), any(List.class));
 		Mockito.doReturn(new ArrayList<FieldDetails>()).when(entityDetails).getFields(anyString(), any(List.class));
 
 		EntityDetails actual = entityDetails.retreiveEntityFieldsAndRships(classes.get(0), "com.nfin.test.domain.model.Temp.Addresses", classes );

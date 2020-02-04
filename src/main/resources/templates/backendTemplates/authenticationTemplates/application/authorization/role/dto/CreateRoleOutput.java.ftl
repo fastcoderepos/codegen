@@ -4,6 +4,9 @@ public class CreateRoleOutput {
     private Long id;
     private String displayName;
     private String name;
+    <#if (AuthenticationType == "oidc" && UsersOnly == "false")>
+    private String scimId;
+    </#if>
 
     public Long getId() {
         return id;
@@ -29,5 +32,15 @@ public class CreateRoleOutput {
         this.name = name;
     }
 
+    <#if (AuthenticationType == "oidc" && UsersOnly == "false")>
+    public String getScimId() {
+        return scimId;
+    }
+
+    public void setScimId(String scimId) {
+        this.scimId = scimId;
+    }
+    
+    </#if>
 }
 

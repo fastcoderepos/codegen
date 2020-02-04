@@ -30,7 +30,7 @@ public class EntityDetails {
 	//	private CodeGeneratorUtils codeGeneratorUtils;
 
 	@Autowired
-	private LoggingHelper logHelper;
+	private LoggingHelper logHelper; 
 
 	Map<String, FieldDetails> fieldsMap = new HashMap<>();
 	Map<String, RelationDetails> relationsMap = new HashMap<>();
@@ -689,7 +689,6 @@ public class EntityDetails {
 
 											for(Map.Entry<String, String> pk : pKeyMap.entrySet())
 											{
-
 												String referenceColumn = pk.getKey();
 												if(columnType.isEmpty())
 													joinDetails.setJoinColumnType(pk.getValue());

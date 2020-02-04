@@ -11,7 +11,7 @@ public class Dependency {
 	public Dependency(String groupId, String artifactId, String version) {
 		super();
 		this.groupId = groupId;
-		this.artifactId = artifactId;
+		this.artifactId = artifactId; 
 		this.version = version;
 	}
 	public Dependency(String groupId, String artifactId, String version, String type, String scope) {

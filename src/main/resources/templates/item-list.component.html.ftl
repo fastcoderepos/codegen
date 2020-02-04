@@ -1,21 +1,22 @@
-<section class="spinner-container" *ngIf="isLoadingResults">
-  <mat-spinner></mat-spinner>
-</section>
-
 <div class="list-container" (onScroll)="onTableScroll()" appVirtualScroll>
-  <div class="top-breadcum">
+  <div class="top-breadcrumb">
     <h1 class="template-title">{{title}}</h1>
-    <div class="fb-row">
-      <div class="fb-col-md-8">
-        <ul class="breadcum">
+    <div class="fc-row">
+      <div class="fc-col-md-8">
+        <ul class="breadcrumb">
           <li><a [routerLink]="['/dashboard']"><i class="material-icons">
                 home
               </i> &nbsp;Dashboard</a></li>
           <li><a>{{title}}</a></li>
+          <li *ngIf="selectedAssociation" (click)="back()">
+            <span *ngIf="selectedAssociation.associatedObj">
+              {{selectedAssociation.table}}: {{selectedAssociation.associatedObj[selectedAssociation.referencedDescriptiveField]}}
+            </span>
+          </li>
         </ul>
       </div>
-      <div class="fb-col-md-4 fb-text-right">
-        <button name="add" mat-raised-button color="primary" <#if AuthenticationType!="none"> [disabled]="!IsCreatePermission"</#if> (click)="addNew()"><i
+      <div class="fc-col-md-4 fc-text-right">
+        <button name="add" mat-raised-button color="primary" <#if AuthenticationType!="none">disabled=<#if ExcludeUserNew>"true"<#else>"!IsCreatePermission"</#if></#if> (click)="addNew()"><i
             class="material-icons">
             add_circle_outline
           </i> &nbsp;{{'GENERAL.ACTIONS.ADD' | translate}}</button>
@@ -107,5 +108,8 @@
   			<mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
   		</mat-table>
   	</div>
+    <section  class="small-spinner-container" *ngIf="isLoadingResults">
+      <mat-spinner></mat-spinner>
+    </section>
 	</mat-card>
 </div>

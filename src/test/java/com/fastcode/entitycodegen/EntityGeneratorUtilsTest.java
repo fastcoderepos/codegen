@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.assertj.core.api.Assertions;
 import org.junit.After;
@@ -33,8 +32,7 @@ public class EntityGeneratorUtilsTest {
 	@InjectMocks
 	@Spy
 	private EntityGeneratorUtils entityGeneratorUtils;
-	
-	
+
 	@Before
 	public void setUp() throws Exception {
 		MockitoAnnotations.initMocks(entityGeneratorUtils);
@@ -56,6 +54,7 @@ public class EntityGeneratorUtilsTest {
 		connectionStringMap.put("password", "fastcode");
 		connectionStringMap.put("database", "postgresql");
 		connectionStringMap.put("driverName", "org.postgresql.Driver");
+		connectionStringMap.put("dialect", "org.hibernate.dialect.PostgreSQLDialect");
 		
 		Assertions.assertThat(entityGeneratorUtils.parseConnectionString(conn)).isEqualTo(connectionStringMap);
 	}

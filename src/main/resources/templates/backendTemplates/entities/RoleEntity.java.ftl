@@ -1,6 +1,7 @@
 package [=PackageName].domain.model;
 
 import javax.persistence.*;
+import org.hibernate.annotations.GenericGenerator;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
@@ -12,10 +13,14 @@ public class RoleEntity implements Serializable {
     private Long id;
     private String displayName;
     private String name;
+    <#if (AuthenticationType == "oidc" && UsersOnly == "false")>
+    private String scimId;
+    </#if>
 
     @Id
     @Column(name = "Id", nullable = false)
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
+    @GenericGenerator(name = "native", strategy = "native")
     public Long getId() {
         return id;
     }
@@ -24,8 +29,20 @@ public class RoleEntity implements Serializable {
         this.id = id;
     }
 
+ 	<#if (AuthenticationType == "oidc" && UsersOnly == "false")>
+ 	@Basic
+    @Column(name = "ScimId", nullable = false, length = 36, unique = true)
+    public String ScimId() {
+        return scimId;
+    }
+
+    public void setScimId(String scimId) {
+        this.scimId = scimId;
+    }
+    
+    </#if>
     @Basic
-    @Column(name = "DisplayName", nullable = true, length = 64)
+    @Column(name = "DisplayName", nullable = false, length = 128)
     public String getDisplayName() {
         return displayName;
     }
@@ -35,7 +52,7 @@ public class RoleEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "Name", nullable = false, length = 32)
+    @Column(name = "Name", nullable = false, length = 128)
     public String getName() {
         return name;
     }

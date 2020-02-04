@@ -10,8 +10,8 @@
             
         <mat-form-field>
           <input formControlName="displayName" matInput placeholder="Display name">
+          <mat-error *ngIf="!itemForm.get('displayName').valid && itemForm.get('displayName').touched">{{'GENERAL.ERRORS.REQUIRED' | translate}}</mat-error>
         </mat-form-field>
-      
       
         <mat-form-field>
           <input formControlName="name" matInput placeholder="Name">
@@ -31,7 +31,7 @@
       </mat-form-field> 
       </form>
     </mat-card-content>
-    <mat-card-actions class="fb-text-right">
+    <mat-card-actions class="fc-text-right">
     <button name="save" mat-raised-button color="primary" (click)="itemNgForm.ngSubmit.emit()"
       [disabled]="!itemForm.valid || loading || !IsCreatePermission">{{'GENERAL.ACTIONS.SAVE' | translate}}</button>
     </mat-card-actions>

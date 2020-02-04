@@ -21,7 +21,7 @@ public class FreeMarkerConfiguration {
 		MultiTemplateLoader mtl = new MultiTemplateLoader(new TemplateLoader[] { ctl1 }); 
 
 		cfg.setInterpolationSyntax(Configuration.SQUARE_BRACKET_INTERPOLATION_SYNTAX); 
-		cfg.setDefaultEncoding("UTF-8"); 
+		cfg.setDefaultEncoding("UTF-8");  
 		cfg.setTemplateLoader(mtl); 
 		
 		return cfg;

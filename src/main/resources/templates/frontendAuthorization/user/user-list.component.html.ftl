@@ -1,21 +1,22 @@
-<section class="spinner-container" *ngIf="isLoadingResults">
-  <mat-spinner></mat-spinner>
-</section>
-
 <div class="list-container" (onScroll)="onTableScroll()" appVirtualScroll>
-  <div class="top-breadcum">
+  <div class="top-breadcrumb">
     <h1 class="template-title">{{title}}</h1>
-    <div class="fb-row">
-      <div class="fb-col-md-8">
-        <ul class="breadcum">
+    <div class="fc-row">
+      <div class="fc-col-md-8">
+        <ul class="breadcrumb">
           <li><a [routerLink]="['/dashboard']"><i class="material-icons">
                 home
               </i> &nbsp;Dashboard</a></li>
           <li><a>{{title}}</a></li>
+          <li *ngIf="selectedAssociation" (click)="back()">
+            <span *ngIf="selectedAssociation.associatedObj">
+              {{selectedAssociation.table}}: {{selectedAssociation.associatedObj[selectedAssociation.referencedDescriptiveField]}}
+            </span>
+          </li>
         </ul>
       </div>
-      <div class="fb-col-md-4 fb-text-right">
-        <button name="add" mat-raised-button color="primary"  (click)="addNew()"><i
+      <div class="fc-col-md-4 fc-text-right">
+        <button name="add" mat-raised-button color="primary" [disabled]=<#if ExcludeUserNew>"true"<#else>"!IsCreatePermission"</#if> (click)="addNew()"><i
             class="material-icons">
             add_circle_outline
           </i> &nbsp;{{'GENERAL.ACTIONS.ADD' | translate}}</button>
@@ -40,12 +41,23 @@
             {{ item.firstName }}
           </mat-cell>
         </ng-container>
+        
         <ng-container matColumnDef="id">
           <mat-header-cell mat-sort-header *matHeaderCellDef [disabled]="!isColumnSortable('id')"> {{getFieldLabel("Id")}}</mat-header-cell>
           <mat-cell *matCellDef="let item">
             {{ item.id }}
           </mat-cell>
         </ng-container>
+        
+				<#if AuthenticationType == "oidc">
+        <ng-container matColumnDef="scimId">
+          <mat-header-cell mat-sort-header *matHeaderCellDef [disabled]="!isColumnSortable('scimId')"> {{getFieldLabel("scimId")}}</mat-header-cell>
+          <mat-cell *matCellDef="let item">
+            {{ item.scimId }}
+          </mat-cell>
+        </ng-container>
+        
+        </#if>
         <ng-container matColumnDef="isActive">
           <mat-header-cell mat-sort-header *matHeaderCellDef [disabled]="!isColumnSortable('isActive')"> {{getFieldLabel("IsActive")}}</mat-header-cell>
           <mat-cell *matCellDef="let item">
@@ -90,5 +102,8 @@
         <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
       </mat-table>
     </div>
+    <section  class="small-spinner-container" *ngIf="isLoadingResults">
+      <mat-spinner></mat-spinner>
+    </section>
   </mat-card>
 </div>
