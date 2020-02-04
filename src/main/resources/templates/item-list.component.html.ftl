@@ -16,7 +16,7 @@
         </ul>
       </div>
       <div class="fc-col-md-4 fc-text-right">
-        <button name="add" mat-raised-button color="primary" <#if AuthenticationType!="none">disabled=<#if ExcludeUserNew>"true"<#else>"!IsCreatePermission"</#if></#if> (click)="addNew()"><i
+        <button name="add" mat-raised-button color="primary" <#if AuthenticationType!="none">[disabled]=<#if ExcludeUserNew>"true"<#else>"!IsCreatePermission"</#if></#if> (click)="addNew()"><i
             class="material-icons">
             add_circle_outline
           </i> &nbsp;{{'GENERAL.ACTIONS.ADD' | translate}}</button>

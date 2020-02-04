@@ -42,7 +42,7 @@
           </mat-cell>
         </ng-container>
 
-	    <#if (AuthenticationType == "oidc" && UsersOnly == "false")>
+	    <#if (AuthenticationType == "oidc" && !UserOnly)>
         <ng-container matColumnDef="scimId">
           <mat-header-cell mat-sort-header *matHeaderCellDef [disabled]="!isColumnSortable('scimId')">
             {{getFieldLabel("ScimId")}}</mat-header-cell>

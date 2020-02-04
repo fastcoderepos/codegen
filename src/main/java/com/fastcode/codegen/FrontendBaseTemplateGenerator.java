@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.json.simple.JSONArray;
@@ -17,7 +18,8 @@ import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.fastcode.entitycodegen.AuthenticationConstants;
+import com.fastcode.entitycodegen.AuthenticationInfo;
+import com.fastcode.entitycodegen.AuthenticationType;
 import com.fastcode.entitycodegen.EntityDetails;
 import com.fastcode.logging.LoggingHelper;
 
@@ -42,7 +44,7 @@ public class FrontendBaseTemplateGenerator {
 	@Autowired
 	FolderContentReader contentReader;
 
-	public void generate(String destination, String appName, Map<String, String> authenticationInput, Map<String, EntityDetails> entityDetails) {
+	public void generate(String destination, String appName, AuthenticationInfo authenticationInfo, Map<String, EntityDetails> entityDetails) {
  
 		String clientSubfolder = appName + "Client";
 		String command = "ng new " + clientSubfolder + " --skipInstall=true";
@@ -51,24 +53,27 @@ public class FrontendBaseTemplateGenerator {
 	//	contentReader.copyDirectoryFromJar("frontend_static/assets", destination + "/"+ clientSubfolder + "/src/assets");
 
 		editTsConfigJsonFile(destination + "/" + clientSubfolder + "/tsconfig.json");
+		Map<String, Object> root = buildRootMap(appName, authenticationInfo, entityDetails.keySet().stream().collect(Collectors.toList()));
 
-		Map<String, Object> root = buildRootMap(appName, authenticationInput, entityDetails.keySet());
 		codeGeneratorUtils.generateFiles(getTemplates(FRONTEND_BASE_TEMPLATE_FOLDER),root, destination + "/"+ clientSubfolder,FRONTEND_BASE_TEMPLATE_FOLDER);
 		copyAssets(destination + "/"+ clientSubfolder + "/src/assets");
 	}
 	
-	public Map<String, Object> buildRootMap(String appName, Map<String, String> authenticationInput, Set<String> entityList)
+	public Map<String, Object> buildRootMap(String appName, AuthenticationInfo authenticationInfo, List<String> entityList)
 	{
-		String authType = authenticationInput.get(AuthenticationConstants.AUTHENTICATION_TYPE);
-		String customTable = authenticationInput.get(AuthenticationConstants.AUTHENTICATION_SCHEMA);
-		Boolean usersOnly = authenticationInput.get(AuthenticationConstants.USERS_ONLY) == "true";
+		AuthenticationType authType = authenticationInfo.getAuthenticationType();
+		String customTable = authenticationInfo.getAuthenticationTable();
+		Boolean userOnly = authenticationInfo.getUserOnly();
 		
 		Map<String, Object> root = new HashMap<>();
 		root.put("AppName", appName);
-		root.put("EntityNames", getEntityNamesList(entityList, authenticationInput));
-		root.put("AuthenticationType", authType);
-		root.put("ExcludeRoleNew", !authType.equals("database") && !usersOnly);
-		root.put("ExcludeUserNew", !authType.equals("database"));
+		root.put("EntityNames", getEntityNamesList(entityList, authenticationInfo));
+		root.put("AuthEntityList", getAuthEntitiesNamesList(authenticationInfo));
+		root.put("EntityList", entityList);
+		root.put("AuthenticationType", authType.getName());
+		root.put("UserOnly", userOnly);
+		root.put("ExcludeRoleNew", !authType.equals(AuthenticationType.DATABASE) && !userOnly);
+		root.put("ExcludeUserNew", !authType.equals(AuthenticationType.DATABASE));
 		
 		if(customTable!=null) {
 			root.put("UserInput","true");
@@ -82,31 +87,50 @@ public class FrontendBaseTemplateGenerator {
 		return root;
 	}
 	
-	public Map<String, String> getEntityNamesList(Set<String> entityList, Map<String, String> authenticationInput){
+	public Map<String, String> getEntityNamesList(List<String> entityList, AuthenticationInfo authenticationInfo){
+
 		Map<String, String> entityNamesList = new HashMap<String, String>();
 		for(String entity: entityList) {
 			String cName = entity.substring(entity.lastIndexOf(".") + 1);
 			entityNamesList.put(codeGeneratorUtils.camelCaseToKebabCase(cName), cName);
 		}
 		
-		String customUser = authenticationInput.get(AuthenticationConstants.AUTHENTICATION_SCHEMA);
-		String authType = authenticationInput.get(AuthenticationConstants.AUTHENTICATION_TYPE);
-		Boolean usersOnly = authenticationInput.get(AuthenticationConstants.USERS_ONLY) == "true";
+		String customUser = authenticationInfo.getAuthenticationTable();
+		AuthenticationType authType = authenticationInfo.getAuthenticationType();
+		Boolean userOnly = authenticationInfo.getUserOnly();
 
-		if(!authType.equals("none")) {
-			entityNamesList.put(codeGeneratorUtils.camelCaseToKebabCase("Role"), "Role");
-			entityNamesList.put(codeGeneratorUtils.camelCaseToKebabCase("Permission"), "Permission");
-			entityNamesList.put(codeGeneratorUtils.camelCaseToKebabCase("Rolepermission"), "Rolepermission");
+		if(!authType.equals(AuthenticationType.NONE)) {
+			List<String> authEntitiesList = getAuthEntitiesNamesList(authenticationInfo);
+			for(String authEntity: authEntitiesList) {
+				entityNamesList.put(codeGeneratorUtils.camelCaseToKebabCase(authEntity), authEntity);
+			}
+		}
+		
+		
+		return entityNamesList;
+	}
+	
+	public List<String> getAuthEntitiesNamesList(AuthenticationInfo authenticationInfo){
+		List<String> entityNamesList = new ArrayList<String>();
+		
+		String customUser = authenticationInfo.getAuthenticationTable();
+		AuthenticationType authType = authenticationInfo.getAuthenticationType();
+		Boolean userOnly = authenticationInfo.getUserOnly();
 
-			if(authType.equals("database") || (!authType.equals("database") && usersOnly) )
+		if(!authType.equals(AuthenticationType.NONE)) {
+			entityNamesList.add("Role");
+			entityNamesList.add("Permission");
+			entityNamesList.add("Rolepermission");
+
+			if(authType.equals(AuthenticationType.DATABASE) || (!authType.equals(AuthenticationType.DATABASE) && userOnly) )
 			{
 				if(customUser == null) {
-					entityNamesList.put(codeGeneratorUtils.camelCaseToKebabCase("User"), "User");
-					entityNamesList.put(codeGeneratorUtils.camelCaseToKebabCase("Userpermission"), "Userpermission");
-					entityNamesList.put(codeGeneratorUtils.camelCaseToKebabCase("Userrole"), "Userrole");
+					entityNamesList.add("User");
+					entityNamesList.add("Userpermission");
+					entityNamesList.add("Userrole");
 				} else {
-					entityNamesList.put(codeGeneratorUtils.camelCaseToKebabCase(customUser + "permission"), customUser + "permission");
-					entityNamesList.put(codeGeneratorUtils.camelCaseToKebabCase(customUser + "role"), customUser + "role");
+					entityNamesList.add(customUser + "permission");
+					entityNamesList.add(customUser + "role");
 				}
 			}
 		}
@@ -238,8 +262,7 @@ public class FrontendBaseTemplateGenerator {
 		try {
 			FileUtils.copyDirectory(new File(System.getProperty("user.dir").replace("\\", "/") + FRONTEND_ASSETS), new File(dest));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logHelper.getLogger().error("FileNotFoundException Occured : ", e.getMessage());
 		}
 	}
 }

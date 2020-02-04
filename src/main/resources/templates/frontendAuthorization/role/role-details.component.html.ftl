@@ -29,7 +29,7 @@
           <input formControlName="name" matInput placeholder="Name">
           <mat-error *ngIf="!itemForm.get('name').valid && itemForm.get('name').touched">{{'GENERAL.ERRORS.REQUIRED' | translate}}</mat-error>
         </mat-form-field>
-        <#if (AuthenticationType == "oidc" && UsersOnly == "false")>
+        <#if (AuthenticationType == "oidc" && !UserOnly)>
         <mat-form-field>
           <input formControlName="scimId" matInput placeholder="SCIM Id">
           <mat-error *ngIf="!itemForm.get('scimId').valid && itemForm.get('scimId').touched">{{'GENERAL.ERRORS.REQUIRED' | translate}}</mat-error>

@@ -79,6 +79,7 @@ public class CodeGeneratorUtils {
 
 		for (Map.Entry<String, Object> entry : templateFiles.entrySet()) {
 			try {
+			//	System.out.println(" key " +entry.getKey() + " \nva " + entry.getValue().toString());
 				Template template = cfg.getTemplate(entry.getKey()); 
 
 				String entryPath = entry.getValue().toString();

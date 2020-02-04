@@ -40,7 +40,7 @@
         <mat-nav-list class="subnav">
 
           <ng-container *ngFor="let entity of entityList">
-            <a <#if AuthenticationType != "none">*ngIf="isMenuVisible(entity)"</#if> mat-list-item class="mat-sub-list-item" [routerLink]="[entity]">
+            <a <#if AuthenticationType != "none">*ngIf="entityPermissions[entity]"</#if> mat-list-item class="mat-sub-list-item" [routerLink]="[entity]">
              {{entity}}
             </a>
           </ng-container>
@@ -62,18 +62,20 @@
           </mat-expansion-panel-header>
 
           <mat-nav-list class="subnav">
-            <#if !UserInput??> 
-            <a mat-list-item class="mat-sub-list-item" *ngIf="isMenuVisible('user')" routerLink="user">Users </a>
-            <a mat-list-item class="mat-sub-list-item" *ngIf="isMenuVisible('userpermission')" routerLink="userpermission">User Permissions </a>
-            <a mat-list-item class="mat-sub-list-item" *ngIf="isMenuVisible('userrole')" routerLink="userrole">User Roles </a>
+            <#if !UserInput?? && !UserOnly> 
+            <a mat-list-item class="mat-sub-list-item" *ngIf="entityPermissions['user']" routerLink="user">Users </a>
+            <a mat-list-item class="mat-sub-list-item" *ngIf="entityPermissions['userpermission']" routerLink="userpermission">User Permissions </a>
+            <a mat-list-item class="mat-sub-list-item" *ngIf="entityPermissions['userroles']" routerLink="userrole">User Roles </a>
             <#elseif UserInput??> 
-            <a mat-list-item class="mat-sub-list-item" *ngIf="isMenuVisible('[=AuthenticationTable?lower_case]')" routerLink="[=AuthenticationTable?lower_case]">[=AuthenticationTable] </a> 
-            <a mat-list-item class="mat-sub-list-item" *ngIf="isMenuVisible('[=AuthenticationTable?lower_case]permission')" routerLink="[=AuthenticationTable?lower_case]permission">[=AuthenticationTable] Permissions </a> 
-            <a mat-list-item class="mat-sub-list-item" *ngIf="isMenuVisible('[=AuthenticationTable?lower_case]role')" routerLink="[=AuthenticationTable?lower_case]role">[=AuthenticationTable] Roles </a> 
+            <a mat-list-item class="mat-sub-list-item" *ngIf="entityPermissions['[=AuthenticationTable?lower_case]']" routerLink="[=AuthenticationTable?lower_case]">[=AuthenticationTable] </a> 
+            <#if !UserOnly>
+            <a mat-list-item class="mat-sub-list-item" *ngIf="entityPermissions['[=AuthenticationTable?lower_case]permission']" routerLink="[=AuthenticationTable?lower_case]permission">[=AuthenticationTable] Permissions </a> 
+            <a mat-list-item class="mat-sub-list-item" *ngIf="entityPermissions['[=AuthenticationTable?lower_case]role']" routerLink="[=AuthenticationTable?lower_case]role">[=AuthenticationTable] Roles </a> 
             </#if>
-            <a mat-list-item class="mat-sub-list-item" *ngIf="isMenuVisible('role')" routerLink="role">Roles</a> 
-            <a mat-list-item class="mat-sub-list-item" *ngIf="isMenuVisible('permission')" routerLink="permission">Permissions</a> 
-            <a mat-list-item class="mat-sub-list-item" *ngIf="isMenuVisible('rolepermission')" routerLink="rolepermission">Roles Permissions</a>
+            </#if>
+            <a mat-list-item class="mat-sub-list-item" *ngIf="entityPermissions['role']" routerLink="role">Roles</a> 
+            <a mat-list-item class="mat-sub-list-item" *ngIf="entityPermissions['permission']" routerLink="permission">Permissions</a> 
+            <a mat-list-item class="mat-sub-list-item" *ngIf="entityPermissions['rolepermission']" routerLink="rolepermission">Roles Permissions</a>
           </mat-nav-list>
         </mat-expansion-panel>
         </#if>
@@ -86,14 +88,13 @@
     </mat-nav-list>
   </mat-sidenav>
   <mat-sidenav-content #navContent class="fc-sidenav-content">
-    <mat-toolbar class="fc-tool-bar" color="primary" <#if AuthenticationType == "oidc">[ngClass]="!authenticationService.token?'no-header':''" *ngIf="authenticationService.token"</#if>>
+    <mat-toolbar class="fc-tool-bar" color="primary" <#if AuthenticationType != "none">*ngIf="authenticationService.token"</#if>>
       <figure class="loggo mob-logo">
         <img src="../../../../assets/images/logo.png" alt="logo"/>
       </figure>
       <span></span>
       <span>
         <#if AuthenticationType != "none">
-        <button mat-button *ngIf="!authenticationService.token" (click)="login()">Login</button>
         
         <button mat-button [matMenuTriggerFor]="menu" *ngIf="authenticationService.token"><i class="material-icons">
             account_circle

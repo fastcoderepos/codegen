@@ -8,11 +8,11 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.apache.http.auth.InvalidCredentialsException;
-<#if AuthenticationType == "database" || (AuthenticationType == "ldap" && UsersOnly== "true")>
+<#if AuthenticationType == "database" || (AuthenticationType == "ldap" && UserOnly)>
 import [=PackageName].domain.model.[=AuthenticationTable]Entity;
 import [=PackageName].domain.authorization.[=AuthenticationTable?lower_case].I[=AuthenticationTable]Manager;
 </#if>
-<#if AuthenticationType == "ldap" && UsersOnly != "true">
+<#if AuthenticationType == "ldap" && !UserOnly>
 import [=PackageName].domain.authorization.role.IRoleManager;
 import java.util.stream.Collectors;
 </#if>
@@ -46,7 +46,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     <#if AuthenticationType == "ldap">
     private SecurityUtils securityUtils;
-    <#if UsersOnly== "true">
+    <#if UserOnly>
     private I[=AuthenticationTable]Manager _userManager;
     <#else>
     private IRoleManager _roleManager;
@@ -63,7 +63,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         this.authenticationManager = authenticationManager;
         <#if AuthenticationType == "ldap">
     	this.securityUtils = ctx.getBean(SecurityUtils.class);
-    	<#if UsersOnly== "true">
+    	<#if UserOnly>
     	this._userManager = ctx.getBean(I[=AuthenticationTable]Manager.class);
     	<#else>
     	this._roleManager = ctx.getBean(IRoleManager.class);
@@ -135,7 +135,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         <#if AuthenticationType == "ldap">
         List<String> scopes  = (auth.getAuthorities().stream().map(s -> s.toString()).collect(Collectors.toList()));
 		List<String> permissionsList = new ArrayList<String>();
-		<#if UsersOnly== "true">
+		<#if UserOnly>
 		<#if UserInput?? && AuthenticationFields??>
         [=AuthenticationTable]Entity user = _userManager.FindBy[=AuthenticationFields.UserName.fieldName?cap_first](userName);       
         <#else>

@@ -2,7 +2,7 @@ package [=PackageName].restcontrollers;
 
 import [=PackageName].application.authorization.permission.PermissionAppService;
 import [=PackageName].application.authorization.rolepermission.RolepermissionAppService;
-<#if (AuthenticationType == "database" || UsersOnly == "true")>
+<#if (AuthenticationType == "database" || UserOnly)>
 import [=PackageName].application.authorization.[=AuthenticationTable?lower_case]permission.[=AuthenticationTable]permissionAppService;
 import [=PackageName].application.authorization.[=AuthenticationTable?lower_case]permission.dto.Find[=AuthenticationTable]permissionByIdOutput;
 </#if>
@@ -38,7 +38,7 @@ public class PermissionController {
     
     @Autowired
 	private RolepermissionAppService  _rolepermissionAppService;
-	<#if (AuthenticationType == "database" || UsersOnly == "true")>
+	<#if (AuthenticationType == "database" || UserOnly)>
     @Autowired
 	private [=AuthenticationTable]permissionAppService  _[=AuthenticationTable?uncap_first]permissionAppService;
     </#if>
@@ -48,11 +48,11 @@ public class PermissionController {
 	@Autowired
 	private Environment env;
 	
-	public PermissionController(PermissionAppService appService,LoggingHelper helper,<#if (AuthenticationType == "database" || UsersOnly == "true")>[=AuthenticationTable]permissionAppService [=AuthenticationTable?uncap_first]permissionAppService,</#if>RolepermissionAppService rolepermissionAppService) {
+	public PermissionController(PermissionAppService appService,LoggingHelper helper,<#if (AuthenticationType == "database" || UserOnly)>[=AuthenticationTable]permissionAppService [=AuthenticationTable?uncap_first]permissionAppService,</#if>RolepermissionAppService rolepermissionAppService) {
 		
 		this._permissionAppService= appService;
 		this.logHelper = helper;
-		<#if (AuthenticationType == "database" || UsersOnly == "true")>
+		<#if (AuthenticationType == "database" || UserOnly)>
 		this._[=AuthenticationTable?uncap_first]permissionAppService = [=AuthenticationTable?uncap_first]permissionAppService;
 		</#if>
 		this._rolepermissionAppService = rolepermissionAppService;
@@ -156,7 +156,7 @@ public class PermissionController {
 		return new ResponseEntity(output, HttpStatus.OK);
 	}
 
-	<#if (AuthenticationType == "database" || UsersOnly == "true")>
+	<#if (AuthenticationType == "database" || UserOnly)>
 	@PreAuthorize("hasAnyAuthority('PERMISSIONENTITY_READ')")
 	@RequestMapping(value = "/{permissionid}/[=AuthenticationTable?uncap_first]permission", method = RequestMethod.GET)
 	public ResponseEntity Get[=AuthenticationTable]permission(@PathVariable String permissionid, @RequestParam(value="search", required=false) String search, @RequestParam(value = "offset", required=false) String offset, @RequestParam(value = "limit", required=false) String limit, Sort sort)throws Exception {

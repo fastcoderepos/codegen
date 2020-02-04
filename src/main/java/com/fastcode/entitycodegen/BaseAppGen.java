@@ -23,7 +23,7 @@ public class BaseAppGen {
         boolean isWindows = System.getProperty("os.name").toLowerCase().startsWith("windows");
 
         String[] builderCommand;
-        if (isWindows) { 
+        if (isWindows) {  
             builderCommand = new String[] { "cmd.exe", "/c", "mvn" + " clean" };
         } else {
             builderCommand = new String[] { "sh", "-c", "mvn" + " clean" };
@@ -50,7 +50,7 @@ public class BaseAppGen {
             boolean overRide, String otherOptions) {
        
     	boolean isWindows = System.getProperty("os.name").toLowerCase().startsWith("windows");
-        String cliCommand = " -b=2.1.9.RELEASE " + "-a=" + appName + " -g=" + groupId + " -d=" + dependency + " " + otherOptions + " "
+        String cliCommand = " -b=2.1.9.RELEASE " + "-packaging=war "+"-a=" + appName + " -g=" + groupId + " -d=" + dependency + " " + otherOptions + " "
                 + appName;
         String[] builderCommand;
         if (isWindows) {

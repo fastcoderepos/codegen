@@ -28,11 +28,15 @@ import org.mockito.MockitoAnnotations;
 import org.slf4j.Logger;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import com.fastcode.CodegenApplication;
 import com.fastcode.codegen.CodeGenerator;
 import com.fastcode.codegen.CodeGeneratorUtils;
 import com.fastcode.codegen.FolderContentReader;
 import com.fastcode.logging.LoggingHelper;
 
+import freemarker.cache.ClassTemplateLoader;
+import freemarker.cache.MultiTemplateLoader;
+import freemarker.cache.TemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 
@@ -57,6 +61,9 @@ public class CodeGeneratorUtilsTest {
 	@Mock
     private Logger loggerMock;
    
+	@Mock
+	FreeMarkerConfiguration freeMarkerConfiguration;
+	
 	@Mock
 	private LoggingHelper logHelper;
 	
@@ -115,12 +122,19 @@ public class CodeGeneratorUtilsTest {
 	@Test
 	public void generateFiles_parametersAreValid_throwException() throws IOException
 	{
-		
+		Configuration cfg = new Configuration(Configuration.VERSION_2_3_28);
+		ClassTemplateLoader ctl1 = new ClassTemplateLoader(CodegenApplication.class,  "/templates/testTemplates");// "/templates/backendTemplates/"); 
+		MultiTemplateLoader mtl = new MultiTemplateLoader(new TemplateLoader[] { ctl1 }); 
 
-		File tempFile = File.createTempFile("entities", ".java.ftl", destPath);
+		cfg.setInterpolationSyntax(Configuration.SQUARE_BRACKET_INTERPOLATION_SYNTAX); 
+		cfg.setDefaultEncoding("UTF-8");  
+		cfg.setTemplateLoader(mtl); 
+
+		Mockito.doReturn(cfg).when(freeMarkerConfiguration).configure(anyString());
+		File tempFile = File.createTempFile("SearchFields", ".java.ftl", destPath);
 		 
 		Map<String, Object> templateFiles = new HashMap<String, Object>();
-		templateFiles.put(destPath.getAbsolutePath(), tempFile.getAbsolutePath());
+		templateFiles.put("/SearchFields.java", CodeGenerator.class.getResource("/templates/testTemplates/SearchFields.java.ftl"));
 		codeGeneratorUtils.generateFiles(templateFiles,new HashMap<String, Object>(), destPath.getAbsolutePath(), destPath.getAbsolutePath());
 	
 	}

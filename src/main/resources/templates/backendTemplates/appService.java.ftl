@@ -1,7 +1,7 @@
-package [=PackageName].application<#if (AuthenticationType == "database" || UsersOnly == "true")  && ClassName == AuthenticationTable>.authorization</#if>.[=ClassName?lower_case];
+package [=PackageName].application<#if (AuthenticationType == "database" || UserOnly)  && ClassName == AuthenticationTable>.authorization</#if>.[=ClassName?lower_case];
 
-import [=PackageName].application<#if (AuthenticationType == "database" || UsersOnly == "true")  && ClassName == AuthenticationTable>.authorization</#if>.[=ClassName?lower_case].dto.*;
-import [=PackageName].domain<#if (AuthenticationType == "database" || UsersOnly == "true")  && ClassName == AuthenticationTable>.authorization</#if>.[=ClassName?lower_case].I[=ClassName]Manager;
+import [=PackageName].application<#if (AuthenticationType == "database" || UserOnly)  && ClassName == AuthenticationTable>.authorization</#if>.[=ClassName?lower_case].dto.*;
+import [=PackageName].domain<#if (AuthenticationType == "database" || UserOnly)  && ClassName == AuthenticationTable>.authorization</#if>.[=ClassName?lower_case].I[=ClassName]Manager;
 import [=PackageName].domain.model.Q[=EntityClassName];
 import [=PackageName].domain.model.[=EntityClassName];
 <#if CompositeKeyClasses?seq_contains(ClassName)>
@@ -9,7 +9,7 @@ import [=PackageName].domain.model.[=IdClass];
 </#if>
 <#list Relationship as relationKey,relationValue>
 <#if relationValue.relation == "OneToOne" || relationValue.relation == "ManyToOne">
-import [=PackageName].domain<#if (AuthenticationType == "database" || UsersOnly == "true") && relationValue.eName == AuthenticationTable>.authorization</#if>.[=relationValue.eName?lower_case].[=relationValue.eName]Manager;
+import [=PackageName].domain<#if (AuthenticationType == "database" || UserOnly) && relationValue.eName == AuthenticationTable>.authorization</#if>.[=relationValue.eName?lower_case].[=relationValue.eName]Manager;
 </#if>
 <#if relationValue.relation == "ManyToOne" || relationValue.relation == "OneToOne">
 import [=PackageName].domain.model.[=relationValue.eName]Entity;
@@ -21,7 +21,7 @@ import [=PackageName].domain.model.[=relationValue.eName]Id;
 </#if>
 </#if>
 </#list>
-<#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>
+<#if (AuthenticationType == "database" || UserOnly) && ClassName == AuthenticationTable>
 import [=PackageName].domain.irepository.IJwtRepository;
 import [=PackageName].domain.model.JwtEntity;
 </#if>
@@ -30,7 +30,7 @@ import [=CommonModulePackage].logging.LoggingHelper;
 import com.querydsl.core.BooleanBuilder;
 
 import java.util.*;
-<#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>
+<#if (AuthenticationType == "database" || UserOnly) && ClassName == AuthenticationTable>
 import java.util.Set;
 import javax.servlet.ServletContext;
 
@@ -217,7 +217,7 @@ public class [=ClassName]AppService implements I[=ClassName]AppService {
  	    Find[=ClassName]ByIdOutput output=mapper.[=EntityClassName]ToFind[=ClassName]ByIdOutput(found[=ClassName]); 
 		return output;
 	}
-	<#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>
+	<#if (AuthenticationType == "database" || UserOnly) && ClassName == AuthenticationTable>
 	
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	<#if Cache !false>
@@ -384,7 +384,7 @@ public class [=ClassName]AppService implements I[=ClassName]AppService {
 	public void checkProperties(List<String> list) throws Exception  {
 		for (int i = 0; i < list.size(); i++) {
 		if(!(
-		<#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>
+		<#if (AuthenticationType == "database" || UserOnly) && ClassName == AuthenticationTable>
 		list.get(i).replace("%20","").trim().equals("userrole") ||
 		</#if>
 		<#list Relationship as relationKey,relationValue>
@@ -720,7 +720,7 @@ public class [=ClassName]AppService implements I[=ClassName]AppService {
     </#if>
     </#list>
     
-    <#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>
+    <#if (AuthenticationType == "database" || UserOnly) && ClassName == AuthenticationTable>
     public Map<String,String> parse[=AuthenticationTable]permissionJoinColumn(String keysString) {
     	Map<String,String> joinColumnMap = new HashMap<String,String>();
     	<#assign primaryKeyLength=PrimaryKeys?size>

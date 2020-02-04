@@ -24,14 +24,14 @@ import [=PackageName].domain.model.JwtEntity;
 import java.net.URL;
 import org.springframework.security.core.authority.AuthorityUtils;
 import [=PackageName].domain.irepository.IJwtRepository;
-<#if AuthenticationType =="oidc">
+<#if AuthenticationType == "oidc">
 import com.nimbusds.jose.*;
 import com.nimbusds.jwt.*;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-<#if UsersOnly == "true">
+<#if UserOnly>
 import [=PackageName].domain.model.[=AuthenticationTable]Entity;
 import [=PackageName].domain.authorization.[=AuthenticationTable?lower_case].I[=AuthenticationTable]Manager;
 <#else>
@@ -56,7 +56,7 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
     <#if AuthenticationType == "oidc">
     private Environment environment;
     private SecurityUtils securityUtils;
-    <#if UsersOnly == "true">
+    <#if UserOnly>
     private I[=AuthenticationTable]Manager _userMgr;
     <#else>
     private IRoleManager _roleManager;
@@ -67,7 +67,7 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
         <#if AuthenticationType == "oidc">
         this.environment = ctx.getBean(Environment.class);
     	this.securityUtils = ctx.getBean(SecurityUtils.class);
-    	<#if UsersOnly== "true">
+    	<#if UserOnly>
     	this._userMgr = ctx.getBean(IUserManager.class);
     	<#else>
     	this._roleManager = ctx.getBean(IRoleManager.class);
@@ -151,8 +151,8 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
         </#if>
         Claims claims;
        
-        if (StringUtils.isNotEmpty(token) && token.startsWith(SecurityConstants.TOKEN_PREFIX)) {
-            String userName = null;
+		if (StringUtils.isNotEmpty(token) && token.startsWith(SecurityConstants.TOKEN_PREFIX)) {
+        	String userName = null;
             List<GrantedAuthority> authorities = null;
             <#if AuthenticationType !="none" && AuthenticationType !="oidc">
             claims = Jwts.parser()
@@ -166,8 +166,8 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
                         .collect(Collectors.toList());
                         
             <#elseif AuthenticationType =="oidc">
-            String aud= null;
-    		<#if UsersOnly != "true">
+
+    		<#if !UserOnly>
             List<String> groups = new ArrayList<String>();
     		</#if>
             
@@ -188,55 +188,55 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
 	            	System.out.println("valid signature");
 	                claimSet = accessToken.getJWTClaimsSet();
 	                userName = claimSet.getSubject();
-	                aud = (String) claimSet.getClaims().get("aud");
-	                    if(!aud.equals(environment.getProperty("spring.security.oauth2.client.registration.oidc.client-id")))
-	                    {
-	                    	throw new JwtException("Invalid token");
-	                    }
-	                <#if UsersOnly != "true">
+	                List<String> aud = null;
+	                aud = (ArrayList) claimSet.getClaims().get("aud");
+	                if(!aud.get(0).equals("localhost:5555")) {
+	                	throw new JwtException("Invalid token");
+	                }
+	                <#if !UserOnly>
 	                groups = (ArrayList<String>) claimSet.getClaims().get("groups");
 	                </#if>
-	                } else {
-	                    System.out.println("invalid signature");
-	                }
-	                } catch (Exception e) {
+	           } else {
+	                System.out.println("invalid signature");
+	           }
+	      } catch (Exception e) {
 	                    e.printStackTrace();
-	            }
+	      }
                
-                <#if UsersOnly == "true">
-                // Add all the roles and permissions in a list and then convert the list into all permissions, removing duplicates
-            	<#if UserInput?? && AuthenticationFields??>
-                [=AuthenticationTable]Entity user = _userMgr.FindBy[=AuthenticationFields.UserName.fieldName?cap_first](userName);       
-            	<#else>
-                [=AuthenticationTable]Entity user = _userMgr.FindByUserName(userName);
-            	</#if>    
-                if (user == null) {
-					throw new UsernameNotFoundException(userName);
-				}
+        <#if UserOnly>
+        // Add all the roles and permissions in a list and then convert the list into all permissions, removing duplicates
+        <#if UserInput?? && AuthenticationFields??>
+        [=AuthenticationTable]Entity user = _userMgr.FindBy[=AuthenticationFields.UserName.fieldName?cap_first](userName);       
+        <#else>
+        [=AuthenticationTable]Entity user = _userMgr.FindByUserName(userName);
+        </#if>    
+        if (user == null) {
+	    	throw new UsernameNotFoundException(userName);
+	    }
 
-                List<String> permissions = securityUtils.getAllPermissionsFromUserAndRole(user);
-                String[] groupsArray = new String[permissions.size()];
-             	authorities = AuthorityUtils.createAuthorityList(permissions.toArray(groupsArray));
+        List<String> permissions = securityUtils.getAllPermissionsFromUserAndRole(user);
+        String[] groupsArray = new String[permissions.size()];
+        authorities = AuthorityUtils.createAuthorityList(permissions.toArray(groupsArray));
                 
-                <#else>
-                List<String> permissionsList = new ArrayList<String>();
-            	for( String item : groups)
-   				{
-   					RoleEntity role = _roleManager.FindByRoleName(item);
-   					if(role != null) {
-   						List<String> permissions= securityUtils.getAllPermissionsFromRole(role);
-   						permissionsList.addAll(permissions);
-   					}
-   				}
-   				permissionsList= permissionsList.stream().distinct().collect(Collectors.toList());
-            	String[] groupsArray = new String[permissionsList.size()];
-            	authorities = AuthorityUtils.createAuthorityList(permissionsList.toArray(groupsArray));
-                </#if>
-            </#if>
+        <#else>
+        List<String> permissionsList = new ArrayList<String>();
+        for( String item : groups)
+   	    {
+			RoleEntity role = _roleManager.FindByRoleName(item);
+   			if(role != null) {
+   				List<String> permissions= securityUtils.getAllPermissionsFromRole(role);
+   				permissionsList.addAll(permissions);
+   			}
+   		}
+   		permissionsList= permissionsList.stream().distinct().collect(Collectors.toList());
+        String[] groupsArray = new String[permissionsList.size()];
+        authorities = AuthorityUtils.createAuthorityList(permissionsList.toArray(groupsArray));
+        </#if>
+        </#if>
 
-            if ((userName != null) && StringUtils.isNotEmpty(userName)) {
-            	return new UsernamePasswordAuthenticationToken(userName, null, authorities);
-        	}
+        if ((userName != null) && StringUtils.isNotEmpty(userName)) {
+        	return new UsernamePasswordAuthenticationToken(userName, null, authorities);
+        }
         }
         return null;
 

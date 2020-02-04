@@ -59,7 +59,7 @@ public class FolderContentReader {
 					if(file.isFile())
 						list.add(file.getAbsolutePath());
 				}
-			}
+			} 
 			return list;
 
 		}
