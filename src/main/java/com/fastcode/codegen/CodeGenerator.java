@@ -57,7 +57,7 @@ public class CodeGenerator {
 		String instanceName = className.substring(0, 1).toLowerCase() + className.substring(1);
 		String moduleName = codeGeneratorUtils.camelCaseToKebabCase(className);
 
-		root.put("Schema", schema); 
+		root.put("Schema", schema);
 		root.put("Cache", cache);
 		root.put("ModuleName", moduleName);
 		root.put("EntityClassName", entityClassName);

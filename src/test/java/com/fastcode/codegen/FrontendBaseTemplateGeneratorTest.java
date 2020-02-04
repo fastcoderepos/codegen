@@ -123,14 +123,10 @@ public class FrontendBaseTemplateGeneratorTest {
 		root.put("AuthenticationType","database");
 		root.put("UserInput","true");
 		root.put("AuthenticationTable", testValue);
-		
 		root.put("EntityNames", new HashMap());
-	
 		root.put("ExcludeRoleNew", false);
 		root.put("ExcludeUserNew", false);
 
-	
-	
 		Mockito.doReturn(new HashMap()).when(frontendBaseTemplateGenerator).getEntityNamesList(any(List.class),any(AuthenticationInfo.class));
 		Assertions.assertThat(frontendBaseTemplateGenerator.buildRootMap(testValue,authenticationInfo, new ArrayList<String>())).isEqualTo(root);
 	}
@@ -153,10 +149,83 @@ public class FrontendBaseTemplateGeneratorTest {
 		root.put("ExcludeUserNew", false);
 	
 		Mockito.doReturn(new HashMap()).when(frontendBaseTemplateGenerator).getEntityNamesList(any(List.class),any(AuthenticationInfo.class));
-		
 		Assertions.assertThat(frontendBaseTemplateGenerator.buildRootMap(testValue, authenticationInfo, new ArrayList<String>())).isEqualTo(root);
 
+	} 
+	
+	@Test
+	public void getEntityNamesList_authenticationTypeIsDatabaseAndAuthenticationTableIsNull_returnMap()
+	{
+		List<String> list = new ArrayList<String>();
+		list.add("entity1");
+		list.add("entity2");
+		
+		Map<String, String> entityNamesList = new HashMap<String, String>();
+		entityNamesList.put("entity-1", "entity1");
+		entityNamesList.put("entity-2", "entity2");
+		entityNamesList.put("role", "Role");
+		entityNamesList.put("permission", "Permission");
+		entityNamesList.put("role-permission", "Rolepermission");
+		entityNamesList.put("user", "User");
+		entityNamesList.put("user-permission", "Userpermission");
+		entityNamesList.put("user-role", "Userrole");
+		
+		Mockito.doReturn("entity-1", "entity-2","role", "permission", "role-permission", "user", "user-permission", "user-role").when(mockedUtils).camelCaseToKebabCase(anyString());
+	//    Assertions.assertThat()
 	}
+	
+	@Test
+	public void getEntityNamesList_authenticationTypeIsDatabaseAndAuthenticationTableIsNotNull_returnMap()
+	{
+		List<String> list = new ArrayList<String>();
+		list.add("entity1");
+		list.add("entity2");
+		
+		Map<String, String> entityNamesList = new HashMap<String, String>();
+		entityNamesList.put("entity-1", "entity1");
+		entityNamesList.put("entity-2", "entity2");
+		entityNamesList.put("role", "Role");
+		entityNamesList.put("permission", "Permission");
+		entityNamesList.put("role-permission", "Rolepermission");
+		entityNamesList.put("user", "User");
+		entityNamesList.put("user-permission", "Userpermission");
+		entityNamesList.put("user-role", "Userrole");
+		
+		Mockito.doReturn("entity-1", "entity-2","role", "permission", "role-permission", "user", "user-permission", "user-role").when(mockedUtils).camelCaseToKebabCase(anyString());
+	}
+//	public Map<String, String> getEntityNamesList(List<String> entityList, AuthenticationInfo authenticationInfo){
+//
+//		Map<String, String> entityNamesList = new HashMap<String, String>();
+//		for(String entity: entityList) {
+//			String cName = entity.substring(entity.lastIndexOf(".") + 1);
+//			entityNamesList.put(codeGeneratorUtils.camelCaseToKebabCase(cName), cName);
+//		}
+//		
+//		String customUser = authenticationInfo.getAuthenticationTable();
+//		AuthenticationType authType = authenticationInfo.getAuthenticationType();
+//		Boolean userOnly = authenticationInfo.getUserOnly();
+//
+//		if(!authType.equals(AuthenticationType.NONE)) {
+//			entityNamesList.put(codeGeneratorUtils.camelCaseToKebabCase("Role"), "Role");
+//			entityNamesList.put(codeGeneratorUtils.camelCaseToKebabCase("Permission"), "Permission");
+//			entityNamesList.put(codeGeneratorUtils.camelCaseToKebabCase("Rolepermission"), "Rolepermission");
+//
+//			if(authType.equals(AuthenticationType.DATABASE) || (!authType.equals(AuthenticationType.DATABASE) && userOnly) )
+//			{
+//				if(customUser == null) {
+//					entityNamesList.put(codeGeneratorUtils.camelCaseToKebabCase("User"), "User");
+//					entityNamesList.put(codeGeneratorUtils.camelCaseToKebabCase("Userpermission"), "Userpermission");
+//					entityNamesList.put(codeGeneratorUtils.camelCaseToKebabCase("Userrole"), "Userrole");
+//				} else {
+//					entityNamesList.put(codeGeneratorUtils.camelCaseToKebabCase(customUser + "permission"), customUser + "permission");
+//					entityNamesList.put(codeGeneratorUtils.camelCaseToKebabCase(customUser + "role"), customUser + "role");
+//				}
+//			}
+//		}
+//		
+//		
+//		return entityNamesList;
+//	}
 
 	@Test
 	public void getTemplates_pathIsValid_returnMap()

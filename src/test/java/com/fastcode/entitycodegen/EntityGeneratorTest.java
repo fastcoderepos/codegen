@@ -695,14 +695,17 @@ public class EntityGeneratorTest {
 		root.put("PackageName", PACKAGE_NAME);
 		root.put("CommonModulePackage", PACKAGE_NAME.concat(".commonmodule"));
 		root.put("CompositeKeyClasses", entityDetails.getCompositeKeyClasses());
+		root.put("Relationship", entityDetails.getRelationsMap());
+		root.put("DescriptiveField", entityDetails.getEntitiesDescriptiveFieldMap());
 		root.put("TableName", entityDetails.getEntityTableName());
 		root.put("SchemaName", SCHEMA_NAME);
 		root.put("IdClass", entityDetails.getIdClass());
+		root.put("UserInput", null);
 		root.put("UserOnly", authenticationInfo.getUserOnly());
 		root.put("AuthenticationType",AuthenticationType.DATABASE.getName());
 		root.put("AuthenticationTable", "User");
 		root.put("AuthenticationFields", entityDetails.getAuthenticationFieldsMap());
-
+ 
 		root.put("Fields", entityDetails.getFieldsMap());
 		root.put("Relationship", entityDetails.getRelationsMap());
 		root.put("PrimaryKeys", entityDetails.getPrimaryKeys());
@@ -734,11 +737,13 @@ public class EntityGeneratorTest {
 		root.put("TableName", entityDetails.getEntityTableName());
 		root.put("SchemaName", SCHEMA_NAME);
 		root.put("IdClass", entityDetails.getIdClass());
+		root.put("Relationship", entityDetails.getRelationsMap());
+		root.put("UserInput", "true");
 		root.put("UserOnly", authenticationInfo.getUserOnly());
 		root.put("AuthenticationType",AuthenticationType.DATABASE.getName());
 		root.put("AuthenticationTable",authenticationInfo.getAuthenticationTable());
 		root.put("AuthenticationFields", entityDetails.getAuthenticationFieldsMap());
-
+		root.put("DescriptiveField", entityDetails.getEntitiesDescriptiveFieldMap());
 		root.put("Fields", entityDetails.getFieldsMap());
 		root.put("Relationship", entityDetails.getRelationsMap());
 		root.put("PrimaryKeys", entityDetails.getPrimaryKeys());
@@ -783,7 +788,7 @@ public class EntityGeneratorTest {
 		Map<String, Object> root = new HashMap<>();
 		root.put("ClassName", "entity1");
 		Mockito.doNothing().when(mockedCodeGeneratorUtils).generateFiles(any(HashMap.class), any(HashMap.class), anyString(), anyString());
-		entityGenerator.generateEntity(root, destPath.getAbsolutePath());
+		entityGenerator.generateIdClass(root, destPath.getAbsolutePath());
 		Mockito.verify(mockedCodeGeneratorUtils,Mockito.times(1)).generateFiles(any(HashMap.class), any(HashMap.class),  anyString(), anyString());
 	}
 

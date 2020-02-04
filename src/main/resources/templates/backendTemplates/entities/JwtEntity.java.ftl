@@ -9,7 +9,7 @@ import javax.persistence.*;
 import javax.validation.constraints.Email; 
 import javax.validation.constraints.NotNull; 
 import java.io.Serializable; 
- 
+import org.hibernate.annotations.GenericGenerator; 
 <#if Cache!false>
 @RedisHash("JwtEntity") 
 <#else>
@@ -25,7 +25,8 @@ public class JwtEntity implements Serializable {
     
     @Id 
     @Column(name = "Id", nullable = false) 
-    @GeneratedValue(strategy = GenerationType.IDENTITY) 
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
+    @GenericGenerator(name = "native", strategy = "native")
     public Long getId() { 
         return id; 
     } 

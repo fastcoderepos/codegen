@@ -23,24 +23,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 </#if>
 import org.springframework.web.bind.annotation.*;
-<#if AuthenticationType == "oidc">
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import [=PackageName].security.SecurityConstants;
-import [=PackageName].security.SecurityUtils;
-
-import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.jwt.SignedJWT;
-<#if UserOnly>
-import [=PackageName].domain.authorization.user.IUserManager;
-import [=PackageName].domain.model.UserEntity;
-<#else>
-import [=PackageName].domain.model.RoleEntity;
-import [=PackageName].domain.authorization.role.IRoleManager;
-import java.util.ArrayList;
-import java.util.stream.Collectors;
-</#if>
-</#if>
 import java.util.List;
 import java.util.Map;
 
@@ -74,70 +56,6 @@ public class UserController {
 
 	@Autowired
 	private Environment env;
-	<#if AuthenticationType == "oidc">
-    <#if UserOnly>
-    @Autowired
-	IUserManager _userMgr;
-    <#else>
-	@Autowired
-	IRoleManager _roleManager;
-    </#if>
-	@Autowired
-	SecurityUtils utils;
-
-	@Autowired 
-	HttpServletRequest request;
-
-	@RequestMapping(value = "/myPermissions", method = RequestMethod.GET)
-	public ResponseEntity GetMeInfo() throws Exception{
-
-		String token = request.getHeader(SecurityConstants.HEADER_STRING);
-		String userName = "";
-		
-		SignedJWT accessToken = null;
-		JWTClaimsSet claimSet = null;
-		
-		accessToken = SignedJWT.parse(token.replace(SecurityConstants.TOKEN_PREFIX, ""));
-		claimSet = accessToken.getJWTClaimsSet();
-		userName = claimSet.getSubject();
-		
-		<#if UserOnly>
-		// Add all the roles and permissions in a list and then convert the list into all permissions, removing duplicates
-		List<String> permissions=null;
-		UserEntity user = _userMgr.FindByUserName(userName);  
-		if(user !=null )
-		{
-			permissions = utils.getAllPermissionsFromUserAndRole(user);
-		}
-		else
-			throw new EntityNotFoundException(
-					String.format("There does not exist a user with a name=%s", userName));
-		return new ResponseEntity(permissions, HttpStatus.OK);
-		<#elseif !UserOnly>
-		List<String> groups = new ArrayList<String>();
-		groups = (ArrayList<String>) claimSet.getClaims().get("groups");
-		List<String> permissionsList = new ArrayList<String>();
-		for( String item : groups)
-		{
-
-			RoleEntity role = _roleManager.FindByRoleName(item);
-			if(role != null) {
-				List<String> permissions= utils.getAllPermissionsFromRole(role);
-
-				permissionsList.addAll(permissions);
-			}
-		else
-			throw new EntityNotFoundException(
-					String.format("There does not exist a role with a name=%s", item));
-
-		}
-		permissionsList= permissionsList.stream().distinct().collect(Collectors.toList());
-
-		return new ResponseEntity(permissionsList, HttpStatus.OK);
-        </#if>
-	}
-
-    </#if>
 	
 	public UserController(UserAppService userAppService, UserpermissionAppService userpermissionAppService,
 			UserroleAppService userroleAppService,<#if AuthenticationType == "database">PasswordEncoder pEncoder,</#if>JWTAppService jwtAppService, LoggingHelper logHelper) {

@@ -24,7 +24,7 @@ import [=PackageName].domain.model.JwtEntity;
 import java.net.URL;
 import org.springframework.security.core.authority.AuthorityUtils;
 import [=PackageName].domain.irepository.IJwtRepository;
-<#if AuthenticationType =="oidc">
+<#if AuthenticationType == "oidc">
 import com.nimbusds.jose.*;
 import com.nimbusds.jwt.*;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
@@ -151,8 +151,8 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
         </#if>
         Claims claims;
        
-        if (StringUtils.isNotEmpty(token) && token.startsWith(SecurityConstants.TOKEN_PREFIX)) {
-            String userName = null;
+		if (StringUtils.isNotEmpty(token) && token.startsWith(SecurityConstants.TOKEN_PREFIX)) {
+        	String userName = null;
             List<GrantedAuthority> authorities = null;
             <#if AuthenticationType !="none" && AuthenticationType !="oidc">
             claims = Jwts.parser()
@@ -166,8 +166,7 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
                         .collect(Collectors.toList());
                         
             <#elseif AuthenticationType =="oidc">
-            String aud= null;
-    		<#if !UsersOnly>
+    		<#if !UserOnly>
             List<String> groups = new ArrayList<String>();
     		</#if>
             
@@ -188,55 +187,55 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
 	            	System.out.println("valid signature");
 	                claimSet = accessToken.getJWTClaimsSet();
 	                userName = claimSet.getSubject();
-	                aud = (String) claimSet.getClaims().get("aud");
-	                    if(!aud.equals(environment.getProperty("spring.security.oauth2.client.registration.oidc.client-id")))
-	                    {
-	                    	throw new JwtException("Invalid token");
-	                    }
+	                List<String> aud = null;
+	                aud = (ArrayList) claimSet.getClaims().get("aud");
+	                if(!aud.get(0).equals("localhost:5555")) {
+	                	throw new JwtException("Invalid token");
+	                }
 	                <#if !UserOnly>
 	                groups = (ArrayList<String>) claimSet.getClaims().get("groups");
 	                </#if>
-	                } else {
-	                    System.out.println("invalid signature");
-	                }
-	                } catch (Exception e) {
+	           } else {
+	                System.out.println("invalid signature");
+	           }
+	      } catch (Exception e) {
 	                    e.printStackTrace();
-	            }
+	      }
                
-                <#if UserOnly>
-                // Add all the roles and permissions in a list and then convert the list into all permissions, removing duplicates
-            	<#if UserInput?? && AuthenticationFields??>
-                [=AuthenticationTable]Entity user = _userMgr.FindBy[=AuthenticationFields.UserName.fieldName?cap_first](userName);       
-            	<#else>
-                [=AuthenticationTable]Entity user = _userMgr.FindByUserName(userName);
-            	</#if>    
-                if (user == null) {
-					throw new UsernameNotFoundException(userName);
-				}
+        <#if UserOnly>
+        // Add all the roles and permissions in a list and then convert the list into all permissions, removing duplicates
+        <#if UserInput?? && AuthenticationFields??>
+        [=AuthenticationTable]Entity user = _userMgr.FindBy[=AuthenticationFields.UserName.fieldName?cap_first](userName);       
+        <#else>
+        [=AuthenticationTable]Entity user = _userMgr.FindByUserName(userName);
+        </#if>    
+        if (user == null) {
+	    	throw new UsernameNotFoundException(userName);
+	    }
 
-                List<String> permissions = securityUtils.getAllPermissionsFromUserAndRole(user);
-                String[] groupsArray = new String[permissions.size()];
-             	authorities = AuthorityUtils.createAuthorityList(permissions.toArray(groupsArray));
+        List<String> permissions = securityUtils.getAllPermissionsFromUserAndRole(user);
+        String[] groupsArray = new String[permissions.size()];
+        authorities = AuthorityUtils.createAuthorityList(permissions.toArray(groupsArray));
                 
-                <#else>
-                List<String> permissionsList = new ArrayList<String>();
-            	for( String item : groups)
-   				{
-   					RoleEntity role = _roleManager.FindByRoleName(item);
-   					if(role != null) {
-   						List<String> permissions= securityUtils.getAllPermissionsFromRole(role);
-   						permissionsList.addAll(permissions);
-   					}
-   				}
-   				permissionsList= permissionsList.stream().distinct().collect(Collectors.toList());
-            	String[] groupsArray = new String[permissionsList.size()];
-            	authorities = AuthorityUtils.createAuthorityList(permissionsList.toArray(groupsArray));
-                </#if>
-            </#if>
+        <#else>
+        List<String> permissionsList = new ArrayList<String>();
+        for( String item : groups)
+   	    {
+			RoleEntity role = _roleManager.FindByRoleName(item);
+   			if(role != null) {
+   				List<String> permissions= securityUtils.getAllPermissionsFromRole(role);
+   				permissionsList.addAll(permissions);
+   			}
+   		}
+   		permissionsList= permissionsList.stream().distinct().collect(Collectors.toList());
+        String[] groupsArray = new String[permissionsList.size()];
+        authorities = AuthorityUtils.createAuthorityList(permissionsList.toArray(groupsArray));
+        </#if>
+        </#if>
 
-            if ((userName != null) && StringUtils.isNotEmpty(userName)) {
-            	return new UsernamePasswordAuthenticationToken(userName, null, authorities);
-        	}
+        if ((userName != null) && StringUtils.isNotEmpty(userName)) {
+        	return new UsernamePasswordAuthenticationToken(userName, null, authorities);
+        }
         }
         return null;
 

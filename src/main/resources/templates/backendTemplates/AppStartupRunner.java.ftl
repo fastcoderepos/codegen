@@ -14,7 +14,9 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
+<#if AuthenticationType == "database">
 import org.springframework.security.crypto.password.PasswordEncoder;
+</#if>
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -46,10 +48,12 @@ public class AppStartupRunner implements ApplicationRunner {
     
     @Autowired
     private LoggingHelper loggingHelper;
-
+ <#if AuthenticationType == "database">
+ 
     @Autowired
     private PasswordEncoder pEncoder;
-    
+</#if>    
+
     @Override
     public void run(ApplicationArguments args) {
 
@@ -63,6 +67,7 @@ public class AppStartupRunner implements ApplicationRunner {
 
         RoleEntity role = new RoleEntity();
         role.setName("ROLE_Admin");
+        role.setDisplayName("Role1");
         role = roleManager.Create(role);
         <#if (AuthenticationType == "database" || UserOnly)>
         addDefaultUser(role);
@@ -89,14 +94,14 @@ public class AppStartupRunner implements ApplicationRunner {
 		for(String entity: entityList) {
 			<#if (AuthenticationType == "database" || UserOnly) && !UserInput??>
 			if(!environment.getProperty("fastCode.auth.method").equals("database") && (entity.equals("role") || entity.equals("user")))
-        	<#elseif (AuthenticationType == "database" || UserOnly) && UserInput??>
+        	<#elseif (AuthenticationType == "database" || UserOnly) || (AuthenticationType != "database" && !UserOnly) && UserInput??>
         	if(!environment.getProperty("fastCode.auth.method").equals("database") && (entity.equals("role") || entity.equals("[=AuthenticationTable?lower_case]")))
         	<#else>
         	if(!environment.getProperty("fastCode.auth.method").equals("database") && entity.equals("role"))
         	</#if>
-        		addEntityPermissions(entity, role.getId(),true);
+        		addEntityPermissions(entity, role.getId(), true);
 			else
-				addEntityPermissions(entity, role.getId(),false);
+				addEntityPermissions(entity, role.getId(), false);
         }
       
         loggingHelper.getLogger().info("Completed creating the data in the database");

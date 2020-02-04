@@ -94,7 +94,7 @@ public class AuthenticationClassesTemplateGenerator {
 			root.put("PrimaryKeys", entityDetails.getPrimaryKeys());
 		}
 
-		return root;
+		return root;  
 	}
 
 	public Map<String, Object> getAuthenticationTemplatesForUserGroupCase(String templatePath, AuthenticationType authenticationType) {
