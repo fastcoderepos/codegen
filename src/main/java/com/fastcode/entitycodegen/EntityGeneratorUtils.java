@@ -26,7 +26,7 @@ public class EntityGeneratorUtils {
 		
 		if(!urlArr[0].isEmpty())
 		{
-			if(urlArr[0].contains(":")) {
+			if(urlArr[0].contains(":")) { 
 			String[] paramsArr = urlArr[0].split("\\:");
 			if(!paramsArr[1].isEmpty() && getDriverName(paramsArr[1]) !=null)
 			{ 
@@ -95,15 +95,11 @@ public class EntityGeneratorUtils {
 	public List<String> getPrimaryKeysFromList(List<FieldDetails> fieldsList)
 	{
 		List<String> primaryKeys= new ArrayList<String>();
-		for(FieldDetails f : fieldsList)
-		{
-			
-			if(f.getIsPrimaryKey())
-			{
+		for(FieldDetails f : fieldsList) {
+			if(f.getIsPrimaryKey()) {
 				primaryKeys.add(f.getFieldName());
 			}
 		}
-
 		return primaryKeys;
 	}
 
@@ -111,9 +107,7 @@ public class EntityGeneratorUtils {
 	{
 		Map<String,String> primaryKeys = new HashMap<>();
 		for (Map.Entry<String, FieldDetails> entry : fieldsMap.entrySet()) {
-			if(entry.getValue().getIsPrimaryKey())
-			{
-				
+			if(entry.getValue().getIsPrimaryKey()) {
 				if(entry.getValue().getFieldType().equalsIgnoreCase("long"))
 					primaryKeys.put(entry.getValue().getFieldName(),"Long");
 				else
@@ -145,8 +139,8 @@ public class EntityGeneratorUtils {
 	}
 	
 	public List<Class<?>> filterOnlyRelevantEntities(ArrayList<Class<?>> entityClasses) {
-		List<Class<?>> relevantEntities = entityClasses.stream()
-				.filter((e) -> !(e.getName().endsWith("Id$Tokenizer") || e.getName().endsWith("JvCommit") || e.getName().endsWith("JvCommitProperty") || e.getName().endsWith("JvCommitPropertyId") || e.getName().endsWith("JvSnapshot") || e.getName().endsWith("JvGlobalIdent")  ))
+		List<Class<?>> relevantEntities = entityClasses.stream() 
+				.filter((e) -> !(e.getName().endsWith("Id$Tokenizer")))
 				.collect(Collectors.toList());
 		return relevantEntities;
 	}

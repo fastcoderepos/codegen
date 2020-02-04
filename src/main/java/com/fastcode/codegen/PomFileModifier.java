@@ -32,6 +32,12 @@ public class PomFileModifier {
 	private LoggingHelper logHelper;
 
 	public void updatePomFile(String path,AuthenticationType authenticationType,String database,Boolean cache) {
+		
+		addDependenciesAndPluginsToPom(path,getDependenciesList(authenticationType, database, cache));
+	}
+	
+	public List<Dependency> getDependenciesList(AuthenticationType authenticationType,String database,Boolean cache)
+	{
 		List<Dependency> dependencies = new ArrayList<Dependency>();
 
 		Dependency mapstruct = new Dependency("org.mapstruct", "mapstruct", "1.2.0.Final");
@@ -81,7 +87,7 @@ public class PomFileModifier {
 			dependencies.add(databaseDependency);
 		}
 		
-		addDependenciesAndPluginsToPom(path,dependencies);
+		return dependencies;
 	}
 	
 	public Dependency getDatabaseDependency(String database)

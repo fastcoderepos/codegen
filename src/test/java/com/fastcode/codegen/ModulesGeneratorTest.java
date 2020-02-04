@@ -36,7 +36,8 @@ import com.fastcode.codegen.FrontendBaseTemplateGenerator;
 import com.fastcode.codegen.GitRepositoryManager;
 import com.fastcode.codegen.ModulesGenerator;
 import com.fastcode.codegen.PomFileModifier;
-import com.fastcode.entitycodegen.AuthenticationConstants;
+import com.fastcode.entitycodegen.AuthenticationInfo;
+import com.fastcode.entitycodegen.AuthenticationType;
 import com.fastcode.entitycodegen.BaseAppGen;
 import com.fastcode.entitycodegen.EntityDetails;
 import com.fastcode.entitycodegen.EntityGenerator;
@@ -134,7 +135,7 @@ public class ModulesGeneratorTest {
 		Mockito.verify(mockedGitRepositoryManager,Mockito.times(0)).CopyGitFiles();
 	
 	}
-	
+	 
 	@Test
 	public void generateCode_gitHasNotUncommitedChangesButUnableToCreateUpgradeBranch_returnNothing() throws IOException
 	{ 
@@ -161,17 +162,16 @@ public class ModulesGeneratorTest {
 	@Test
 	public void generateCode_gitUpgradeIsFalseCopyGitFilesAuthenticationTypeIsNone_returnNothing() throws Exception
 	{
-		Map<String,String> authenticationInputMap = new HashMap<String, String>();
-		//authenticationInputMap.put(AuthenticationConstants.AUTHENTICATION_SCHEMA, entityName);
-		authenticationInputMap.put(AuthenticationConstants.AUTHENTICATION_TYPE, "none");
-		authenticationInputMap.put(AuthenticationConstants.USERS_ONLY, "false");
+		AuthenticationInfo authenticationInfo = new AuthenticationInfo();
+		authenticationInfo.setAuthenticationType(AuthenticationType.NONE);
+		authenticationInfo.setUserOnly(false);
 		
 		UserInput input = new UserInput();
 		input.setDestinationPath(destPath.getAbsolutePath());
 		input.setUpgrade(false);
 		input.setCache(true);
 		input.setGroupArtifactId("com.nfinity.test");
-		input.setAuthenticationMap(authenticationInputMap);
+		input.setAuthenticationInfo(authenticationInfo);
 		input.setConnectionStr("test");
 		input.setCache(false);
 	
@@ -184,39 +184,38 @@ public class ModulesGeneratorTest {
 		Mockito.doReturn(false).when(mockedUserInput).getUpgrade();
 		Mockito.doNothing().when(mockedGitRepositoryManager).CopyGitFiles();
 		Mockito.doNothing().when(mockedBaseAppGen).CreateBaseApplication(anyString(), anyString(),anyString(), anyString(), any(Boolean.class), anyString());
-        Mockito.doReturn(details).when(mockedEntityGenerator).generateEntities(any(HashMap.class), anyString(),anyString(), anyString(),any(HashMap.class));
-		Mockito.doNothing().when(mockedPomFileModifier).updatePomFile(anyString(), anyString(),anyString(), any(Boolean.class));
+        Mockito.doReturn(details).when(mockedEntityGenerator).generateEntities(any(HashMap.class), anyString(),anyString(), anyString(),any(AuthenticationInfo.class));
+		Mockito.doNothing().when(mockedPomFileModifier).updatePomFile(anyString(), any(AuthenticationType.class),anyString(), any(Boolean.class));
 		Mockito.doNothing().when(mockedCommonModule).generateCommonModuleClasses(anyString(),anyString());
         Mockito.doNothing().when(mockedBaseAppGen).CompileApplication(anyString());
-        Mockito.doNothing().when(mockedFrontendGenerator).generate(anyString(), anyString(),anyString(), anyString());
+        Mockito.doNothing().when(mockedFrontendGenerator).generate(anyString(), anyString(),any(AuthenticationInfo.class), any(HashMap.class));
         Mockito.doReturn(new HashMap<String,String>()).when(entityGeneratorUtils).parseConnectionString(anyString());
         
-        Mockito.doNothing().when(mockedCodeGenerator).generateAll(anyString(), anyString(), anyString(), any(Boolean.class), anyString(), any(HashMap.class), anyString(), anyString(), any(HashMap.class));
+        Mockito.doNothing().when(mockedCodeGenerator).generateAll(anyString(), anyString(), anyString(), any(Boolean.class), anyString(), any(HashMap.class), anyString(), anyString(), any(AuthenticationInfo.class));
         Mockito.doNothing().when(mockedGitRepositoryManager).addToGitRepository(any(Boolean.class), anyString());
         
         exit.expectSystemExitWithStatus(0);
         modulesGenerator.generateCode(input);
     
-        Mockito.verify(mockedCodeGenerator).generateAll(anyString(), anyString(), anyString(), any(Boolean.class),anyString(), Matchers.<Map<String, EntityDetails>>any(), anyString(), anyString(), Matchers.<Map<String, String>>any());
+        Mockito.verify(mockedCodeGenerator).generateAll(anyString(), anyString(), anyString(), any(Boolean.class),anyString(), Matchers.<Map<String, EntityDetails>>any(), anyString(), anyString(), any(AuthenticationInfo.class));
 		Mockito.verify(mockedGitRepositoryManager,Mockito.times(0)).createUpgradeBranch();
 		Mockito.verify(mockedGitRepositoryManager,Mockito.times(1)).CopyGitFiles();
-		Mockito.verify(mockedFrontendGenerator,Mockito.times(1)).generate(anyString(), anyString(),anyString(), anyString());
+		Mockito.verify(mockedFrontendGenerator,Mockito.times(1)).generate(anyString(), anyString(),any(AuthenticationInfo.class),  Matchers.<Map<String, EntityDetails>>any());
 	}
 	
 	@Test
 	public void generateCode_gitUpgradeIsFalseCopyGitFilesAuthenticationTypeIsNotNone_returnNothing() throws IOException, IllegalStateException, SQLException
 	{
-		Map<String,String> authenticationInputMap = new HashMap<String, String>();
-		//authenticationInputMap.put(AuthenticationConstants.AUTHENTICATION_SCHEMA, entityName);
-		authenticationInputMap.put(AuthenticationConstants.AUTHENTICATION_TYPE, "database");
-		authenticationInputMap.put(AuthenticationConstants.USERS_ONLY, "false");
+		AuthenticationInfo authenticationInfo = new AuthenticationInfo();
+		authenticationInfo.setAuthenticationType(AuthenticationType.DATABASE);
+		authenticationInfo.setUserOnly(false);
 		
 		UserInput input = new UserInput();
 		input.setDestinationPath(destPath.getAbsolutePath());
 		input.setUpgrade(false);
 		input.setCache(true);
 		input.setGroupArtifactId("com.nfinity.test");
-		input.setAuthenticationMap(authenticationInputMap);
+		input.setAuthenticationInfo(authenticationInfo);
 		input.setConnectionStr("test");
 		input.setCache(false);
 	
@@ -229,24 +228,24 @@ public class ModulesGeneratorTest {
 		Mockito.doReturn(false).when(mockedUserInput).getUpgrade();
 		Mockito.doNothing().when(mockedGitRepositoryManager).CopyGitFiles();
 		Mockito.doNothing().when(mockedBaseAppGen).CreateBaseApplication(anyString(), anyString(),anyString(), anyString(), any(Boolean.class), anyString());
-        Mockito.doReturn(details).when(mockedEntityGenerator).generateEntities(any(HashMap.class), anyString(), anyString(), anyString(),any(HashMap.class));
-		Mockito.doNothing().when(mockedPomFileModifier).updatePomFile(anyString(), anyString(),anyString(), any(Boolean.class));
+        Mockito.doReturn(details).when(mockedEntityGenerator).generateEntities(any(HashMap.class), anyString(), anyString(), anyString(),any(AuthenticationInfo.class));
+		Mockito.doNothing().when(mockedPomFileModifier).updatePomFile(anyString(), any(AuthenticationType.class),anyString(), any(Boolean.class));
 		Mockito.doNothing().when(mockedCommonModule).generateCommonModuleClasses(anyString(),anyString());
         Mockito.doNothing().when(mockedBaseAppGen).CompileApplication(anyString());
-        Mockito.doNothing().when(mockedFrontendGenerator).generate(anyString(), anyString(),anyString(), anyString());
-        Mockito.doNothing().when(mockedAuthClasses).generateAutheticationClasses(anyString(), anyString(), any(Boolean.class),anyString(), any(HashMap.class), any(HashMap.class));
+        Mockito.doNothing().when(mockedFrontendGenerator).generate(anyString(), anyString(),any(AuthenticationInfo.class), any(HashMap.class));
+        Mockito.doNothing().when(mockedAuthClasses).generateAutheticationClasses(anyString(), anyString(), any(Boolean.class),anyString(), any(AuthenticationInfo.class), any(HashMap.class));
         Mockito.doReturn(new HashMap<String,String>()).when(entityGeneratorUtils).parseConnectionString(anyString());
-        Mockito.doNothing().when(mockedCodeGenerator).generateAll(anyString(), anyString(), anyString(), any(Boolean.class), anyString(), any(HashMap.class), anyString(), anyString(), any(HashMap.class));
+        Mockito.doNothing().when(mockedCodeGenerator).generateAll(anyString(), anyString(), anyString(), any(Boolean.class), anyString(), any(HashMap.class), anyString(), anyString(), any(AuthenticationInfo.class));
         Mockito.doNothing().when(mockedGitRepositoryManager).addToGitRepository(any(Boolean.class), anyString());
         
         exit.expectSystemExitWithStatus(0); 
         modulesGenerator.generateCode(input);
       
-        Mockito.verify(mockedCodeGenerator).generateAll(anyString(), anyString(), anyString(), any(Boolean.class), anyString(), Matchers.<Map<String, EntityDetails>>any(), anyString(), anyString(),Matchers.<Map<String, String>>any());
-        Mockito.verify(mockedAuthClasses).generateAutheticationClasses(anyString(), anyString(), any(Boolean.class),anyString(), Matchers.<Map<String, String>>any(),Matchers.<Map<String, EntityDetails>>any());
+        Mockito.verify(mockedCodeGenerator).generateAll(anyString(), anyString(), anyString(), any(Boolean.class), anyString(), Matchers.<Map<String, EntityDetails>>any(), anyString(), anyString(),Matchers.any(AuthenticationInfo.class));
+        Mockito.verify(mockedAuthClasses).generateAutheticationClasses(anyString(), anyString(), any(Boolean.class),anyString(), Matchers.any(AuthenticationInfo.class),Matchers.<Map<String, EntityDetails>>any());
 		Mockito.verify(mockedGitRepositoryManager,Mockito.times(0)).createUpgradeBranch();
 		Mockito.verify(mockedGitRepositoryManager,Mockito.times(1)).CopyGitFiles();
-		Mockito.verify(mockedFrontendGenerator,Mockito.times(1)).generate(anyString(), anyString(),anyString(), anyString());
+		Mockito.verify(mockedFrontendGenerator,Mockito.times(1)).generate(anyString(), anyString(),any(AuthenticationInfo.class), Matchers.<Map<String, EntityDetails>>any());
 	}
 
 	

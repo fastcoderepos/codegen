@@ -23,7 +23,7 @@ public class CodegenApplication implements ApplicationRunner {
 		UserInput userInput = context.getBean(UserInput.class);
 		ModulesGenerator generator = context.getBean(ModulesGenerator.class);
 		generator.generateCode(userInput.composeInput(root)); 
-	} 
+	}  
 
 	@Override 
 	public void run(ApplicationArguments args) throws Exception {

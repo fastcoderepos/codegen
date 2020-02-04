@@ -62,7 +62,7 @@ public class ModulesGenerator {
 		
 		if(!dependenciesIdentifier.checkDependencies())
 		{
-			System.exit(1);
+			System.exit(1);  
 		}
 
 		gitRepositoryManager.setDestinationPath(input.getDestinationPath());
@@ -127,7 +127,7 @@ public class ModulesGenerator {
  
 		frontendGenerator.generate(input.getDestinationPath(), artifactId, input.getAuthenticationInfo(), details);
 
-		if(!input.getAuthenticationInfo().getAuthenticationType().equals("none"))
+		if(!input.getAuthenticationInfo().getAuthenticationType().getName().equals("none"))
 		{
 			authClasses.generateAutheticationClasses(input.getDestinationPath(), groupArtifactId,input.getCache(),input.getSchemaName(),input.getAuthenticationInfo(),details);
 		}

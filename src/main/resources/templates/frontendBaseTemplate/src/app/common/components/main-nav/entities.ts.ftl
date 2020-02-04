@@ -6,6 +6,6 @@ export var Entities: string[] = [
 
 export var AuthEntities: string[] = [
     <#list AuthEntityList as entity>
-    "[=entity]",
+    "[=entity?lower_case]",
     </#list>
 ]

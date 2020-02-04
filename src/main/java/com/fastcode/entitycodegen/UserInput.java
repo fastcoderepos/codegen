@@ -2,6 +2,7 @@ package com.fastcode.entitycodegen;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +34,6 @@ public class UserInput {
 	Boolean usersOnly = false;
 	String logonName;
 	AuthenticationInfo authenticationInfo = new AuthenticationInfo();
-
 
 	public AuthenticationInfo getAuthenticationInfo() {
 		return authenticationInfo;
@@ -108,11 +108,10 @@ public class UserInput {
 
 	public List<FieldDetails> getFilteredFieldsList(List<FieldDetails> fields)
 	{
+		String[] types = {"long", "short", "integer", "double", "string", "timestamp", "boolean", "date" };
 		List<FieldDetails> fieldsList = new ArrayList<>();
 		for (FieldDetails f : fields) {
-			if (f.fieldType.equalsIgnoreCase("long") || f.fieldType.equalsIgnoreCase("integer") || f.fieldType.equalsIgnoreCase("double")
-					|| f.fieldType.equalsIgnoreCase("short") || f.fieldType.equalsIgnoreCase("string") || f.fieldType.equalsIgnoreCase("boolean")
-					|| f.fieldType.equalsIgnoreCase("timestamp") || f.fieldType.equalsIgnoreCase("date"))
+			if(Arrays.stream(types).anyMatch(f.getFieldType()::equalsIgnoreCase))
 				fieldsList.add(f);
 		}
 		return fieldsList;
@@ -160,36 +159,10 @@ public class UserInput {
 
 		// jdbc:postgresql://localhost:5432/FCV2Db?username=postgres;password=fastcode
 		// jdbc:postgresql://localhost:5432/Demo?username=postgres;password=fastcode
-
 		input.setUpgrade(root.get("upgrade") == null
 				? false: (root.get("upgrade").toLowerCase().equals("true") ? true : false));
 		input.setConnectionStr(root.get("conn") != null ? root.get("conn") : null);
-		if(input.getConnectionStr() == null)
-		{
-			System.out.print("\nDo you want to use sample schema for code generation ? (y/n) ");
-			String sampleSchemaOption = scanner.nextLine();
-
-			if(sampleSchemaOption.equalsIgnoreCase("y") || sampleSchemaOption.equalsIgnoreCase("yes"))
-			{
-				input.setConnectionStr("jdbc:h2:mem:testdb?username=sa;password=sa");
-				input.setSchemaName("sample");
-			}
-			else
-			{
-				input.setConnectionStr(getInput(scanner, "DB Connection String"));
-				input.setSchemaName(root.get("s") == null ? getInput(scanner, "Db schema") : root.get("s"));
-
-			}
-		}
-		else
-			input.setSchemaName(root.get("s") == null ? getInput(scanner, "Db schema") : root.get("s"));
-
-		while(entityGeneratorUtils.parseConnectionString(input.getConnectionStr())==null)
-		{
-			System.out.println("Invalid Connection String");
-			input.setConnectionStr(getInput(scanner, "Connection String"));
-		}
-
+		input = validateConnectionStringAndSetSchema(input, root.get("s"), scanner);
 		input.setDestinationPath(
 				root.get("d") == null ? getInput(scanner, "destination folder") : root.get("d"));
 		input.setGroupArtifactId(
@@ -205,6 +178,36 @@ public class UserInput {
 				: (root.get("c").toLowerCase().equals("true") ? true : false));
 
 		input= getAuthenticationInput(input,scanner);
+
+		return input;
+	}
+
+	public UserInput validateConnectionStringAndSetSchema(UserInput input, String schemaName,Scanner scanner)
+	{
+		if(input.getConnectionStr() == null)
+		{
+			System.out.print("\nDo you want to use sample schema for code generation ? (y/n) ");
+			String sampleSchemaOption = scanner.nextLine();
+
+			if(sampleSchemaOption.equalsIgnoreCase("y") || sampleSchemaOption.equalsIgnoreCase("yes"))
+			{
+				input.setConnectionStr("jdbc:h2:mem:testdb?username=sa;password=sa");
+				input.setSchemaName("sample");
+			}
+			else
+			{
+				input.setConnectionStr(getInput(scanner, "DB Connection String"));
+				input.setSchemaName(schemaName == null ? getInput(scanner, "Db schema") : schemaName);
+			}
+		}
+		else
+			input.setSchemaName(schemaName == null ? getInput(scanner, "Db schema") : schemaName);
+
+		while(entityGeneratorUtils.parseConnectionString(input.getConnectionStr())==null)
+		{
+			System.out.println("Invalid Connection String");
+			input.setConnectionStr(getInput(scanner, "Connection String"));
+		}
 
 		return input;
 	}
@@ -241,10 +244,11 @@ public class UserInput {
 				int choice = scanner.nextInt();
 				while (choice < 1 || choice > 2) {
 					System.out.println("\nInvalid Input \nEnter again :");
-					choice = scanner.nextInt();
+					choice = scanner.nextInt(); 
 				}
 
 				authenticationInfo.setUserOnly(choice == 1 ? true : false);
+
 				scanner.nextLine();
 				if(value == 3 && choice == 2)
 				{

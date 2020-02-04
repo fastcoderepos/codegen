@@ -1,7 +1,5 @@
 package com.fastcode.codegen;
 
-import java.util.Scanner;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -33,18 +31,17 @@ public class CodegenDependenciesIdentifier {
 		command = "spring --version";
 
 		String result = commandUtils.runProcess(command,destinationPath);
-		String regex = "(?!\\.)(\\d+(\\.\\d+)+)(?:[-.][A-Z]+)?(?![\\d.])$";
-
-		result =result.replaceAll(regex, "$1");
-		result = result.replaceAll("[^\\d.]", "");
-		System.out.println(" Spring VERSION  " + result);
-
+		
 		if(result == "") {
 			logHelper.getLogger().error("SpringCli is not found on your computer.");
 			return false;
 		}
-
-		if(versionCompare(result, SPRING_VERSION)== -1)
+		
+		String regex = "(?!\\.)(\\d+(\\.\\d+)+)(?:[-.][A-Z]+)?(?![\\d.])$";
+		result =result.replaceAll(regex, "$1");
+		result = result.replaceAll("[^\\d.]", "");
+	
+		if(commandUtils.versionCompare(result, SPRING_VERSION)== -1)
 		{
 			logHelper.getLogger().error("Update to the minimum required version of Spring Cli "+ SPRING_VERSION);
 			return false;
@@ -57,16 +54,16 @@ public class CodegenDependenciesIdentifier {
 		command = "mvn --version";
 
 		String result = commandUtils.runProcess(command,destinationPath);
-		String arr[] = result.split("\\(");
-		result = arr[0].replaceAll("[^\\d.]", "");
-		System.out.println(" Maven VERSION  " + result);
-
+		
 		if(result == "") {
 			logHelper.getLogger().error("Maven is not found on your computer.");
 			return false;
 		}
+		
+		String arr[] = result.split("\\(");
+		result = arr[0].replaceAll("[^\\d.]", "");
 
-		if(versionCompare(result, MAVEN_VERSION)== -1)
+		if(commandUtils.versionCompare(result, MAVEN_VERSION)== -1)
 		{
 			logHelper.getLogger().error("Update to the minimum required version of Maven "+ MAVEN_VERSION);
 			return false;
@@ -77,8 +74,13 @@ public class CodegenDependenciesIdentifier {
 
 	public boolean isJavaInstalled() {
 		String result =System.getProperty("java.specification.version");
-		System.out.println(" JAVA VERSION  " + result);
-		if(versionCompare(result, JAVA_VERSION)== -1)
+		
+		if(result == "") {
+			logHelper.getLogger().error("Java is not found on your computer.");
+			return false;
+		}
+
+		if(commandUtils.versionCompare(result, JAVA_VERSION)== -1)
 		{
 			logHelper.getLogger().error("Update to the minimum required version of JAVA "+ JAVA_VERSION);
 			return false;
@@ -91,15 +93,14 @@ public class CodegenDependenciesIdentifier {
 		command = "node --version";
 
 		String result = commandUtils.runProcess(command,destinationPath);
-		result = result.replaceAll("[^\\d.]", "");
-		System.out.println(" Node VERSION  " + result);
-
+		
 		if(result == "") {
 			logHelper.getLogger().error("Node is not found on your computer.");
 			return false;
 		}
-
-		if(versionCompare(result, NODE_VERSION)== -1)
+		result = result.replaceAll("[^\\d.]", "");
+		
+		if(commandUtils.versionCompare(result, NODE_VERSION)== -1)
 		{
 			logHelper.getLogger().error("Update to the minimum required version of Node "+ NODE_VERSION);
 			return false;
@@ -112,15 +113,14 @@ public class CodegenDependenciesIdentifier {
 		command = "psql --version";
 
 		String result = commandUtils.runProcess(command,destinationPath);
-		result = result.replaceAll("[^\\d.]", "");
-		System.out.println(" PSQL VERSION  " + result);
-
+		
 		if(result == "") {
 			logHelper.getLogger().error("PSQL is not found on your computer.");
 			return false;
 		}
-
-		if(versionCompare(result, PSQL_VERSION)== -1)
+		result = result.replaceAll("[^\\d.]", "");
+		
+		if(commandUtils.versionCompare(result, PSQL_VERSION)== -1)
 		{
 			logHelper.getLogger().error("Update to the minimum required version of PSQL "+ PSQL_VERSION);
 			return false;
@@ -133,45 +133,22 @@ public class CodegenDependenciesIdentifier {
 		command = "ng --version";
 
 		String result = commandUtils.runProcess(command,destinationPath);
-		String arr[] = result.split("\\:");
-		result = arr[1].replaceAll("[^\\d.]", "");
-		System.out.println(" Angular VERSION " + result);
+		
 		if(result == "") {
 			logHelper.getLogger().error("Angular is not found on your computer.");
 			return false;
 		}
 
-		if(versionCompare(result, ANGULAR_VERSION)== -1)
+		String arr[] = result.split("\\:");
+		result = arr[1].replaceAll("[^\\d.]", "");
+		
+		if(commandUtils.versionCompare(result, ANGULAR_VERSION)== -1)
 		{
 			logHelper.getLogger().error("Update to the minimum required version of Angular Cli "+ ANGULAR_VERSION);
 			return false;
 		}
 
 		return true;
-	}
-	public int versionCompare(String str1, String str2) {
-		try (Scanner s1 = new Scanner(str1);
-				Scanner s2 = new Scanner(str2);) {
-			s1.useDelimiter("\\.");
-			s2.useDelimiter("\\.");
-
-			while (s1.hasNextInt() && s2.hasNextInt()) {
-				int v1 = s1.nextInt();
-				int v2 = s2.nextInt();
-				if (v1 < v2) {
-					return -1;
-				} else if (v1 > v2) {
-					return 1;
-				}
-			}
-
-			if (s1.hasNextInt() && s1.nextInt() != 0)
-				return 1; //str1 has an additional lower-level version number
-			if (s2.hasNextInt() && s2.nextInt() != 0)
-				return -1; //str2 has an additional lower-level version
-
-			return 0;
-		} // end of try-with-resources
 	}
 	
 	public boolean checkDependencies()

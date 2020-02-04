@@ -41,7 +41,7 @@ public class JoinDetails {
 		this.referenceColumn = referenceColumn;
 	}
 
-	public String getJoinColumnType() {
+	public String getJoinColumnType() { 
 		return joinColumnType;
 	}
 

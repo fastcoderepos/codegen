@@ -53,8 +53,8 @@ public class FrontendBaseTemplateGenerator {
 	//	contentReader.copyDirectoryFromJar("frontend_static/assets", destination + "/"+ clientSubfolder + "/src/assets");
 
 		editTsConfigJsonFile(destination + "/" + clientSubfolder + "/tsconfig.json");
-
 		Map<String, Object> root = buildRootMap(appName, authenticationInfo, entityDetails.keySet().stream().collect(Collectors.toList()));
+
 		codeGeneratorUtils.generateFiles(getTemplates(FRONTEND_BASE_TEMPLATE_FOLDER),root, destination + "/"+ clientSubfolder,FRONTEND_BASE_TEMPLATE_FOLDER);
 		copyAssets(destination + "/"+ clientSubfolder + "/src/assets");
 	}
@@ -88,6 +88,7 @@ public class FrontendBaseTemplateGenerator {
 	}
 	
 	public Map<String, String> getEntityNamesList(List<String> entityList, AuthenticationInfo authenticationInfo){
+
 		Map<String, String> entityNamesList = new HashMap<String, String>();
 		for(String entity: entityList) {
 			String cName = entity.substring(entity.lastIndexOf(".") + 1);
@@ -261,8 +262,7 @@ public class FrontendBaseTemplateGenerator {
 		try {
 			FileUtils.copyDirectory(new File(System.getProperty("user.dir").replace("\\", "/") + FRONTEND_ASSETS), new File(dest));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logHelper.getLogger().error("FileNotFoundException Occured : ", e.getMessage());
 		}
 	}
 }

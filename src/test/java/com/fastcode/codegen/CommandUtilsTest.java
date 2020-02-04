@@ -135,6 +135,24 @@ public class CommandUtilsTest {
 		Assertions.assertThat(commandUtils.getBuilderCommand(command)).isEqualTo(builderCommand);
 	}
 	
+	@Test
+	public void versionCompare_str1HasLowerVersion_returnString() {
+	
+		Assertions.assertThat(commandUtils.versionCompare("2.23.0","2.23.1")).isEqualTo(-1);
+	}
+	
+	@Test
+	public void versionCompare_str2HasLowerVersion_returnString() {
+	
+		Assertions.assertThat(commandUtils.versionCompare("2.23.1","2.23.0")).isEqualTo(1);
+	}
+	
+	@Test
+	public void versionCompare_bothVersionsAreEqual_returnString() {
+	
+		Assertions.assertThat(commandUtils.versionCompare("2.23.0","2.23.0")).isEqualTo(0);
+	}
+	
 //	public String runProcess(String command, String path) {
 //        String[] builderCommand = getBuilderCommand(command);
 //        return runProcess(builderCommand, path, true);

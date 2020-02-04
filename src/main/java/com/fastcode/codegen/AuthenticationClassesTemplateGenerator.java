@@ -94,7 +94,7 @@ public class AuthenticationClassesTemplateGenerator {
 			root.put("PrimaryKeys", entityDetails.getPrimaryKeys());
 		}
 
-		return root;
+		return root;  
 	}
 
 	public Map<String, Object> getAuthenticationTemplatesForUserGroupCase(String templatePath, AuthenticationType authenticationType) {
@@ -134,29 +134,23 @@ public class AuthenticationClassesTemplateGenerator {
 					templates.put(filePath, outputFileName);
 				}
 			}
-			else
-			{
+			else  
+			{ 
 				if((outputFileName.toLowerCase().contains("userpermission") || outputFileName.toLowerCase().contains("userrole")))
 				{
 					outputFileName = outputFileName.replace("User", authTable);
 					outputFileName = outputFileName.replace("user", authTable.toLowerCase());
 				}
 
-				//				if(!(outputFileName.toLowerCase().contains("user") && !((outputFileName.contains("UserDetailsServiceImpl") && authenticationType == "database") || outputFileName.contains("LoginUser") || outputFileName.toLowerCase().contains(authenticationTable.toLowerCase()+"permission") || outputFileName.toLowerCase().contains(authenticationTable.toLowerCase()+"role"))))
-				//				{ 	
-				//					if(!outputFileName.contains("GetUser") && !(outputFileName.contains("JWTAuthentication") && authenticationType.equals("oidc"))  )
-				//					{
 				if(shouldIncludeTemplatesIfCustomUser(outputFileName, authType, authTable))
 				{
 					if(outputFileName.contains("GetCU"))
 					{
 						outputFileName = outputFileName.replace("CU", authTable);
 					}
-
 					templates.put(filePath, outputFileName);
 				}
 
-				//				}
 			}
 		}
 
@@ -164,38 +158,34 @@ public class AuthenticationClassesTemplateGenerator {
 	}
 	public Boolean shouldIncludeTemplatesIfDefaultUser(String outputFileName, AuthenticationType authType)
 	{
-		//!outputFileName.contains("GetCU") && !((outputFileName.contains("JWTAuthentication") && authType.equals("oidc")) || (outputFileName.contains("UserDetailsServiceImpl") && !authType.equals(AuthenticationType.DATABASE))))
 		Boolean isUserRelationDto = outputFileName.contains("GetCU");
-//		Boolean isRequiredFile = outputFileName.contains("LoginUser") || outputFileName.toLowerCase().contains(authTable.toLowerCase().concat("permission")) || outputFileName.toLowerCase().contains(authTable.toLowerCase().concat("role"));
 		Boolean isDatabaseUserImplClass = outputFileName.contains("UserDetailsServiceImpl") && !authType.equals(AuthenticationType.DATABASE);
 		Boolean excludeFileIfOidc = outputFileName.contains("JWTAuthentication") && authType.equals(AuthenticationType.OIDC);
-		
+
 		return !isUserRelationDto && !(excludeFileIfOidc || isDatabaseUserImplClass);
 	   
 	}
 	public Boolean shouldIncludeTemplatesIfCustomUser(String outputFileName, AuthenticationType authType, String authTable)
 	{
 		Boolean isUserFile = outputFileName.toLowerCase().contains("user");
-		Boolean isUserRelationDto = outputFileName.contains("GetUser");
+		Boolean isUserRelationDto = outputFileName.contains("Get".concat(authTable)); 
 		Boolean isRequiredFile = outputFileName.contains("LoginUser") || outputFileName.toLowerCase().contains(authTable.toLowerCase().concat("permission")) || outputFileName.toLowerCase().contains(authTable.toLowerCase().concat("role"));
+
 		Boolean isDatabaseUserImplClass = outputFileName.contains("UserDetailsServiceImpl") && authType.equals(AuthenticationType.DATABASE);
 		Boolean excludeFileIfOidc = outputFileName.contains("JWTAuthentication") && authType.equals(AuthenticationType.OIDC);
 	   
-		//	if(!outputFileName.contains("GetUser") && !(outputFileName.contains("JWTAuthentication") && authenticationType.equals("oidc"))  )
-		//			{
 		Boolean excludeUserFiles = isUserFile && !(isDatabaseUserImplClass || isRequiredFile);
-
-		return !excludeUserFiles || (!isUserRelationDto && !excludeFileIfOidc);
-		//return true;
+		
+       	return !excludeUserFiles && (!isUserRelationDto && !excludeFileIfOidc);
 	}
 
 	public Map<String, Object> getBackendAuthorizationTestFiles(String templatePath, String authTable) {
 		List<String> filesList = codeGeneratorUtils.readFilesFromDirectory(templatePath);
 		filesList = codeGeneratorUtils.replaceFileNames(filesList, templatePath);
 
-		Map<String, Object> templates = new HashMap<>();
+		Map<String, Object> templates = new HashMap<>(); 
 
-		for (String filePath : filesList) {
+		for (String filePath : filesList) { 
 			String outputFileName = filePath.substring(0, filePath.lastIndexOf('.'));
 			if(authTable==null)
 			{
@@ -208,7 +198,7 @@ public class AuthenticationClassesTemplateGenerator {
 					outputFileName = outputFileName.replace("User", authTable);
 					outputFileName = outputFileName.replace("user", authTable.toLowerCase());
 				}
-                String fName = outputFileName.toLowerCase();
+                String fName = outputFileName.toLowerCase(); 
 				if( !fName.contains("user") && (fName.contains(authTable.toLowerCase().concat("permission")) 
 						|| fName.contains(authTable.toLowerCase().concat("role"))))
 				{ 		

@@ -75,7 +75,7 @@ public class GitRepositoryManagerTest {
 	public void isGitInstalled_gitIsInstalled_returnTrue() {
 		gitRepositoryManager.setDestinationPath(destPath.getAbsolutePath());
 		String response = "git version 2.23.0.windows.1";
-		//String command = "init";
+	
 		Mockito.doReturn(response).when(mockedCommandUtils).runGitProcess(anyString(),anyString());
 		Assertions.assertThat(gitRepositoryManager.isGitInstalled()).isEqualTo(true);
 	}
@@ -84,7 +84,7 @@ public class GitRepositoryManagerTest {
 	public void isGitInstalled_gitIsNotInstalled_returnFalse() {
 		gitRepositoryManager.setDestinationPath(destPath.getAbsolutePath());
 		String response = "";
-		//String command = "init";
+	
 		Mockito.doReturn(response).when(mockedCommandUtils).runGitProcess(anyString(),anyString());
 		Assertions.assertThat(gitRepositoryManager.isGitInstalled()).isEqualTo(false);
 	}
@@ -178,7 +178,7 @@ public class GitRepositoryManagerTest {
 		
 		Mockito.doNothing().when(gitRepositoryManager).commitUpgradeBranch();
 		Mockito.doReturn(response).when(mockedCommandUtils).runGitProcess(anyString(),anyString());
-		Mockito.doReturn(-1).when(gitRepositoryManager).versionCompare(anyString(),anyString());
+		Mockito.doReturn(-1).when(mockedCommandUtils).versionCompare(anyString(),anyString());
 		gitRepositoryManager.addToGitRepository(true,"sourceBranch");
 		Mockito.verify(mockedCommandUtils, Mockito.times(5)).runGitProcess(anyString(), anyString());
 	}
@@ -224,24 +224,6 @@ public class GitRepositoryManagerTest {
 		
 		Mockito.doReturn(response).when(mockedCommandUtils).runGitProcess(anyString(),anyString());
 		Assertions.assertThat(gitRepositoryManager.getGitVersion()).isEqualTo("2.23.0");
-	}
-	
-	@Test
-	public void versionCompare_str1HasLowerVersion_returnString() {
-	
-		Assertions.assertThat(gitRepositoryManager.versionCompare("2.23.0","2.23.1")).isEqualTo(-1);
-	}
-	
-	@Test
-	public void versionCompare_str2HasLowerVersion_returnString() {
-	
-		Assertions.assertThat(gitRepositoryManager.versionCompare("2.23.1","2.23.0")).isEqualTo(1);
-	}
-	
-	@Test
-	public void versionCompare_bothVersionsAreEqual_returnString() {
-	
-		Assertions.assertThat(gitRepositoryManager.versionCompare("2.23.0","2.23.0")).isEqualTo(0);
 	}
 
 	@Test

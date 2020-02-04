@@ -82,7 +82,7 @@ public class RelationDetails {
 	}
 
 	public String geteModuleName() {
-		return eModuleName;
+		return eModuleName; 
 	}
 
 	public void seteModuleName(String eModuleName) {

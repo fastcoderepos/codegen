@@ -21,7 +21,7 @@ public class FieldDetails {
 	public String getFieldName() {
 		return fieldName;
 	}
-	public void setFieldName(String fieldName) {
+	public void setFieldName(String fieldName) { 
 		this.fieldName = fieldName;
 	}
 	public String getFieldType() {
