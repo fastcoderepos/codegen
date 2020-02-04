@@ -71,9 +71,9 @@ public class AuthenticationClassesTemplateGeneratorTest {
 	public void buildBackendRootMap_authenticationTableIsNotNull_returnMap()
 	{
 		AuthenticationInfo authenticationInfo = new AuthenticationInfo();
-		authenticationInfo.setAuthenticationTable(entityName);
+		authenticationInfo.setAuthenticationTable(entityName); 
 		authenticationInfo.setAuthenticationType(AuthenticationType.DATABASE);
-		authenticationInfo.setUserOnly(true);
+		authenticationInfo.setUserOnly(true); 
 		
 		Map<String, EntityDetails> details = new HashMap<String,EntityDetails>();
 		EntityDetails entityDetails = new EntityDetails(new HashMap<String, FieldDetails>(), new HashMap<String, RelationDetails>(),testValue, testValue);
