@@ -31,7 +31,7 @@ import [=PackageName].security.SecurityUtils;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-<#if UsersOnly == "true">
+<#if UserOnly>
 import [=PackageName].domain.authorization.user.IUserManager;
 import [=PackageName].domain.model.UserEntity;
 <#else>
@@ -75,7 +75,7 @@ public class UserController {
 	@Autowired
 	private Environment env;
 	<#if AuthenticationType == "oidc">
-    <#if UsersOnly == "true">
+    <#if UserOnly>
     @Autowired
 	IUserManager _userMgr;
     <#else>
@@ -101,7 +101,7 @@ public class UserController {
 		claimSet = accessToken.getJWTClaimsSet();
 		userName = claimSet.getSubject();
 		
-		<#if UsersOnly == "true">
+		<#if UserOnly>
 		// Add all the roles and permissions in a list and then convert the list into all permissions, removing duplicates
 		List<String> permissions=null;
 		UserEntity user = _userMgr.FindByUserName(userName);  
@@ -113,7 +113,7 @@ public class UserController {
 			throw new EntityNotFoundException(
 					String.format("There does not exist a user with a name=%s", userName));
 		return new ResponseEntity(permissions, HttpStatus.OK);
-		<#elseif UsersOnly != "true">
+		<#elseif !UserOnly>
 		List<String> groups = new ArrayList<String>();
 		groups = (ArrayList<String>) claimSet.getClaims().get("groups");
 		List<String> permissionsList = new ArrayList<String>();

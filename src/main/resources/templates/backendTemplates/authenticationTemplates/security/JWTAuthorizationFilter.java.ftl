@@ -31,7 +31,7 @@ import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-<#if UsersOnly == "true">
+<#if UserOnly>
 import [=PackageName].domain.model.[=AuthenticationTable]Entity;
 import [=PackageName].domain.authorization.[=AuthenticationTable?lower_case].I[=AuthenticationTable]Manager;
 <#else>
@@ -56,7 +56,7 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
     <#if AuthenticationType == "oidc">
     private Environment environment;
     private SecurityUtils securityUtils;
-    <#if UsersOnly == "true">
+    <#if UserOnly>
     private I[=AuthenticationTable]Manager _userMgr;
     <#else>
     private IRoleManager _roleManager;
@@ -67,7 +67,7 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
         <#if AuthenticationType == "oidc">
         this.environment = ctx.getBean(Environment.class);
     	this.securityUtils = ctx.getBean(SecurityUtils.class);
-    	<#if UsersOnly== "true">
+    	<#if UserOnly>
     	this._userMgr = ctx.getBean(IUserManager.class);
     	<#else>
     	this._roleManager = ctx.getBean(IRoleManager.class);
@@ -167,7 +167,7 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
                         
             <#elseif AuthenticationType =="oidc">
             String aud= null;
-    		<#if UsersOnly != "true">
+    		<#if !UsersOnly>
             List<String> groups = new ArrayList<String>();
     		</#if>
             
@@ -193,7 +193,7 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
 	                    {
 	                    	throw new JwtException("Invalid token");
 	                    }
-	                <#if UsersOnly != "true">
+	                <#if !UserOnly>
 	                groups = (ArrayList<String>) claimSet.getClaims().get("groups");
 	                </#if>
 	                } else {
@@ -203,7 +203,7 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
 	                    e.printStackTrace();
 	            }
                
-                <#if UsersOnly == "true">
+                <#if UserOnly>
                 // Add all the roles and permissions in a list and then convert the list into all permissions, removing duplicates
             	<#if UserInput?? && AuthenticationFields??>
                 [=AuthenticationTable]Entity user = _userMgr.FindBy[=AuthenticationFields.UserName.fieldName?cap_first](userName);       

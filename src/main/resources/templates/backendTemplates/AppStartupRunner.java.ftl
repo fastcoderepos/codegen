@@ -3,7 +3,7 @@ package [=PackageName];
 import [=PackageName].domain.model.*;
 import [=PackageName].domain.authorization.permission.IPermissionManager;
 import [=PackageName].domain.authorization.rolepermission.IRolepermissionManager;
-<#if (AuthenticationType == "database" || UsersOnly == "true")>
+<#if (AuthenticationType == "database" || UserOnly)>
 import [=PackageName].domain.authorization.[=AuthenticationTable?lower_case]role.I[=AuthenticationTable]roleManager;
 import [=PackageName].domain.authorization.[=AuthenticationTable?lower_case].I[=AuthenticationTable]Manager;
 </#if>
@@ -33,7 +33,7 @@ public class AppStartupRunner implements ApplicationRunner {
     @Autowired
     private IRoleManager roleManager;
 
-<#if (AuthenticationType == "database" || UsersOnly == "true")> 
+<#if (AuthenticationType == "database" || UserOnly)> 
     @Autowired
     private I[=AuthenticationTable]Manager userManager;
     
@@ -64,7 +64,7 @@ public class AppStartupRunner implements ApplicationRunner {
         RoleEntity role = new RoleEntity();
         role.setName("ROLE_Admin");
         role = roleManager.Create(role);
-        <#if (AuthenticationType == "database" || UsersOnly == "true")>
+        <#if (AuthenticationType == "database" || UserOnly)>
         addDefaultUser(role);
         </#if>
         
@@ -73,11 +73,11 @@ public class AppStartupRunner implements ApplicationRunner {
         entityList.add("permission");
         entityList.add("rolepermission");
 
-        <#if (AuthenticationType == "database" || UsersOnly == "true") && !UserInput??>
+        <#if (AuthenticationType == "database" || UserOnly) && !UserInput??>
 		entityList.add("user");
 		entityList.add("userpermission");
 		entityList.add("userrole");
-		<#elseif (AuthenticationType == "database" || UsersOnly == "true") && UserInput??>
+		<#elseif (AuthenticationType == "database" || UserOnly) && UserInput??>
 		entityList.add("[=AuthenticationTable?lower_case]permission");
 		entityList.add("[=AuthenticationTable?lower_case]role");
         </#if>
@@ -87,9 +87,9 @@ public class AppStartupRunner implements ApplicationRunner {
 		</#list>
 		
 		for(String entity: entityList) {
-			<#if (AuthenticationType == "database" || UsersOnly == "true") && !UserInput??>
+			<#if (AuthenticationType == "database" || UserOnly) && !UserInput??>
 			if(!environment.getProperty("fastCode.auth.method").equals("database") && (entity.equals("role") || entity.equals("user")))
-        	<#elseif (AuthenticationType == "database" || UsersOnly == "true") && UserInput??>
+        	<#elseif (AuthenticationType == "database" || UserOnly) && UserInput??>
         	if(!environment.getProperty("fastCode.auth.method").equals("database") && (entity.equals("role") || entity.equals("[=AuthenticationTable?lower_case]")))
         	<#else>
         	if(!environment.getProperty("fastCode.auth.method").equals("database") && entity.equals("role"))
@@ -136,10 +136,10 @@ public class AppStartupRunner implements ApplicationRunner {
     	}
     }
     
-    <#if (AuthenticationType == "database" || UsersOnly == "true")>
+    <#if (AuthenticationType == "database" || UserOnly)>
     private void addDefaultUser(RoleEntity role) {
     	[=AuthenticationTable]Entity admin = new [=AuthenticationTable]Entity();
-        <#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName?? && ClassName == AuthenticationTable>  
+        <#if (AuthenticationType == "database" || UserOnly) && ClassName?? && ClassName == AuthenticationTable>  
         <#if AuthenticationFields??>
   	    <#list AuthenticationFields as authKey,authValue>
   	    <#list Fields as key,value>

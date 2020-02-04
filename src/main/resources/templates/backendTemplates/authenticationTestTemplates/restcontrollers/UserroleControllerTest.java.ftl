@@ -154,7 +154,7 @@ public class [=AuthenticationTable]roleControllerTest {
 		
 		[=AuthenticationTable]roleEntity [=AuthenticationTable?uncap_first]role = new [=AuthenticationTable]roleEntity();
 		[=AuthenticationTable?uncap_first]role.setRoleId(role.getId());
-		<#if (AuthenticationType == "database" || UsersOnly == "true") && !UserInput??>
+		<#if (AuthenticationType == "database" || UserOnly) && !UserInput??>
 		[=AuthenticationTable?uncap_first]role.set[=AuthenticationTable]Id(user.getId());
 		<#else>
 		<#if PrimaryKeys??>
@@ -175,7 +175,7 @@ public class [=AuthenticationTable]roleControllerTest {
 	public static Create[=AuthenticationTable]roleInput create[=AuthenticationTable]roleInput() {
 		Create[=AuthenticationTable]roleInput [=AuthenticationTable?uncap_first]role = new Create[=AuthenticationTable]roleInput();
 		[=AuthenticationTable?uncap_first]role.setRoleId(3L);
-		<#if (AuthenticationType == "database" || UsersOnly == "true") && !UserInput??>
+		<#if (AuthenticationType == "database" || UserOnly) && !UserInput??>
 		[=AuthenticationTable?uncap_first]role.set[=AuthenticationTable]Id(3L);
 		<#else>
 		<#if PrimaryKeys??>
@@ -200,7 +200,7 @@ public class [=AuthenticationTable]roleControllerTest {
 
 	public static [=AuthenticationTable]Entity create[=AuthenticationTable]Entity() {
 		[=AuthenticationTable]Entity [=AuthenticationTable?uncap_first] = new [=AuthenticationTable]Entity();
-		<#if (AuthenticationType == "database" || UsersOnly == "true") && !UserInput??>
+		<#if (AuthenticationType == "database" || UserOnly) && !UserInput??>
 	    [=AuthenticationTable?uncap_first].setId(DEFAULT_USER_ID);
 		[=AuthenticationTable?uncap_first].setIsActive(true);
 		[=AuthenticationTable?uncap_first].set[=AuthenticationTable]Name("u1");
@@ -265,7 +265,7 @@ public class [=AuthenticationTable]roleControllerTest {
 	public Find[=AuthenticationTable]ByIdOutput create[=AuthenticationTable]ByIdOuput()
 	{
 		Find[=AuthenticationTable]ByIdOutput [=AuthenticationTable?uncap_first] = new Find[=AuthenticationTable]ByIdOutput();
-		<#if (AuthenticationType == "database" || UsersOnly == "true") && !UserInput??>
+		<#if (AuthenticationType == "database" || UserOnly) && !UserInput??>
 		[=AuthenticationTable?uncap_first].setId(4L);
 		[=AuthenticationTable?uncap_first].setIsActive(true);
 		[=AuthenticationTable?uncap_first].set[=AuthenticationTable]Name("u4");

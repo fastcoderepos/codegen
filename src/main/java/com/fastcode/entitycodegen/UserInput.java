@@ -15,13 +15,13 @@ import com.google.common.base.CaseFormat;
 
 @Component
 public class UserInput {
-	
+
 	@Autowired
 	EntityDetails entityDetails;
-	
+
 	@Autowired
 	EntityGeneratorUtils entityGeneratorUtils;
-	
+
 	String packageName;
 	String groupArtifactId;
 	String destinationPath;
@@ -32,14 +32,14 @@ public class UserInput {
 	Boolean doUpgrade=false;
 	Boolean usersOnly = false;
 	String logonName;
-	Map<String, String> authenticationMap = new HashMap<String, String>();
+	AuthenticationInfo authenticationInfo = new AuthenticationInfo();
 
-	
-	public Map<String, String> getAuthenticationMap() {
-		return authenticationMap;
+
+	public AuthenticationInfo getAuthenticationInfo() {
+		return authenticationInfo;
 	}
-	public void setAuthenticationMap(Map<String, String> authenticationMap) {
-		this.authenticationMap = authenticationMap;
+	public void setAuthenticationInfo(AuthenticationInfo authenticationInfo) {
+		this.authenticationInfo = authenticationInfo;
 	}
 	public String getLogonName() {
 		return logonName;
@@ -98,14 +98,14 @@ public class UserInput {
 	}
 	public Boolean getUpgrade() { return doUpgrade; }
 	public void setUpgrade(Boolean doUpgrade) { this.doUpgrade = doUpgrade; }
-	
+
 	public String getInput(Scanner inputReader, String inputType) {
 
 		System.out.print("\nPlease enter value for " + inputType + ":");
 		String value = inputReader.nextLine();
 		return value;
 	}
-	
+
 	public List<FieldDetails> getFilteredFieldsList(List<FieldDetails> fields)
 	{
 		List<FieldDetails> fieldsList = new ArrayList<>();
@@ -117,7 +117,7 @@ public class UserInput {
 		}
 		return fieldsList;
 	}
-	
+
 	public int getFieldsInput(int size)
 	{
 		System.out.print("\nPlease enter value between (1-" +size+ ") :");
@@ -129,21 +129,21 @@ public class UserInput {
 		}
 		return index;
 	}
-	
+
 	public FieldDetails getEntityDescriptionField(String entityName, List<FieldDetails> fields) {
 		int index = 1; 
 		StringBuilder builder = new StringBuilder(MessageFormat.format(
 				"\nSelect a descriptive field of {0} entity by typing their corresponding number: ", entityName));
 
 		List<FieldDetails> fieldsList = getFilteredFieldsList(fields);
-		
+
 		for (FieldDetails f : fieldsList) {
 			builder.append(MessageFormat.format("{0}.{1} ", index, f.getFieldName()));
 			index++;
 		}
 		System.out.println(builder.toString());
 		index= getFieldsInput(fieldsList.size());
-        
+
 		FieldDetails selected = fieldsList.get(index - 1);
 		while(!selected.getFieldType().equalsIgnoreCase("String") || !selected.getIsNullable())
 		{
@@ -153,7 +153,7 @@ public class UserInput {
 		}
 		return selected;
 	}
-	
+
 	public UserInput composeInput(Map<String, String> root) {
 		UserInput input = new UserInput();
 		Scanner scanner = new Scanner(System.in);
@@ -166,30 +166,30 @@ public class UserInput {
 		input.setConnectionStr(root.get("conn") != null ? root.get("conn") : null);
 		if(input.getConnectionStr() == null)
 		{
-		System.out.print("\nDo you want to use sample schema for code generation ? (y/n) ");
-		String sampleSchemaOption = scanner.nextLine();
+			System.out.print("\nDo you want to use sample schema for code generation ? (y/n) ");
+			String sampleSchemaOption = scanner.nextLine();
 
-		if(sampleSchemaOption.equalsIgnoreCase("y") || sampleSchemaOption.equalsIgnoreCase("yes"))
-		{
-		input.setConnectionStr("jdbc:h2:mem:testdb?username=sa;password=sa");
-		input.setSchemaName("sample");
+			if(sampleSchemaOption.equalsIgnoreCase("y") || sampleSchemaOption.equalsIgnoreCase("yes"))
+			{
+				input.setConnectionStr("jdbc:h2:mem:testdb?username=sa;password=sa");
+				input.setSchemaName("sample");
+			}
+			else
+			{
+				input.setConnectionStr(getInput(scanner, "DB Connection String"));
+				input.setSchemaName(root.get("s") == null ? getInput(scanner, "Db schema") : root.get("s"));
+
+			}
 		}
 		else
-		{
-		input.setConnectionStr(getInput(scanner, "DB Connection String"));
-		input.setSchemaName(root.get("s") == null ? getInput(scanner, "Db schema") : root.get("s"));
-		
-		}
-		}
-		else
-		input.setSchemaName(root.get("s") == null ? getInput(scanner, "Db schema") : root.get("s"));
-		
+			input.setSchemaName(root.get("s") == null ? getInput(scanner, "Db schema") : root.get("s"));
+
 		while(entityGeneratorUtils.parseConnectionString(input.getConnectionStr())==null)
 		{
 			System.out.println("Invalid Connection String");
 			input.setConnectionStr(getInput(scanner, "Connection String"));
 		}
-	
+
 		input.setDestinationPath(
 				root.get("d") == null ? getInput(scanner, "destination folder") : root.get("d"));
 		input.setGroupArtifactId(
@@ -200,41 +200,41 @@ public class UserInput {
 			System.out.println("Invalid input");
 			input.setGroupArtifactId(getInput(scanner, "groupArtifactId"));
 		}
-		
+
 		input.setCache(root.get("c") == null ? (getInput(scanner, "cache").toLowerCase().equals("true") ? true : false)
-		       : (root.get("c").toLowerCase().equals("true") ? true : false));
+				: (root.get("c").toLowerCase().equals("true") ? true : false));
 
 		input= getAuthenticationInput(input,scanner);
-		
+
 		return input;
 	}
-	
+
 	public UserInput getAuthenticationInput(UserInput input,Scanner scanner)
 	{
-		Map<String, String> authMap = new HashMap<String, String>();
+		AuthenticationInfo authenticationInfo = new AuthenticationInfo();
 		System.out.print("\nSelect Authentication and Authorization method :");
 		System.out.print("\n1. none");
 		System.out.print("\n2. database");
 		System.out.print("\n3. ldap");
 		System.out.print("\n4. oidc");
 		System.out.print("\nEnter 1,2,3 or 4 : ");
-		
+
 		int value = scanner.nextInt();
 		while (value < 1 || value > 4) {
 			System.out.println("\nInvalid Input \nEnter again :");
 			value = scanner.nextInt();
 		}
 		if (value == 1) {
-			authMap.put(AuthenticationConstants.AUTHENTICATION_TYPE, "none");
-			authMap.put(AuthenticationConstants.USERS_ONLY, "false");
+			authenticationInfo.setAuthenticationType(AuthenticationType.NONE);
+			authenticationInfo.setUserOnly(false);
 		} 
-		else if (value>1) {
+		else {
 			scanner.nextLine();
-			authMap.put(AuthenticationConstants.AUTHENTICATION_TYPE, value == 2 ? "database" : value==3 ? "ldap" : "oidc");
+			authenticationInfo.setAuthenticationType(value == 2 ? AuthenticationType.DATABASE : value == 3 ? AuthenticationType.LDAP : AuthenticationType.OIDC);
 
 			if (value == 3 || value == 4) {
-				
-				System.out.print("\nWhich one of the following do you store in " + authMap.get(AuthenticationConstants.AUTHENTICATION_TYPE) + " for your application?");
+
+				System.out.print("\nWhich one of the following do you store in " + authenticationInfo.getAuthenticationType() + " for your application?");
 				System.out.print("\n1. User Information");
 				System.out.print("\n2. User and Group Information");
 				System.out.print("\nEnter 1 or 2 : ");
@@ -243,17 +243,17 @@ public class UserInput {
 					System.out.println("\nInvalid Input \nEnter again :");
 					choice = scanner.nextInt();
 				}
-				
-				authMap.put(AuthenticationConstants.USERS_ONLY, choice == 1 ? "true" : "false");
+
+				authenticationInfo.setUserOnly(choice == 1 ? true : false);
 				scanner.nextLine();
 				if(value == 3 && choice == 2)
 				{
 					System.out.print("\nWhat is the User Logon Name you are using? ");
 					String logonName = scanner.nextLine();
-					authMap.put(AuthenticationConstants.LOGON_NAME, logonName);
+					authenticationInfo.setLogonName(logonName);
 				}
 			}
-	
+
 			System.out.print("\nDo you have a User table in your data model? (y/n)");
 			String str= scanner.nextLine();
 			if(str.equalsIgnoreCase("y") || str.equalsIgnoreCase("yes"))
@@ -261,11 +261,11 @@ public class UserInput {
 				System.out.print("\nEnter table name :");
 				str= scanner.nextLine();
 				str = str.contains("_") ? CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, str) : str;
-				authMap.put(AuthenticationConstants.AUTHENTICATION_SCHEMA, str.substring(0, 1).toUpperCase() + str.substring(1));
+				authenticationInfo.setAuthenticationTable(str.substring(0, 1).toUpperCase() + str.substring(1));
 			}
-			
+
 		}
-		input.setAuthenticationMap(authMap);
+		input.setAuthenticationInfo(authenticationInfo);
 		return input;
 	}
 }

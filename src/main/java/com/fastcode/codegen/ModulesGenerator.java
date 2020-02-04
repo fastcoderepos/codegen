@@ -8,7 +8,6 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.fastcode.entitycodegen.AuthenticationConstants;
 import com.fastcode.entitycodegen.BaseAppGen;
 import com.fastcode.entitycodegen.EntityDetails;
 import com.fastcode.entitycodegen.EntityGenerator;
@@ -110,7 +109,7 @@ public class ModulesGenerator {
 			dependencies = dependencies.concat(",cache");
 		}
 		
-		if(!input.getAuthenticationMap().get(AuthenticationConstants.AUTHENTICATION_TYPE).equals("none"))
+		if(!input.getAuthenticationInfo().getAuthenticationType().equals("none"))
 		{
 			dependencies = dependencies.concat(",security");
 		}
@@ -120,22 +119,22 @@ public class ModulesGenerator {
 		try { 
 		Map<String, String> connectionProps = entityGeneratorUtils.parseConnectionString(input.getConnectionStr());
 		Map<String, EntityDetails> details = entityGenerator.generateEntities(connectionProps,
-				input.getSchemaName(), groupArtifactId, input.getDestinationPath() + "/" + artifactId,input.getAuthenticationMap());
+				input.getSchemaName(), groupArtifactId, input.getDestinationPath() + "/" + artifactId,input.getAuthenticationInfo());
 
-		pomFileModifier.updatePomFile(input.getDestinationPath() + "/" + artifactId + "/pom.xml",input.getAuthenticationMap().get(AuthenticationConstants.AUTHENTICATION_TYPE),connectionProps.get("database"),input.getCache());
+		pomFileModifier.updatePomFile(input.getDestinationPath() + "/" + artifactId + "/pom.xml",input.getAuthenticationInfo().getAuthenticationType(),connectionProps.get("database"),input.getCache());
 		commonModule.generateCommonModuleClasses(input.getDestinationPath()+ "/" + artifactId, groupArtifactId);
 		baseAppGen.CompileApplication(input.getDestinationPath() + "/" + artifactId);
  
-		frontendGenerator.generate(input.getDestinationPath(), artifactId, input.getAuthenticationMap(), details);
+		frontendGenerator.generate(input.getDestinationPath(), artifactId, input.getAuthenticationInfo(), details);
 
-		if(!input.getAuthenticationMap().get(AuthenticationConstants.AUTHENTICATION_TYPE).equals("none"))
+		if(!input.getAuthenticationInfo().getAuthenticationType().equals("none"))
 		{
-			authClasses.generateAutheticationClasses(input.getDestinationPath(), groupArtifactId,input.getCache(),input.getSchemaName(),input.getAuthenticationMap(),details);
+			authClasses.generateAutheticationClasses(input.getDestinationPath(), groupArtifactId,input.getCache(),input.getSchemaName(),input.getAuthenticationInfo(),details);
 		}
 
 		codeGenerator.generateAll(artifactId, artifactId + "Client", groupArtifactId, input.getCache(),
 						input.getDestinationPath(), details, input.getConnectionStr(),
-						input.getSchemaName(),input.getAuthenticationMap());
+						input.getSchemaName(),input.getAuthenticationInfo());
 
 		gitRepositoryManager.addToGitRepository(input.getUpgrade(), sourceBranch);
 

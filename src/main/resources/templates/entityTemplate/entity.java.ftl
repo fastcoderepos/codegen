@@ -13,7 +13,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Date;
 <#if ClassName == AuthenticationTable>
-<#if AuthenticationType == "database" || (AuthenticationType != "database" && (UsersOnly?? && UsersOnly == "true"))>
+<#if AuthenticationType == "database" || (AuthenticationType != "database" && UserOnly)>
 import [=PackageName].domain.model.[=AuthenticationTable]permissionEntity;
 import [=PackageName].domain.model.[=AuthenticationTable]roleEntity;
 </#if>
@@ -269,7 +269,7 @@ public class [=ClassName]Entity implements Serializable {
 </#list>
 
 <#if ClassName == AuthenticationTable>
-<#if AuthenticationType == "database" || (AuthenticationType != "database" && (UsersOnly?? && UsersOnly == "true"))>
+<#if AuthenticationType == "database" || (AuthenticationType != "database" && UserOnly)>
   @OneToMany(mappedBy = "[=AuthenticationTable?uncap_first]", cascade = CascadeType.ALL, orphanRemoval = true) 
   public Set<[=AuthenticationTable]permissionEntity> get[=AuthenticationTable]permissionSet() { 
 	return [=AuthenticationTable?uncap_first]permissionSet; 

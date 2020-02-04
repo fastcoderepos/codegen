@@ -9,7 +9,7 @@ public class CreateRoleInput {
     @Length(max = 128, message = "Display Name must be less than 128 characters")
     private String displayName;
     
-    <#if (AuthenticationType == "oidc" && UsersOnly == "false")>
+    <#if (AuthenticationType == "oidc" && !UserOnly)>
     @NotNull(message = "ScimId Should not be null")
     @Length(max = 36, message = "ScimId must be less than 36 characters")
     private String scimId;
@@ -27,7 +27,7 @@ public class CreateRoleInput {
         this.displayName = displayName;
     }
     
-    <#if (AuthenticationType == "oidc" && UsersOnly == "false")>
+    <#if (AuthenticationType == "oidc" && !UserOnly)>
     public String getScimId() {
         return scimId;
     }
