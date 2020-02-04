@@ -13,7 +13,7 @@ public class RoleEntity implements Serializable {
     private Long id;
     private String displayName;
     private String name;
-    <#if (AuthenticationType == "oidc" && UsersOnly == "false")>
+    <#if (AuthenticationType == "oidc" && !UserOnly)>
     private String scimId;
     </#if>
 
@@ -29,7 +29,7 @@ public class RoleEntity implements Serializable {
         this.id = id;
     }
 
- 	<#if (AuthenticationType == "oidc" && UsersOnly == "false")>
+ 	<#if (AuthenticationType == "oidc" && !UserOnly)>
  	@Basic
     @Column(name = "ScimId", nullable = false, length = 36, unique = true)
     public String ScimId() {
@@ -85,7 +85,7 @@ public class RoleEntity implements Serializable {
  
     private Set<RolepermissionEntity> rolepermissionSet = new HashSet<RolepermissionEntity>(); 
   
-<#if AuthenticationType == "database" || (AuthenticationType != "database" && (UsersOnly?? && UsersOnly == "true"))>
+<#if AuthenticationType == "database" || (AuthenticationType != "database" && UserOnly)>
     @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, orphanRemoval = true) 
     public Set<[=AuthenticationTable]roleEntity> get[=AuthenticationTable]roleSet() { 
       return [=AuthenticationTable?uncap_first]roleSet; 

@@ -51,7 +51,7 @@ import [=PackageName].application.authorization.role.dto.FindRoleByIdOutput;
 import [=PackageName].application.authorization.role.dto.FindRoleByNameOutput;
 import [=PackageName].application.authorization.role.dto.UpdateRoleInput;
 import [=PackageName].application.authorization.rolepermission.RolepermissionAppService;
-<#if (AuthenticationType == "database" || UsersOnly == "true")>
+<#if (AuthenticationType == "database" || UserOnly)>
 import [=PackageName].application.authorization.[=AuthenticationTable?lower_case]role.[=AuthenticationTable]roleAppService;
 </#if>
 import [=PackageName].domain.irepository.IRoleRepository;
@@ -73,7 +73,7 @@ public class RoleControllerTest {
 
 	@SpyBean
 	private RoleAppService roleAppService;
-	<#if (AuthenticationType == "database" || UsersOnly == "true")>
+	<#if (AuthenticationType == "database" || UserOnly)>
 	
 	@SpyBean
 	private [=AuthenticationTable]roleAppService [=AuthenticationTable?uncap_first]roleAppService;
@@ -154,7 +154,7 @@ public class RoleControllerTest {
         <#if Cache !false>
         evictAllCaches();
         </#if>
-        final RoleController roleController = new RoleController(roleAppService,logHelper,<#if (AuthenticationType == "database" || UsersOnly == "true")>[=AuthenticationTable?uncap_first]roleAppService,</#if>rolepermissionAppService);
+        final RoleController roleController = new RoleController(roleAppService,logHelper,<#if (AuthenticationType == "database" || UserOnly)>[=AuthenticationTable?uncap_first]roleAppService,</#if>rolepermissionAppService);
         
         when(logHelper.getLogger()).thenReturn(loggerMock);
 		doNothing().when(loggerMock).error(anyString());

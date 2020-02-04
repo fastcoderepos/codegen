@@ -47,7 +47,7 @@ export class RoleDetailsComponent extends BaseDetailsComponent<IRole> implements
       displayName: ['', Validators.required],
       id: [{value: '', disabled: true}, Validators.required],
       name: ['', Validators.required],
-      <#if (AuthenticationType == "oidc" && UsersOnly == "false")>
+      <#if (AuthenticationType == "oidc" && !UserOnly)>
 			scimId: ['', Validators.required],
       </#if>
     });

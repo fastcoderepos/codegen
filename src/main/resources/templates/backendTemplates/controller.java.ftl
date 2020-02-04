@@ -1,6 +1,6 @@
 package [=PackageName].restcontrollers;
 
-<#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>
+<#if (AuthenticationType == "database" || UserOnly) && ClassName == AuthenticationTable>
 import javax.persistence.EntityExistsException;
 </#if>
 import javax.persistence.EntityNotFoundException;
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-<#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>
+<#if (AuthenticationType == "database" || UserOnly) && ClassName == AuthenticationTable>
 <#if AuthenticationType == "database">
 import org.springframework.security.crypto.password.PasswordEncoder;
 </#if>
@@ -38,14 +38,14 @@ import [=CommonModulePackage].search.SearchCriteria;
 import [=CommonModulePackage].search.SearchUtils;
 import [=CommonModulePackage].application.OffsetBasedPageRequest;
 import [=CommonModulePackage].domain.EmptyJsonResponse;
-import [=PackageName].application<#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>.authorization</#if>.[=ClassName?lower_case].[=ClassName]AppService;
-import [=PackageName].application<#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>.authorization</#if>.[=ClassName?lower_case].dto.*;
+import [=PackageName].application<#if (AuthenticationType == "database" || UserOnly) && ClassName == AuthenticationTable>.authorization</#if>.[=ClassName?lower_case].[=ClassName]AppService;
+import [=PackageName].application<#if (AuthenticationType == "database" || UserOnly) && ClassName == AuthenticationTable>.authorization</#if>.[=ClassName?lower_case].dto.*;
 <#list Relationship as relationKey,relationValue>
 <#if ClassName != relationValue.eName>
-import [=PackageName].application<#if (AuthenticationType == "database" || UsersOnly == "true") && relationValue.eName == AuthenticationTable>.authorization</#if>.[=relationValue.eName?lower_case].[=relationValue.eName]AppService;
+import [=PackageName].application<#if (AuthenticationType == "database" || UserOnly) && relationValue.eName == AuthenticationTable>.authorization</#if>.[=relationValue.eName?lower_case].[=relationValue.eName]AppService;
 </#if>
 <#if relationValue.relation == "OneToMany">
-import [=PackageName].application<#if (AuthenticationType == "database" || UsersOnly == "true") && relationValue.eName == AuthenticationTable>.authorization</#if>.[=relationValue.eName?lower_case].dto.Find[=relationValue.eName]ByIdOutput;
+import [=PackageName].application<#if (AuthenticationType == "database" || UserOnly) && relationValue.eName == AuthenticationTable>.authorization</#if>.[=relationValue.eName?lower_case].dto.Find[=relationValue.eName]ByIdOutput;
 </#if>
 </#list>
 <#if AuthenticationType == "oidc" && ClassName == AuthenticationTable>
@@ -56,7 +56,7 @@ import [=PackageName].security.SecurityUtils;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-<#if UsersOnly == "true">
+<#if UserOnly>
 import [=PackageName].domain.authorization.[=AuthenticationTable?lower_case].I[=AuthenticationTable]Manager;
 import [=PackageName].domain.model.[=AuthenticationTable]Entity;
 <#else>
@@ -66,7 +66,7 @@ import java.util.ArrayList;
 import java.util.stream.Collectors;
 </#if>
 </#if>
-<#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>
+<#if (AuthenticationType == "database" || UserOnly) && ClassName == AuthenticationTable>
 import [=PackageName].domain.model.[=AuthenticationTable]permissionEntity;
 import [=PackageName].domain.model.RoleEntity;
 import [=PackageName].domain.authorization.[=AuthenticationTable?lower_case].I[=AuthenticationTable]Manager;
@@ -109,7 +109,7 @@ public class [=ClassName]Controller {
     private PasswordEncoder pEncoder;
 	</#if>
 	
-	<#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>
+	<#if (AuthenticationType == "database" || UserOnly) && ClassName == AuthenticationTable>
 	@Autowired
     private [=AuthenticationTable]permissionAppService _[=AuthenticationTable?uncap_first]permissionAppService;
     
@@ -121,7 +121,7 @@ public class [=ClassName]Controller {
     </#if>  
     
     <#if AuthenticationType == "oidc" && ClassName == AuthenticationTable>
-    <#if UsersOnly == "true">
+    <#if UserOnly>
     @Autowired
 	I[=AuthenticationTable]Manager _userMgr;
     <#else>
@@ -147,7 +147,7 @@ public class [=ClassName]Controller {
 		claimSet = accessToken.getJWTClaimsSet();
 		userName = claimSet.getSubject();
 		
-		<#if UsersOnly == "true">
+		<#if UserOnly>
 		// Add all the roles and permissions in a list and then convert the list into all permissions, removing duplicates
 		List<String> permissions=null;
 		[=AuthenticationTable]Entity user = _userMgr.FindBy<#if AuthenticationFields?? && AuthenticationFields.UserName??>[=AuthenticationFields.UserName.fieldName?cap_first]</#if>(userName);  
@@ -159,7 +159,7 @@ public class [=ClassName]Controller {
 			throw new EntityNotFoundException(
 					String.format("There does not exist a user with a name=%s", userName));
 		return new ResponseEntity(permissions, HttpStatus.OK);
-		<#elseif UsersOnly != "true">
+		<#elseif UserOnly>
 		List<String> groups = new ArrayList<String>();
 		groups = (ArrayList<String>) claimSet.getClaims().get("groups");
 		List<String> permissionsList = new ArrayList<String>();
@@ -186,7 +186,7 @@ public class [=ClassName]Controller {
     </#if>
     
     public [=ClassName]Controller([=ClassName]AppService [=ClassName?uncap_first]AppService,<#list Relationship as relationKey,relationValue><#if ClassName != relationValue.eName && relationValue.eName !="OneToMany"> [=relationValue.eName]AppService [=relationValue.eName?uncap_first]AppService,</#if></#list>
-	<#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable><#if AuthenticationType == "database">PasswordEncoder pEncoder,</#if> [=AuthenticationTable]permissionAppService [=AuthenticationTable?uncap_first]permissionAppService, [=AuthenticationTable]roleAppService [=AuthenticationTable?uncap_first]roleAppService,JWTAppService jwtAppService,</#if> LoggingHelper helper) {
+	<#if (AuthenticationType == "database" || UserOnly) && ClassName == AuthenticationTable><#if AuthenticationType == "database">PasswordEncoder pEncoder,</#if> [=AuthenticationTable]permissionAppService [=AuthenticationTable?uncap_first]permissionAppService, [=AuthenticationTable]roleAppService [=AuthenticationTable?uncap_first]roleAppService,JWTAppService jwtAppService,</#if> LoggingHelper helper) {
 		super();
 		this._[=ClassName?uncap_first]AppService = [=ClassName?uncap_first]AppService;
 		<#list Relationship as relationKey,relationValue>
@@ -194,7 +194,7 @@ public class [=ClassName]Controller {
     	this._[=relationValue.eName?uncap_first]AppService = [=relationValue.eName?uncap_first]AppService;
     	</#if>
     	</#list>
-		<#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>
+		<#if (AuthenticationType == "database" || UserOnly) && ClassName == AuthenticationTable>
 		<#if AuthenticationType == "database">
 	    this.pEncoder = pEncoder;
 	    </#if>
@@ -211,7 +211,7 @@ public class [=ClassName]Controller {
     </#if>
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseEntity<Create[=ClassName]Output> Create(@RequestBody @Valid Create[=ClassName]Input [=ClassName?uncap_first]) {
-		<#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>
+		<#if (AuthenticationType == "database" || UserOnly) && ClassName == AuthenticationTable>
 		<#if AuthenticationFields??>
 		<#list AuthenticationFields as authKey,authValue>
         <#if authKey== "UserName">
@@ -355,7 +355,7 @@ public class [=ClassName]Controller {
 			return new ResponseEntity(new EmptyJsonResponse(), HttpStatus.NOT_FOUND);
 		}
 		
-		<#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>
+		<#if (AuthenticationType == "database" || UserOnly) && ClassName == AuthenticationTable>
 		<#if AuthenticationFields??>
         <#if AuthenticationType == "database">
 	    [=ClassName?uncap_first].set[=AuthenticationFields.Password.fieldName?cap_first](pEncoder.encode(current[=ClassName].get[=AuthenticationFields.Password.fieldName?cap_first]()));
@@ -488,7 +488,7 @@ public class [=ClassName]Controller {
  
     </#if>
     </#list>
-	<#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>
+	<#if (AuthenticationType == "database" || UserOnly) && ClassName == AuthenticationTable>
 	<#if AuthenticationType != "none">
     @PreAuthorize("hasAnyAuthority('[=ClassName?upper_case]ENTITY_READ')")
     </#if>

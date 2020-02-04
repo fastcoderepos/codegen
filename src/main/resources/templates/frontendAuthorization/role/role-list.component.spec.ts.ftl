@@ -19,7 +19,7 @@ describe('RoleListComponent', () => {
       displayName: 'displayName1',
       id: 1,
       name: 'name1',
-	    <#if (AuthenticationType == "oidc" && UsersOnly == "false")>
+	    <#if (AuthenticationType == "oidc" && !UserOnly)>
 			scimId: 'scimId1',
 	    </#if>
     },
@@ -27,7 +27,7 @@ describe('RoleListComponent', () => {
       displayName: 'displayName2',
       id: 2,
       name: 'name2',
-	    <#if (AuthenticationType == "oidc" && UsersOnly == "false")>
+	    <#if (AuthenticationType == "oidc" && !UserOnly)>
 			scimId: 'scimId2',
 	    </#if>
     },

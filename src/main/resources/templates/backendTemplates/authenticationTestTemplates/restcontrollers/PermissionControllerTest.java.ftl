@@ -52,7 +52,7 @@ import [=PackageName].application.authorization.permission.dto.FindPermissionByI
 import [=PackageName].application.authorization.permission.dto.FindPermissionByNameOutput;
 import [=PackageName].application.authorization.permission.dto.UpdatePermissionInput;
 import [=PackageName].application.authorization.rolepermission.RolepermissionAppService;
-<#if (AuthenticationType == "database" || UsersOnly == "true")>
+<#if (AuthenticationType == "database" || UserOnly)>
 import [=PackageName].application.authorization.[=AuthenticationTable?lower_case]permission.[=AuthenticationTable]permissionAppService;
 </#if>
 import [=PackageName].domain.irepository.IPermissionRepository;
@@ -74,7 +74,7 @@ public class PermissionControllerTest {
 
 	@SpyBean
 	private PermissionAppService permissionAppService;
-	<#if (AuthenticationType == "database" || UsersOnly == "true")>
+	<#if (AuthenticationType == "database" || UserOnly)>
 	
 	@SpyBean
 	private [=AuthenticationTable]permissionAppService [=AuthenticationTable?uncap_first]permissionAppService; 
@@ -156,7 +156,7 @@ public class PermissionControllerTest {
         <#if Cache !false>
         evictAllCaches();
         </#if>
-        final PermissionController permissionController = new PermissionController(permissionAppService,logHelper,<#if (AuthenticationType == "database" || UsersOnly == "true")>[=AuthenticationTable?uncap_first]permissionAppService,</#if>rolepermissionAppService);
+        final PermissionController permissionController = new PermissionController(permissionAppService,logHelper,<#if (AuthenticationType == "database" || UserOnly)>[=AuthenticationTable?uncap_first]permissionAppService,</#if>rolepermissionAppService);
         
         when(logHelper.getLogger()).thenReturn(loggerMock);
 		doNothing().when(loggerMock).error(anyString());

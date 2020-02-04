@@ -71,7 +71,7 @@ export class RoleListComponent extends BaseListComponent<IRole> implements OnIni
 				filter: true,
 				type: listColumnType.String
 			},
-			<#if (AuthenticationType == "oidc" && UsersOnly == "false")>
+			<#if (AuthenticationType == "oidc" && !UserOnly)>
 			{
 				column: 'scimId',
 				label: 'scimId',

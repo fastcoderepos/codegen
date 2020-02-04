@@ -1,4 +1,4 @@
-package [=PackageName].application<#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>.authorization</#if>.[=ClassName?lower_case].dto;
+package [=PackageName].application<#if (AuthenticationType == "database" || UserOnly) && ClassName == AuthenticationTable>.authorization</#if>.[=ClassName?lower_case].dto;
 
 import java.util.Date;
 public class Update[=ClassName]Output {

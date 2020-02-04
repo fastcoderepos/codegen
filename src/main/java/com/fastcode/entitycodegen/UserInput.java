@@ -32,14 +32,13 @@ public class UserInput {
 	Boolean doUpgrade=false;
 	Boolean usersOnly = false;
 	String logonName;
-	Map<String, String> authenticationMap = new HashMap<String, String>();
+	AuthenticationInfo authenticationInfo = new AuthenticationInfo();
 
-
-	public Map<String, String> getAuthenticationMap() {
-		return authenticationMap;
+	public AuthenticationInfo getAuthenticationInfo() {
+		return authenticationInfo;
 	}
-	public void setAuthenticationMap(Map<String, String> authenticationMap) {
-		this.authenticationMap = authenticationMap;
+	public void setAuthenticationInfo(AuthenticationInfo authenticationInfo) {
+		this.authenticationInfo = authenticationInfo;
 	}
 	public String getLogonName() {
 		return logonName;
@@ -211,7 +210,7 @@ public class UserInput {
 
 	public UserInput getAuthenticationInput(UserInput input,Scanner scanner)
 	{
-		Map<String, String> authMap = new HashMap<String, String>();
+		AuthenticationInfo authenticationInfo = new AuthenticationInfo();
 		System.out.print("\nSelect Authentication and Authorization method :");
 		System.out.print("\n1. none");
 		System.out.print("\n2. database");
@@ -225,16 +224,16 @@ public class UserInput {
 			value = scanner.nextInt();
 		}
 		if (value == 1) {
-			authMap.put(AuthenticationConstants.AUTHENTICATION_TYPE, "none");
-			authMap.put(AuthenticationConstants.USERS_ONLY, "false");
+			authenticationInfo.setAuthenticationType(AuthenticationType.NONE);
+			authenticationInfo.setUserOnly(false);
 		} 
-		else if (value>1) {
+		else {
 			scanner.nextLine();
-			authMap.put(AuthenticationConstants.AUTHENTICATION_TYPE, value == 2 ? "database" : value==3 ? "ldap" : "oidc");
+			authenticationInfo.setAuthenticationType(value == 2 ? AuthenticationType.DATABASE : value == 3 ? AuthenticationType.LDAP : AuthenticationType.OIDC);
 
 			if (value == 3 || value == 4) {
 
-				System.out.print("\nWhich one of the following do you store in " + authMap.get(AuthenticationConstants.AUTHENTICATION_TYPE) + " for your application?");
+				System.out.print("\nWhich one of the following do you store in " + authenticationInfo.getAuthenticationType() + " for your application?");
 				System.out.print("\n1. User Information");
 				System.out.print("\n2. User and Group Information");
 				System.out.print("\nEnter 1 or 2 : ");
@@ -244,13 +243,14 @@ public class UserInput {
 					choice = scanner.nextInt(); 
 				}
 
-				authMap.put(AuthenticationConstants.USERS_ONLY, choice == 1 ? "true" : "false");
+				authenticationInfo.setUserOnly(choice == 1 ? true : false);
+
 				scanner.nextLine();
 				if(value == 3 && choice == 2)
 				{
 					System.out.print("\nWhat is the User Logon Name you are using? ");
 					String logonName = scanner.nextLine();
-					authMap.put(AuthenticationConstants.LOGON_NAME, logonName);
+					authenticationInfo.setLogonName(logonName);
 				}
 			}
 
@@ -261,11 +261,11 @@ public class UserInput {
 				System.out.print("\nEnter table name :");
 				str= scanner.nextLine();
 				str = str.contains("_") ? CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, str) : str;
-				authMap.put(AuthenticationConstants.AUTHENTICATION_SCHEMA, str.substring(0, 1).toUpperCase() + str.substring(1));
+				authenticationInfo.setAuthenticationTable(str.substring(0, 1).toUpperCase() + str.substring(1));
 			}
 
 		}
-		input.setAuthenticationMap(authMap);
+		input.setAuthenticationInfo(authenticationInfo);
 		return input;
 	}
 }

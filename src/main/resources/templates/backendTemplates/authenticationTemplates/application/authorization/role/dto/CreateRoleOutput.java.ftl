@@ -4,7 +4,7 @@ public class CreateRoleOutput {
     private Long id;
     private String displayName;
     private String name;
-    <#if (AuthenticationType == "oidc" && UsersOnly == "false")>
+    <#if (AuthenticationType == "oidc" && !UserOnly)>
     private String scimId;
     </#if>
 
@@ -32,7 +32,7 @@ public class CreateRoleOutput {
         this.name = name;
     }
 
-    <#if (AuthenticationType == "oidc" && UsersOnly == "false")>
+    <#if (AuthenticationType == "oidc" && !UserOnly)>
     public String getScimId() {
         return scimId;
     }

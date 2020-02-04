@@ -33,6 +33,7 @@ import org.w3c.dom.Element;
 
 import com.fastcode.codegen.Dependency;
 import com.fastcode.codegen.PomFileModifier;
+import com.fastcode.entitycodegen.AuthenticationType;
 import com.fastcode.logging.LoggingHelper;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -72,7 +73,7 @@ public class PomFileModifierTest {
 		
 		Mockito.doNothing().when(pomFileModifier).addDependenciesAndPluginsToPom(anyString(),any(List.class));
 		Mockito.doReturn(new Dependency("", "", "")).when(pomFileModifier).getDatabaseDependency(anyString());
-		pomFileModifier.updatePomFile(destPath.getAbsolutePath(), "database", "postgresql", true);
+		pomFileModifier.updatePomFile(destPath.getAbsolutePath(), AuthenticationType.DATABASE, "postgresql", true);
 		
 		Mockito.verify(pomFileModifier,Mockito.times(1)).addDependenciesAndPluginsToPom(anyString(),any(List.class));
 

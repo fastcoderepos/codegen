@@ -1,4 +1,4 @@
-package [=PackageName].domain<#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>.authorization</#if>.[=ClassName?lower_case];
+package [=PackageName].domain<#if (AuthenticationType == "database" || UserOnly) && ClassName == AuthenticationTable>.authorization</#if>.[=ClassName?lower_case];
 
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +58,7 @@ public class [=ClassName]Manager implements I[=ClassName]Manager {
 		}
 
 	}
-	<#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>
+	<#if (AuthenticationType == "database" || UserOnly) && ClassName == AuthenticationTable>
 	<#if AuthenticationFields??>
 	<#list AuthenticationFields as authKey,authValue>
 	<#if authKey== "UserName">

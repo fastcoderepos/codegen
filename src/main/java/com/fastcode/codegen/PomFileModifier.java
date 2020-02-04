@@ -22,6 +22,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
+import com.fastcode.entitycodegen.AuthenticationType;
 import com.fastcode.logging.LoggingHelper;
 
 @Component
@@ -30,7 +31,7 @@ public class PomFileModifier {
 	@Autowired
 	private LoggingHelper logHelper;
 
-	public void updatePomFile(String path,String authenticationType,String database,Boolean cache) {
+	public void updatePomFile(String path,AuthenticationType authenticationType,String database,Boolean cache) {
 		List<Dependency> dependencies = new ArrayList<Dependency>();
 
 		Dependency mapstruct = new Dependency("org.mapstruct", "mapstruct", "1.2.0.Final");
@@ -53,7 +54,7 @@ public class PomFileModifier {
 			dependencies.add(redisClient);
 	    }
 	    
-		if(authenticationType !="none")
+		if(!authenticationType.equals(AuthenticationType.NONE))
 		{
 			Dependency json_web_token =new Dependency("io.jsonwebtoken","jjwt","0.9.0");
 			dependencies.add(json_web_token);

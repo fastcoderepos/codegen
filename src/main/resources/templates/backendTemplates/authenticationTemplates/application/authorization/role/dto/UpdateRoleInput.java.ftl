@@ -16,7 +16,7 @@ public class UpdateRoleInput {
     @Length(max = 128, message = "Name must be less than 128 characters")
     private String name;
 
-    <#if (AuthenticationType == "oidc" && UsersOnly == "false")>
+    <#if (AuthenticationType == "oidc" && !UserOnly)>
     @NotNull(message = "ScimId Should not be null")
     @Length(max = 36, message = "ScimId must be less than 36 characters")
     private String scimId;
@@ -46,7 +46,7 @@ public class UpdateRoleInput {
         this.name = name;
     }
     
-    <#if (AuthenticationType == "oidc" && UsersOnly == "false")>
+    <#if (AuthenticationType == "oidc" && !UserOnly)>
     public String getScimId() {
         return scimId;
     }

@@ -18,7 +18,7 @@ import [=PackageName].domain.model.[=EntityClassName];
 @RepositoryRestResource(collectionResourceRel = "[=ApiPath]", path = "[=ApiPath]")
 public interface I[=ClassName]Repository extends JpaRepository<[=EntityClassName], <#if CompositeKeyClasses?seq_contains(ClassName)>[=IdClass]<#else><#list Fields as key,value><#if value.isPrimaryKey!false><#if value.fieldType?lower_case == "long">Long<#elseif value.fieldType?lower_case == "integer">Integer<#elseif value.fieldType?lower_case == "short">Short<#elseif value.fieldType?lower_case == "double">Double<#elseif value.fieldType?lower_case == "string">String</#if></#if></#list></#if>>,QuerydslPredicateExecutor<[=EntityClassName]> {
 
-<#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>
+<#if (AuthenticationType == "database" || UserOnly) && ClassName == AuthenticationTable>
 <#if AuthenticationFields??>
 	<#list AuthenticationFields as authKey,authValue>
 	<#if authKey== "UserName">

@@ -71,15 +71,15 @@ public class BeanConfig {
         SimpleCacheManager cacheManager = new SimpleCacheManager();
 
         List<Cache> caches = new ArrayList<>();
-        <#if (AuthenticationType =="database" || UsersOnly=="true") && !UserInput?? >
+        <#if (AuthenticationType =="database" || UserOnly) && !UserInput?? >
         caches.add(new ConcurrentMapCache("[=AuthenticationTable]"));
         </#if>
-        <#if AuthenticationType == "database" || UsersOnly=="false">
+        <#if AuthenticationType == "database" || !UserOnly>
         caches.add(new ConcurrentMapCache("Role"));
         caches.add(new ConcurrentMapCache("Permission"));
         caches.add(new ConcurrentMapCache("Rolepermission"));
         </#if>
-        <#if AuthenticationType == "database" || UsersOnly=="true">
+        <#if AuthenticationType == "database" || UserOnly>
         caches.add(new ConcurrentMapCache("[=AuthenticationTable]role"));
         caches.add(new ConcurrentMapCache("[=AuthenticationTable]permission"));
         </#if>

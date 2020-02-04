@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 import [=PackageName].domain.model.RolepermissionEntity;
-<#if AuthenticationType != "database" && UsersOnly == "false">
+<#if AuthenticationType != "database" && !UserOnly>
 import [=PackageName].domain.model.RoleEntity;
 <#else>
 import [=PackageName].domain.model.[=AuthenticationTable]Entity;
@@ -18,7 +18,7 @@ import [=PackageName].domain.model.[=AuthenticationTable]roleEntity;
 @Component
 public class SecurityUtils {
 
-   <#if AuthenticationType != "database" && UsersOnly == "false">
+   <#if AuthenticationType != "database" && !UserOnly>
 	public List<String> getAllPermissionsFromRole(RoleEntity role)
     {
     	List<String> permissions = new ArrayList<>();

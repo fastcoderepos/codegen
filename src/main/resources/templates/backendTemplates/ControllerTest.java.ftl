@@ -20,7 +20,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityNotFoundException;
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
-<#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>
+<#if (AuthenticationType == "database" || UserOnly) && ClassName == AuthenticationTable>
 import javax.persistence.EntityExistsException;
 </#if>
 
@@ -47,8 +47,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import [=CommonModulePackage].logging.LoggingHelper;
-import [=PackageName].application<#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>.authorization</#if>.[=ClassName?lower_case].[=ClassName]AppService;
-import [=PackageName].application<#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>.authorization</#if>.[=ClassName?lower_case].dto.*;
+import [=PackageName].application<#if (AuthenticationType == "database" || UserOnly) && ClassName == AuthenticationTable>.authorization</#if>.[=ClassName?lower_case].[=ClassName]AppService;
+import [=PackageName].application<#if (AuthenticationType == "database" || UserOnly) && ClassName == AuthenticationTable>.authorization</#if>.[=ClassName?lower_case].dto.*;
 import [=PackageName].domain.irepository.I[=ClassName]Repository;
 import [=PackageName].domain.model.[=ClassName]Entity;
 <#list Relationship as relationKey,relationValue>
@@ -61,10 +61,10 @@ import [=PackageName].domain.model.[=relationValue.eName?cap_first]Entity;
 </#list>
 <#list Relationship as relationKey,relationValue>
 <#if ClassName != relationValue.eName && relationValue.eName !="OneToMany">
-import [=PackageName].application<#if (AuthenticationType == "database" || UsersOnly == "true") && relationValue.eName == AuthenticationTable>.authorization</#if>.[=relationValue.eName?lower_case].[=relationValue.eName]AppService;    
+import [=PackageName].application<#if (AuthenticationType == "database" || UserOnly) && relationValue.eName == AuthenticationTable>.authorization</#if>.[=relationValue.eName?lower_case].[=relationValue.eName]AppService;    
 </#if>
 </#list>
-<#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>
+<#if (AuthenticationType == "database" || UserOnly) && ClassName == AuthenticationTable>
 <#if AuthenticationType == "database">
 import org.springframework.security.crypto.password.PasswordEncoder;
 </#if>
@@ -105,7 +105,7 @@ public class [=ClassName]ControllerTest {
 	private [=relationValue.eName]AppService [=relationValue.eName?uncap_first]AppService;
     </#if>
     </#list>
-    <#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>
+    <#if (AuthenticationType == "database" || UserOnly) && ClassName == AuthenticationTable>
     <#if AuthenticationType == "database">
     
 	@SpyBean
@@ -332,7 +332,7 @@ public class [=ClassName]ControllerTest {
 		evictAllCaches();
 		</#if>
 		final [=ClassName]Controller [=ClassName?uncap_first]Controller = new [=ClassName]Controller([=ClassName?uncap_first]AppService,<#list Relationship as relationKey,relationValue><#if ClassName != relationValue.eName && relationValue.eName !="OneToMany">[=relationValue.eName?uncap_first]AppService,</#if></#list>
-	<#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable><#if AuthenticationType == "database">pEncoder,</#if> [=AuthenticationTable?uncap_first]permissionAppService,[=AuthenticationTable?uncap_first]roleAppService,jwtAppService,</#if>logHelper);
+	<#if (AuthenticationType == "database" || UserOnly) && ClassName == AuthenticationTable><#if AuthenticationType == "database">pEncoder,</#if> [=AuthenticationTable?uncap_first]permissionAppService,[=AuthenticationTable?uncap_first]roleAppService,jwtAppService,</#if>logHelper);
 		when(logHelper.getLogger()).thenReturn(loggerMock);
 		doNothing().when(loggerMock).error(anyString());
 
@@ -370,7 +370,7 @@ public class [=ClassName]ControllerTest {
 
 	}    
 	<#if !((AuthenticationType == "ldap" || AuthenticationType == "oidc") && ClassName == AuthenticationTable)>
-	<#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>
+	<#if (AuthenticationType == "database" || UserOnly) && ClassName == AuthenticationTable>
 	public void Create[=AuthenticationTable]_[=AuthenticationTable]DoesNotExist_ReturnStatusOk() throws Exception {
 	    <#if AuthenticationFields??>
 		<#list AuthenticationFields as authKey,authValue>
@@ -820,7 +820,7 @@ public class [=ClassName]ControllerTest {
     </#if>
     </#list>
     
-    <#if (AuthenticationType == "database" || UsersOnly == "true") && ClassName == AuthenticationTable>
+    <#if (AuthenticationType == "database" || UserOnly) && ClassName == AuthenticationTable>
 	@Test
 	public void Get[=AuthenticationTable]role_searchIsNotEmptyAndPropertyIsNotValid_ThrowException() throws Exception {
 	

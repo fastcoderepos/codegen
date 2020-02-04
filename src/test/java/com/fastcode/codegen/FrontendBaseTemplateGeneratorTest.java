@@ -38,7 +38,8 @@ import com.fastcode.codegen.CodeGeneratorUtils;
 import com.fastcode.codegen.CommandUtils;
 import com.fastcode.codegen.FrontendBaseTemplateGenerator;
 import com.fastcode.codegen.JSONUtils;
-import com.fastcode.entitycodegen.AuthenticationConstants;
+import com.fastcode.entitycodegen.AuthenticationInfo;
+import com.fastcode.entitycodegen.AuthenticationType;
 import com.fastcode.entitycodegen.EntityDetails;
 import com.fastcode.logging.LoggingHelper;
 
@@ -89,10 +90,10 @@ public class FrontendBaseTemplateGeneratorTest {
 	@Test
 	public void generate_ParametersAreValid_ReturnNothing() {
 
-		Map<String,String> authenticationInputMap = new HashMap<String, String>(); 
-		authenticationInputMap.put(AuthenticationConstants.AUTHENTICATION_SCHEMA, null);
-		authenticationInputMap.put(AuthenticationConstants.AUTHENTICATION_TYPE, "database");
-		authenticationInputMap.put(AuthenticationConstants.USERS_ONLY, "true");
+		AuthenticationInfo authenticationInfo = new AuthenticationInfo();
+		authenticationInfo.setAuthenticationTable(null);
+		authenticationInfo.setAuthenticationType(AuthenticationType.DATABASE);
+		authenticationInfo.setUserOnly(true);
 
 		Map<String,EntityDetails> details = new HashMap<String, EntityDetails>();
 		details.put("Entity1",new EntityDetails());
@@ -101,22 +102,21 @@ public class FrontendBaseTemplateGeneratorTest {
 		Mockito.doNothing().when(frontendBaseTemplateGenerator).editAngularJsonFile(anyString(),anyString());
 
 		Mockito.doReturn("").when(mockedCommandUtils).runProcess(anyString(), anyString());
-		Mockito.doReturn(new HashedMap()).when(frontendBaseTemplateGenerator).buildRootMap(anyString(), any(HashMap.class), any(List.class));
-		//Mockito.when(frontendBaseTemplateGenerator.buildRootMap(anyString(), any(HashMap.class), any(List.class))).thenReturn(new HashedMap());
+		Mockito.doReturn(new HashedMap()).when(frontendBaseTemplateGenerator).buildRootMap(anyString(), any(AuthenticationInfo.class), any(List.class));
 		Mockito.doReturn(new HashedMap()).when(frontendBaseTemplateGenerator).getTemplates(anyString());
 		Mockito.doNothing().when(mockedUtils).generateFiles(any(HashedMap.class), any(HashedMap.class), anyString(), anyString());
 
-		frontendBaseTemplateGenerator.generate(destPath.getAbsolutePath(), testValue, authenticationInputMap, details);
+		frontendBaseTemplateGenerator.generate(destPath.getAbsolutePath(), testValue, authenticationInfo, details);
 
 	}
 
 	@Test
 	public void buildRootMap_authenticationTableIsNotNull_returnMap()
 	{
-		Map<String,String> authenticationInputMap = new HashMap<String, String>(); 
-		authenticationInputMap.put(AuthenticationConstants.AUTHENTICATION_SCHEMA,  testValue);
-		authenticationInputMap.put(AuthenticationConstants.AUTHENTICATION_TYPE, "database");
-		authenticationInputMap.put(AuthenticationConstants.USERS_ONLY, "true");
+		AuthenticationInfo authenticationInfo = new AuthenticationInfo();
+		authenticationInfo.setAuthenticationTable(testValue);
+		authenticationInfo.setAuthenticationType(AuthenticationType.DATABASE);
+		authenticationInfo.setUserOnly(true);
 
 		Map<String, Object> root = new HashMap<>();
 		root.put("AppName", testValue);
@@ -131,17 +131,17 @@ public class FrontendBaseTemplateGeneratorTest {
 
 	
 	
-		Mockito.doReturn(new HashMap()).when(frontendBaseTemplateGenerator).getEntityNamesList(any(List.class),any(HashMap.class));
-		Assertions.assertThat(frontendBaseTemplateGenerator.buildRootMap(testValue,authenticationInputMap, new ArrayList<String>())).isEqualTo(root);
+		Mockito.doReturn(new HashMap()).when(frontendBaseTemplateGenerator).getEntityNamesList(any(List.class),any(AuthenticationInfo.class));
+		Assertions.assertThat(frontendBaseTemplateGenerator.buildRootMap(testValue,authenticationInfo, new ArrayList<String>())).isEqualTo(root);
 	}
 
 	@Test
 	public void buildRootMap_authenticationTableIsNull_returnMap()
 	{
-		Map<String,String> authenticationInputMap = new HashMap<String, String>(); 
-		authenticationInputMap.put(AuthenticationConstants.AUTHENTICATION_SCHEMA, null);
-		authenticationInputMap.put(AuthenticationConstants.AUTHENTICATION_TYPE, "database");
-		authenticationInputMap.put(AuthenticationConstants.USERS_ONLY, "false");
+		AuthenticationInfo authenticationInfo = new AuthenticationInfo();
+		authenticationInfo.setAuthenticationTable(null);
+		authenticationInfo.setAuthenticationType(AuthenticationType.DATABASE);
+		authenticationInfo.setUserOnly(false);
 		
 		Map<String, Object> root = new HashMap<>();
 		root.put("AppName", testValue);
@@ -152,9 +152,9 @@ public class FrontendBaseTemplateGeneratorTest {
 		root.put("ExcludeRoleNew", false);
 		root.put("ExcludeUserNew", false);
 	
-		Mockito.doReturn(new HashMap()).when(frontendBaseTemplateGenerator).getEntityNamesList(any(List.class),any(HashMap.class));
+		Mockito.doReturn(new HashMap()).when(frontendBaseTemplateGenerator).getEntityNamesList(any(List.class),any(AuthenticationInfo.class));
 		
-		Assertions.assertThat(frontendBaseTemplateGenerator.buildRootMap(testValue, authenticationInputMap, new ArrayList<String>())).isEqualTo(root);
+		Assertions.assertThat(frontendBaseTemplateGenerator.buildRootMap(testValue, authenticationInfo, new ArrayList<String>())).isEqualTo(root);
 
 	}
 
@@ -175,19 +175,6 @@ public class FrontendBaseTemplateGeneratorTest {
 		Assert.assertEquals(frontendBaseTemplateGenerator.getTemplates("/templates/testTemplates").keySet(), templates.keySet());
 
 	}
-
-	//   @Test
-	//   public void getNestedFolders_pathIsValid_returnFile() throws IOException
-	//   {
-	//	   File newTempFolder = folder.newFolder("tempFolder","testTemplates");
-	//
-	//	   File[] folderArray = new File[1];
-	//	   List<File> list = new ArrayList<File>();
-	//	   list.add(newTempFolder);
-	//	   folderArray =list.toArray(folderArray);
-	//
-	//	   Assertions.assertThat(frontendBaseTemplateGenerator.getNestedFolders(destPath.getAbsolutePath())).isEqualTo(folderArray);
-	//    }
 
 	@Test
 	public void getFastCodeCoreProjectNode_noParameterRequired_returnJsonObject() throws IOException, ParseException
@@ -241,7 +228,21 @@ public class FrontendBaseTemplateGeneratorTest {
 	public void editAngularJsonFile_pathIsValid_returnNothing() throws IOException, ParseException
 	{
 		File newTempFolder = folder.newFile("angular.json");
-		String data=  "{\r\n" + 
+		String data=  getAngularJsonData();
+		FileUtils.writeStringToFile(newTempFolder, data);
+		JSONParser parser = new JSONParser();
+		FileReader fr = new FileReader(newTempFolder.getAbsolutePath());
+		Object obj = parser.parse(fr);
+		fr.close();
+
+		Mockito.doReturn(obj).when(mockedJsonUtils).readJsonFile(anyString());
+		Mockito.doNothing().when(mockedJsonUtils).writeJsonToFile(anyString(), anyString());
+		frontendBaseTemplateGenerator.editAngularJsonFile(newTempFolder.getAbsolutePath(), "exampleClient");
+	}
+	
+	private String getAngularJsonData()
+	{
+		return "{\r\n" + 
 				"  \"projects\": {\r\n" + 
 				"    \"exampleClient\": {\r\n" + 
 				"      \"sourceRoot\": \"src\",\r\n" + 
@@ -382,15 +383,6 @@ public class FrontendBaseTemplateGeneratorTest {
 				"  \"version\": 1,\r\n" + 
 				"  \"newProjectRoot\": \"projects\"\r\n" + 
 				"}";
-		FileUtils.writeStringToFile(newTempFolder, data);
-		JSONParser parser = new JSONParser();
-		FileReader fr = new FileReader(newTempFolder.getAbsolutePath());
-		Object obj = parser.parse(fr);
-		fr.close();
-
-		Mockito.doReturn(obj).when(mockedJsonUtils).readJsonFile(anyString());
-		Mockito.doNothing().when(mockedJsonUtils).writeJsonToFile(anyString(), anyString());
-		frontendBaseTemplateGenerator.editAngularJsonFile(newTempFolder.getAbsolutePath(), "exampleClient");
 	}
 
 }
