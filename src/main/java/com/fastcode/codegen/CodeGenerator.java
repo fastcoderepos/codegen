@@ -46,7 +46,7 @@ public class CodeGenerator {
 	public Map<String, Object> buildEntityInfo(String className,String packageName,
 			EntityDetails details, Map<String,String> authenticationInputMap,String schema,Boolean cache) {
 
-		String authType = authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE);
+		String authType = authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE); 
 		String customAuthTable = authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA);
 		String usersOnly = authenticationInputMap.get(AuthenticationConstants.USERS_ONLY);
       

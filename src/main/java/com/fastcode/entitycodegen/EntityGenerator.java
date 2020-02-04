@@ -18,63 +18,63 @@ public class EntityGenerator {
 
 	final static String TEMPLATE_FOLDER = "/templates";
 	final static String ENTITIES_TEMPLATE_FOLDER = "/templates/backendTemplates/entities";
-	
+
 	@Autowired
 	private BaseAppGen baseAppGen;
-	
+
 	@Autowired
 	private ReverseMapping reverseMapping;
-	
+
 	@Autowired
 	private CodeGeneratorUtils codeGeneratorUtils;
-	
+
 	@Autowired
 	private EntityDetails entityDetails;
-	
+
 	@Autowired
 	private EntityGeneratorUtils entityGeneratorUtils;
-	
+
 	@Autowired
 	private UserInput userInput;
-	
+
 	@Autowired
 	private CGenClassLoader loader;
-	
+
 	@Autowired
 	private LoggingHelper logHelper;
 
-//	public String buildTablesStringFromList(List<String> tableList, String schema)
-//	{
-//		String tables = "";
-//		if (tableList != null) {
-//			for (int i = 0; i < tableList.size(); i++) {
-//				if (!tableList.get(i).isEmpty()) {
-//					if (i < tableList.size() - 1)
-//						tables = tables + schema.concat("." + tableList.get(i) + ",");
-//					else
-//						tables = tables + schema.concat("." + tableList.get(i));
-//				}
-//			}
-//		}
-//		
-//		return tables;
-//	}
-	
+	//	public String buildTablesStringFromList(List<String> tableList, String schema)
+	//	{
+	//		String tables = "";
+	//		if (tableList != null) {
+	//			for (int i = 0; i < tableList.size(); i++) {
+	//				if (!tableList.get(i).isEmpty()) {
+	//					if (i < tableList.size() - 1)
+	//						tables = tables + schema.concat("." + tableList.get(i) + ",");
+	//					else
+	//						tables = tables + schema.concat("." + tableList.get(i));
+	//				}
+	//			}
+	//		}
+	//		
+	//		return tables;
+	//	}
+
 	public Map<String, EntityDetails> generateEntities(Map<String,String> connectionProps, String schema,
 			String packageName, String destination, Map<String,String> authenticationMap) throws IllegalStateException, IOException, SQLException { 
 
-		
+
 		String entityPackage = packageName + ".domain.model";
 		final String tempPackageName = entityPackage.concat(".Temp"); 
 		destination = destination.replace('\\', '/');
 		final String destinationPath = destination.concat("/src/main/java");
 		final String targetPath = destination.concat("/target/classes");  
-//		String tables = buildTablesStringFromList(tableList,schema);
-		
-//		if (!tables.isEmpty()) {
-//			reverseMapping.run(tempPackageName, destinationPath, tables, connectionProps);
-//		} else
-			reverseMapping.run(tempPackageName, destinationPath, schema, connectionProps);
+		//		String tables = buildTablesStringFromList(tableList,schema);
+
+		//		if (!tables.isEmpty()) {
+		//			reverseMapping.run(tempPackageName, destinationPath, tables, connectionProps);
+		//		} else
+		reverseMapping.run(tempPackageName, destinationPath, schema, connectionProps);
 		try { 
 			Thread.sleep(280);
 		} catch (InterruptedException e) {
@@ -88,15 +88,15 @@ public class EntityGenerator {
 		} catch (Exception e) {
 			logHelper.getLogger().error("Compilation Error ", e.getMessage());
 		}
-		
+
 		Map<String, EntityDetails> entityDetailsMap = processAndGenerateRelevantEntities(targetPath, tempPackageName, schema, packageName, destinationPath,authenticationMap);
-				
+
 		entityGeneratorUtils.deleteDirectory(destinationPath + "/" + tempPackageName.replaceAll("\\.", "/"));
 		logHelper.getLogger().info("Exit");
 		return entityDetailsMap;
 	}
-	
-	
+
+
 	public Map<String, EntityDetails> processAndGenerateRelevantEntities(String targetPath, String tempPackageName,String schema,String packageName, String destinationPath, Map<String,String> authenticationInputMap) throws IllegalStateException
 	{
 		loader.setPath(targetPath);
@@ -112,20 +112,20 @@ public class EntityGenerator {
 			compositePrimaryKeyEntities=entityGeneratorUtils.findCompositePrimaryKeyClasses(entityClasses);			
 
 			for (Class<?> currentClass : classList) {
-				String entityName = currentClass.getName();
+				String entityName = currentClass.getName(); 
 				String className = entityName.substring(entityName.lastIndexOf(".") + 1);
-               
+
 				// process each entities except many to many association entities
 				if (!entityName.endsWith("Id")) {
 
 					EntityDetails details = entityDetails.retreiveEntityFieldsAndRships(currentClass, entityName, classList);// GetEntityDetails.getDetails(currentClass,
-					
+
 					Map<String, RelationDetails> relationMap = details.getRelationsMap();
 					details.setCompositeKeyClasses(compositePrimaryKeyEntities);
 					details.setPrimaryKeys(entityGeneratorUtils.getPrimaryKeysFromMap(details.getFieldsMap()));
 					relationMap = entityDetails.FindOneToManyJoinColFromChildEntity(relationMap, classList);
 					relationMap = entityDetails.FindOneToOneJoinColFromChildEntity(relationMap, classList);
-				
+
 					//get descriptive fields
 					details=setDescriptiveFieldsAndJoinColumnsInEntityDetailsMap(descriptiveFieldEntities,relationMap,details, className);
 					details.setRelationsMap(relationMap);
@@ -133,11 +133,11 @@ public class EntityGenerator {
 						details=updateFieldsListInRelationMap(details);
 						details.setPrimaryKeys(entityGeneratorUtils.getPrimaryKeysFromMap(details.getFieldsMap()));
 					}
-					
+
 					entityDetailsMap.put(entityName.substring(entityName.lastIndexOf(".") + 1), details);
-					
+
 					Map<String, Object> root =buildRootMap(details,entityName, packageName, schema, authenticationInputMap);
-					
+
 					// Generate Entity based on template
 					generateEntityAndIdClass(root, details, packageName, destinationPath,compositePrimaryKeyEntities);
 				}
@@ -145,19 +145,19 @@ public class EntityGenerator {
 
 			if(!entityDetailsMap.isEmpty())
 			{
-			if(authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA) !=null  && authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE) != "none")
-			{
-				entityDetailsMap=validateAuthenticationTable(entityDetailsMap, authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA), authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE));
-			}
-			
-			if(authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE) !="none")
-			{
-				generateAutheticationEntities(entityDetailsMap, schema, packageName, destinationPath,authenticationInputMap);
-			}
+				if(authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA) !=null  && authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE) != "none")
+				{
+					entityDetailsMap=validateAuthenticationTable(entityDetailsMap, authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA), authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE));
+				}
+
+				if(authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE) !="none")
+				{
+					generateAutheticationEntities(entityDetailsMap, schema, packageName, destinationPath,authenticationInputMap);
+				}
 			}
 			else
 			{
-				
+
 				throw new IllegalStateException("Invalid Schema");
 			}
 
@@ -167,7 +167,7 @@ public class EntityGenerator {
 
 		return entityDetailsMap;
 	}
-	
+
 	public Map<String,FieldDetails> findAndSetDescriptiveField(Map<String,FieldDetails> descriptiveFieldEntities, RelationDetails relationDetails) {
 		FieldDetails descriptiveField = null;
 
@@ -177,7 +177,7 @@ public class EntityGenerator {
 
 		return descriptiveFieldEntities;
 	}
-	
+
 	public EntityDetails setDescriptiveFieldsAndJoinColumnsInEntityDetailsMap(Map<String,FieldDetails> descriptiveFieldEntities,Map<String, RelationDetails> relationMap,EntityDetails details,String className)
 	{
 		//Map<String,FieldDetails> descriptiveFieldEntities = new HashMap<>();
@@ -190,12 +190,12 @@ public class EntityGenerator {
 				if(identifyOneToOneRelationContainsPrimaryKeys(entry.getValue().getfDetails(),details.getPrimaryKeys(),entry.getValue().getJoinDetails())) {
 					details.setIdClass(entry.getValue().geteName()+"Id");
 				}
-				
+
 				//get and set descriptive field
 				if(!(descriptiveFieldEntities.containsKey(entry.getValue().geteName()))){
 					descriptiveFieldEntities = findAndSetDescriptiveField(descriptiveFieldEntities,entry.getValue());
 				}
-				
+
 				//if child id class not exists update join columns
 				if(className.concat("Id") != details.getIdClass() && compositePrimaryKeyEntities.contains(details.getIdClass())) {
 					details=updateJoinColumnName(details,entry.getValue());
@@ -222,21 +222,21 @@ public class EntityGenerator {
 		for(String key: primaryKeysMap.keySet()) {
 			entityPrimaryKeys.add(key);
 		}
-		
+
 		if(entityPrimaryKeys.size()>1)
 		{
-		for(JoinDetails jDetails : joinDetailsList)
-		{
-			if(relationEntityPrimaryKeys.contains(jDetails.getReferenceColumn()) && entityPrimaryKeys.contains(jDetails.getReferenceColumn()))
+			for(JoinDetails jDetails : joinDetailsList)
 			{
-				return true;
+				if(relationEntityPrimaryKeys.contains(jDetails.getReferenceColumn()) && entityPrimaryKeys.contains(jDetails.getReferenceColumn()))
+				{
+					return true;
+				}
 			}
-		}
 		}
 
 		return false;
 	}
-	
+
 	public EntityDetails updateFieldsListInRelationMap(EntityDetails entityDetails)
 	{
 		Map<String, RelationDetails> relationMap= entityDetails.getRelationsMap();
@@ -300,7 +300,7 @@ public class EntityGenerator {
 		}
 		return entityDetailsMap;
 	}
-	
+
 	public Map<String,FieldDetails> displayAuthFieldsAndGetMapping(Map<String,FieldDetails> authFields, List<FieldDetails> fieldsList)
 	{
 		for(Map.Entry<String,FieldDetails> authFieldsEntry: authFields.entrySet())
@@ -311,12 +311,12 @@ public class EntityGenerator {
 				builder.append(MessageFormat.format("{0}.{1} ", index, f.getFieldName()));
 				index++;
 			}
-			
+
 			System.out.println("\n Select field you want to map on "+ authFieldsEntry.getKey() +" by typing its corresponding number : ");
-		    System.out.println(builder.toString());
-		    
+			System.out.println(builder.toString());
+
 			index= userInput.getFieldsInput(fieldsList.size());
-	
+
 			FieldDetails selected=fieldsList.get(index - 1);
 			String type = "String";
 			if(authFieldsEntry.getKey().equals("IsActive"))
@@ -345,7 +345,7 @@ public class EntityGenerator {
 					|| fieldsEntry.getValue().fieldType.equalsIgnoreCase("timestamp") || fieldsEntry.getValue().fieldType.equalsIgnoreCase("date"))
 				fieldsList.add(fieldsEntry.getValue());
 		}
-		
+
 		return fieldsList;
 	}
 
@@ -355,16 +355,16 @@ public class EntityGenerator {
 		authFields.put("UserName", null);
 		authFields.put("IsActive", null);
 		if(authenticationType.equals("database"))
-		authFields.put("Password", null);
-		
-//		if(authenticationType.equals("oidc"))
-//		{
-//			authFields.put("ScmId",null);
-//			authFields.put("FirstName",null);
-//			authFields.put("LastName",null);
-//			authFields.put("EmailAddress",null);
-//		}
-    
+			authFields.put("Password", null);
+
+		//		if(authenticationType.equals("oidc"))
+		//		{
+		//			authFields.put("ScmId",null);
+		//			authFields.put("FirstName",null);
+		//			authFields.put("LastName",null);
+		//			authFields.put("EmailAddress",null);
+		//		}
+
 		for(Map.Entry<String,EntityDetails> entry: entityDetails.entrySet())
 		{
 			if(entry.getKey().equals(authenticationTable))
@@ -412,24 +412,24 @@ public class EntityGenerator {
 
 		String destinationFolder = destPath + "/" + packageName.replaceAll("\\.", "/") + "/domain/model";
 		Map<String, Object> templates = new HashMap<String, Object>();
-	
+
 		if(authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE).equals("database") || 
 				(!authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE).equals("database") && authenticationInputMap.get(AuthenticationConstants.USERS_ONLY).equals("true")))
 		{
 			templates=getAuthenticationEntitiesTemplates(ENTITIES_TEMPLATE_FOLDER,authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE),authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_SCHEMA));
-		
+
 		}
 		else if(!authenticationInputMap.get(AuthenticationConstants.AUTHENTICATION_TYPE).equals("database") && authenticationInputMap.get(AuthenticationConstants.USERS_ONLY).equals("false"))
 		{
 			templates = getAuthenticationEntitiesTemplatesForUserGroupCase(ENTITIES_TEMPLATE_FOLDER);
 		}
 		codeGeneratorUtils.generateFiles(templates, root, destinationFolder,ENTITIES_TEMPLATE_FOLDER);
-		}
-	
+	}
+
 	public Map<String, Object> getAuthenticationEntitiesTemplates(String templatePath, String authenticationType, String authenticationTable) {
 		List<String> filesList = codeGeneratorUtils.readFilesFromDirectory(templatePath);
 		filesList = codeGeneratorUtils.replaceFileNames(filesList, templatePath);
-		
+
 		Map<String, Object> templates = new HashMap<>();
 
 		for (String filePath : filesList) {
@@ -457,31 +457,31 @@ public class EntityGenerator {
 
 		return templates;
 	}
-	
+
 	public Map<String, Object> getAuthenticationEntitiesTemplatesForUserGroupCase(String templatePath) {
 		List<String> filesList = codeGeneratorUtils.readFilesFromDirectory(templatePath);
 		filesList = codeGeneratorUtils.replaceFileNames(filesList, templatePath);
-		
+
 		Map<String, Object> templates = new HashMap<>();
 
 		for (String filePath : filesList) {
 			String outputFileName = filePath.substring(0, filePath.lastIndexOf('.'));
 
-				if(!(outputFileName.toLowerCase().contains("user")))
-				{ 		
-					templates.put(filePath, outputFileName);
-				}
+			if(!(outputFileName.toLowerCase().contains("user")))
+			{ 		
+				templates.put(filePath, outputFileName);
+			}
 		}
 
 		return templates;
 	}
-	
+
 	public Map<String, Object> buildRootMap(EntityDetails details,String entityName, String packageName, String schemaName, Map<String,String> authenticationInputMap)
 	{
 		String className = entityName.substring(entityName.lastIndexOf(".") + 1);
 		String entityClassName = className.concat("Entity");
 		Map<String, Object> root = new HashMap<>();
-	
+
 		root.put("EntityClassName", entityClassName);
 		root.put("ClassName", className);
 		root.put("PackageName", packageName);
@@ -501,10 +501,10 @@ public class EntityGenerator {
 		root.put("Fields", details.getFieldsMap());
 		root.put("Relationship", details.getRelationsMap());
 		root.put("PrimaryKeys", details.getPrimaryKeys());
-		
+
 		return root;
 	}
-	
+
 	public void generateEntityAndIdClass(Map<String, Object> root, EntityDetails details, String packageName,
 			String destPath, List<String> compositePrimaryKeyEntities) {
 

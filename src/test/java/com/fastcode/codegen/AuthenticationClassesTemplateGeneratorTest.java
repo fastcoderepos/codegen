@@ -338,8 +338,6 @@ public class AuthenticationClassesTemplateGeneratorTest {
 		filesList.add("/userroleAppService.java.ftl");
 		filesList.add("/PermissionAppService.java.ftl");
 
-		Mockito.doNothing().when(mockedCodeGenerator).updateAppModule(anyString(), anyString(), any(List.class));
-		Mockito.doNothing().when(mockedCodeGenerator).updateAppRouting(anyString(), anyString(), any(List.class),anyString());
 		Mockito.doNothing().when(mockedCodeGeneratorUtils).generateFiles(any(HashMap.class), any(HashMap.class), anyString(), anyString());
 
 		authenticationClassesTemplateGenerator.generateFrontendAuthorization(destPath.getAbsolutePath(),testValue, authenticationInputMap, new HashMap<String, Object>());

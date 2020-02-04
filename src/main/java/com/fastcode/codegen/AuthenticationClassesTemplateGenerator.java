@@ -141,10 +141,6 @@ public class AuthenticationClassesTemplateGenerator {
 					outputFileName = outputFileName.replace("user", authTable.toLowerCase());
 				}
 
-				//				if(!(outputFileName.toLowerCase().contains("user") && !((outputFileName.contains("UserDetailsServiceImpl") && authenticationType == "database") || outputFileName.contains("LoginUser") || outputFileName.toLowerCase().contains(authenticationTable.toLowerCase()+"permission") || outputFileName.toLowerCase().contains(authenticationTable.toLowerCase()+"role"))))
-				//				{ 	
-				//					if(!outputFileName.contains("GetUser") && !(outputFileName.contains("JWTAuthentication") && authenticationType.equals("oidc"))  )
-				//					{
 				if(shouldIncludeTemplatesIfCustomUser(outputFileName, authType, authTable))
 				{
 					if(outputFileName.contains("GetCU"))
@@ -155,7 +151,6 @@ public class AuthenticationClassesTemplateGenerator {
 					templates.put(filePath, outputFileName);
 				}
 
-				//				}
 			}
 		}
 
@@ -163,9 +158,7 @@ public class AuthenticationClassesTemplateGenerator {
 	}
 	public Boolean shouldIncludeTemplatesIfDefaultUser(String outputFileName, String authType)
 	{
-		//!outputFileName.contains("GetCU") && !((outputFileName.contains("JWTAuthentication") && authType.equals("oidc")) || (outputFileName.contains("UserDetailsServiceImpl") && !authType.equals("database"))))
 		Boolean isUserRelationDto = outputFileName.contains("GetCU");
-//		Boolean isRequiredFile = outputFileName.contains("LoginUser") || outputFileName.toLowerCase().contains(authTable.toLowerCase().concat("permission")) || outputFileName.toLowerCase().contains(authTable.toLowerCase().concat("role"));
 		Boolean isDatabaseUserImplClass = outputFileName.contains("UserDetailsServiceImpl") && !authType.equals("database");
 		Boolean excludeFileIfOidc = outputFileName.contains("JWTAuthentication") && authType.equals("oidc");
 		
@@ -179,13 +172,10 @@ public class AuthenticationClassesTemplateGenerator {
 		Boolean isRequiredFile = outputFileName.contains("LoginUser") || outputFileName.toLowerCase().contains(authTable.toLowerCase().concat("permission")) || outputFileName.toLowerCase().contains(authTable.toLowerCase().concat("role"));
 		Boolean isDatabaseUserImplClass = outputFileName.contains("UserDetailsServiceImpl") && authType.equals("database");
 		Boolean excludeFileIfOidc = outputFileName.contains("JWTAuthentication") && authType.equals("oidc");
-	   
-		//	if(!outputFileName.contains("GetUser") && !(outputFileName.contains("JWTAuthentication") && authenticationType.equals("oidc"))  )
-		//			{
 		Boolean excludeUserFiles = isUserFile && !(isDatabaseUserImplClass || isRequiredFile);
 
 		return !excludeUserFiles || (!isUserRelationDto && !excludeFileIfOidc);
-		//return true;
+		
 	}
 
 	public Map<String, Object> getBackendAuthorizationTestFiles(String templatePath, String authTable) {

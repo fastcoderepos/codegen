@@ -26,7 +26,7 @@ public class EntityGeneratorUtils {
 		
 		if(!urlArr[0].isEmpty())
 		{
-			if(urlArr[0].contains(":")) {
+			if(urlArr[0].contains(":")) { 
 			String[] paramsArr = urlArr[0].split("\\:");
 			if(!paramsArr[1].isEmpty() && getDriverName(paramsArr[1]) !=null)
 			{ 
@@ -146,7 +146,7 @@ public class EntityGeneratorUtils {
 	
 	public List<Class<?>> filterOnlyRelevantEntities(ArrayList<Class<?>> entityClasses) {
 		List<Class<?>> relevantEntities = entityClasses.stream()
-				.filter((e) -> !(e.getName().endsWith("Id$Tokenizer") || e.getName().endsWith("JvCommit") || e.getName().endsWith("JvCommitProperty") || e.getName().endsWith("JvCommitPropertyId") || e.getName().endsWith("JvSnapshot") || e.getName().endsWith("JvGlobalIdent")  ))
+				.filter((e) -> !(e.getName().endsWith("Id$Tokenizer")))
 				.collect(Collectors.toList());
 		return relevantEntities;
 	}

@@ -15,7 +15,7 @@ public class FreeMarkerConfiguration {
 	public static Configuration cfg = new Configuration(Configuration.VERSION_2_3_28);
 
 	public Configuration configure(String folderPath)
-	{
+	{ 
 		
 		ClassTemplateLoader ctl1 = new ClassTemplateLoader(CodegenApplication.class, folderPath + "/");// "/templates/backendTemplates/"); 
 		MultiTemplateLoader mtl = new MultiTemplateLoader(new TemplateLoader[] { ctl1 }); 

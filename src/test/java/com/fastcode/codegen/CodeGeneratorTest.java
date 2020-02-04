@@ -31,7 +31,6 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.fastcode.codegen.CodeGenerator;
@@ -211,8 +210,6 @@ public class CodeGeneratorTest {
 		Mockito.when(mockEntityGeneratorUtils.parseConnectionString(anyString())).thenReturn(new HashMap<String, String>());
 		
 		Mockito.doReturn(list).when(codeGenerator).generateAllModulesForEntities(any(HashMap.class), anyString(), anyString(), anyString(), any(Boolean.class),anyString(),anyString(),any(HashMap.class));
-		Mockito.doNothing().when(codeGenerator).updateAppRouting(anyString(),anyString(), any(List.class), anyString());
-		Mockito.doNothing().when(codeGenerator).updateAppModule(anyString(),anyString(), any(List.class));
 		Mockito.doNothing().when(codeGenerator).updateEntitiesJsonFile(anyString(),any(List.class),anyString());
         Mockito.doNothing().when(contentReader).copyFileFromJar(anyString(), anyString());
 		Mockito.doReturn(new HashMap<String, Object>()).when(codeGenerator).getInfoForApplicationPropertiesFile(anyString(),anyString(), anyString(), anyString(),any(HashMap.class), any(Boolean.class));
@@ -271,8 +268,8 @@ public class CodeGeneratorTest {
 	public void getInfoForAuditControllerAndBeanConfig_parameterListIsValid_ReturnMap()
 	{
 		Map<String,EntityDetails> details = new HashMap<String, EntityDetails>();
-		details.put("com.fastcode.Entity1",new EntityDetails());
-		details.put("com.fastcode.Entity2",new EntityDetails());
+		details.put("Entity1",new EntityDetails());
+		details.put("Entity2",new EntityDetails());
 		
 		Map<String, Object> entitiesMap = new HashMap<String,Object>();
 		for(Map.Entry<String,EntityDetails> entry : details.entrySet())
@@ -300,22 +297,18 @@ public class CodeGeneratorTest {
 		root.put("UserInput","true");
 		root.put("AuthenticationTable", testValue);
 		
-		Assertions.assertThat(codeGenerator.getInfoForAuditControllerAndBeanConfig(details,packageName,testValue,testValue)
+		Assertions.assertThat(codeGenerator.getInfoForBeanConfig(details,packageName,testValue,testValue)
 				).isEqualTo(root);
 	}
-	
-	@Test
-	public void generateAuditorController_parametersAreValid_ReturnNothing()
-	{ 
-	   Mockito.doNothing().when(mockedUtils).generateFiles(any(HashMap.class),any(HashMap.class),anyString(),anyString());
-		
-	   codeGenerator.generateAuditorController(new HashMap<String, EntityDetails>(),packageName, testValue,destPath.getAbsolutePath(), testValue, testValue);
-	   Mockito.verify(mockedUtils,Mockito.times(1)).generateFiles(Matchers.<Map<String, Object>>any(),Matchers.<Map<String, Object>>any(),anyString(),anyString());
-	}
-	
+
 	@Test 
 	public void getUITemplates_parameterListIsValid_ReturnMap()
 	{
+		Map<String,String> authenticationInputMap = new HashMap<String, String>();
+		authenticationInputMap.put(AuthenticationConstants.AUTHENTICATION_SCHEMA, "entity1");
+		authenticationInputMap.put(AuthenticationConstants.AUTHENTICATION_TYPE, testValue);
+		authenticationInputMap.put(AuthenticationConstants.LOGON_NAME, testValue);
+		
 		String moduleName= "entity-1";
 		Map<String, Object> uiTemplate = new HashMap<>();
 		uiTemplate.put("iitem.ts.ftl", "i" + moduleName + ".ts");
@@ -336,7 +329,7 @@ public class CodeGeneratorTest {
 		uiTemplate.put("item-details.component.html.ftl", moduleName + "-details.component.html");
 		uiTemplate.put("item-details.component.scss.ftl", moduleName + "-details.component.scss");
 		uiTemplate.put("item-details.component.spec.ts.ftl", moduleName + "-details.component.spec.ts");
-		Assertions.assertThat(codeGenerator.getUITemplates(moduleName)).isEqualTo(uiTemplate);
+		Assertions.assertThat(codeGenerator.getUITemplates(moduleName,entityName,authenticationInputMap)).isEqualTo(uiTemplate);
 	}
 	
 	@Test 
@@ -496,7 +489,7 @@ public class CodeGeneratorTest {
 		root.put("ModuleName", moduleName);
 		
 		Mockito.doReturn(root).when(codeGenerator).buildEntityInfo(anyString(), anyString(), any(EntityDetails.class), any(HashMap.class), anyString(), any(Boolean.class));
-		Mockito.doReturn(new HashMap<String, Object>()).when(codeGenerator).getUITemplates(anyString());
+		Mockito.doReturn(new HashMap<String, Object>()).when(codeGenerator).getUITemplates(anyString(),anyString(), any(HashMap.class));
 		Mockito.doNothing().when(mockedUtils).generateFiles(any(HashMap.class),any(HashMap.class),anyString(),anyString());
 		Mockito.doNothing().when(codeGenerator).generateBackendFiles(any(HashMap.class), anyString(), any(HashMap.class));
 		Mockito.doNothing().when(codeGenerator).generateBackendUnitAndIntegrationTestFiles(any(HashMap.class), anyString(), any(HashMap.class));
@@ -537,18 +530,18 @@ public class CodeGeneratorTest {
 		Mockito.verify(mockedUtils,Mockito.times(1)).generateFiles(Matchers.<Map<String, Object>>any(),Matchers.<Map<String, Object>>any(),anyString(),anyString());
 	}
 	
-	@Test 
-	public void addImports_parameterListIsValid_ReturnStringBuilder()
-	{
-		String moduleName = "entity-1"; 
-		StringBuilder builder=new StringBuilder();
-		builder.append("import { " + entityName + "ListComponent , " + entityName + "DetailsComponent, " + entityName + "NewComponent } from './" + moduleName + "/index';" + "\n");
-		List<String> entities = new ArrayList<>();
-		entities.add(entityName);
-		
-		Mockito.doReturn(moduleName).when(mockedUtils).camelCaseToKebabCase(anyString());
-		Assertions.assertThat(codeGenerator.addImports(entities)).isEqualToIgnoringNewLines(builder);
-	}
+//	@Test 
+//	public void addImports_parameterListIsValid_ReturnStringBuilder()
+//	{
+//		String moduleName = "entity-1"; 
+//		StringBuilder builder=new StringBuilder();
+//		builder.append("import { " + entityName + "ListComponent , " + entityName + "DetailsComponent, " + entityName + "NewComponent } from './" + moduleName + "/index';" + "\n");
+//		List<String> entities = new ArrayList<>();
+//		entities.add(entityName);
+//		
+//		Mockito.doReturn(moduleName).when(mockedUtils).camelCaseToKebabCase(anyString());
+//		Assertions.assertThat(codeGenerator.addImports(entities)).isEqualToIgnoringNewLines(builder);
+//	}
 
 	@Test 
 	public void modifyMainClass_parameterListIsValid_ReturnNothing() throws IOException
@@ -571,33 +564,33 @@ public class CodeGeneratorTest {
 		Mockito.verify(codeGenerator,Mockito.times(1)).modifyMainClass(destPath.getAbsolutePath(),packageName);
 	}
 	
-	@Test 
-	public void updateAppModule_parameterListIsValid_ReturnNothing() throws IOException
-	{
-		String className = "app.module.ts";
-		File newTempFolder = folder.newFolder("tempFolder","fAppClient","src","app");
-		File tempFile = File.createTempFile("app.module", ".ts", newTempFolder);
-		File newFile = new File(newTempFolder.getAbsolutePath()+ "/" + className);
-		tempFile.renameTo(newFile);
-		List<String> entities = new ArrayList<>();
-		entities.add(entityName);
-		
-		codeGenerator.updateAppModule(destPath.getAbsolutePath(),"fApp",entities);
-	}
-	
-	@Test 
-	public void updateAppRouting_parameterListIsValid_ReturnNothing() throws IOException
-	{
-		String className = "app.routing.ts";
-		File newTempFolder = folder.newFolder("tempFolder","fAppClient","src","app");
-		File tempFile = File.createTempFile("app.routing", ".ts", newTempFolder);
-		File newFile = new File(newTempFolder.getAbsolutePath()+ "/" + className);
-		tempFile.renameTo(newFile);
-		List<String> entities = new ArrayList<>();
-		entities.add(entityName);
-		
-		codeGenerator.updateAppRouting(destPath.getAbsolutePath(),"fApp",entities,entityName);
-	}
+//	@Test 
+//	public void updateAppModule_parameterListIsValid_ReturnNothing() throws IOException
+//	{
+//		String className = "app.module.ts";
+//		File newTempFolder = folder.newFolder("tempFolder","fAppClient","src","app");
+//		File tempFile = File.createTempFile("app.module", ".ts", newTempFolder);
+//		File newFile = new File(newTempFolder.getAbsolutePath()+ "/" + className);
+//		tempFile.renameTo(newFile);
+//		List<String> entities = new ArrayList<>();
+//		entities.add(entityName);
+//		
+//		codeGenerator.updateAppModule(destPath.getAbsolutePath(),"fApp",entities);
+//	}
+//	
+//	@Test 
+//	public void updateAppRouting_parameterListIsValid_ReturnNothing() throws IOException
+//	{
+//		String className = "app.routing.ts";
+//		File newTempFolder = folder.newFolder("tempFolder","fAppClient","src","app");
+//		File tempFile = File.createTempFile("app.routing", ".ts", newTempFolder);
+//		File newFile = new File(newTempFolder.getAbsolutePath()+ "/" + className);
+//		tempFile.renameTo(newFile);
+//		List<String> entities = new ArrayList<>();
+//		entities.add(entityName);
+//		
+//		codeGenerator.updateAppRouting(destPath.getAbsolutePath(),"fApp",entities,entityName);
+//	}
 	
 	@Test 
 	public void updateEntitiesJsonFile_parameterListIsValid_ReturnStringBuilder() throws IOException, ParseException

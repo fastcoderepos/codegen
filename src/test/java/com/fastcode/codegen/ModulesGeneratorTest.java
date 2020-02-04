@@ -188,7 +188,7 @@ public class ModulesGeneratorTest {
 		Mockito.doNothing().when(mockedPomFileModifier).updatePomFile(anyString(), anyString(),anyString(), any(Boolean.class));
 		Mockito.doNothing().when(mockedCommonModule).generateCommonModuleClasses(anyString(),anyString());
         Mockito.doNothing().when(mockedBaseAppGen).CompileApplication(anyString());
-        Mockito.doNothing().when(mockedFrontendGenerator).generate(anyString(), anyString(),anyString(), anyString());
+        Mockito.doNothing().when(mockedFrontendGenerator).generate(anyString(), anyString(),any(HashMap.class), any(HashMap.class));
         Mockito.doReturn(new HashMap<String,String>()).when(entityGeneratorUtils).parseConnectionString(anyString());
         
         Mockito.doNothing().when(mockedCodeGenerator).generateAll(anyString(), anyString(), anyString(), any(Boolean.class), anyString(), any(HashMap.class), anyString(), anyString(), any(HashMap.class));
@@ -200,7 +200,7 @@ public class ModulesGeneratorTest {
         Mockito.verify(mockedCodeGenerator).generateAll(anyString(), anyString(), anyString(), any(Boolean.class),anyString(), Matchers.<Map<String, EntityDetails>>any(), anyString(), anyString(), Matchers.<Map<String, String>>any());
 		Mockito.verify(mockedGitRepositoryManager,Mockito.times(0)).createUpgradeBranch();
 		Mockito.verify(mockedGitRepositoryManager,Mockito.times(1)).CopyGitFiles();
-		Mockito.verify(mockedFrontendGenerator,Mockito.times(1)).generate(anyString(), anyString(),anyString(), anyString());
+		Mockito.verify(mockedFrontendGenerator,Mockito.times(1)).generate(anyString(), anyString(),any(HashMap.class), any(HashMap.class));
 	}
 	
 	@Test
@@ -233,7 +233,7 @@ public class ModulesGeneratorTest {
 		Mockito.doNothing().when(mockedPomFileModifier).updatePomFile(anyString(), anyString(),anyString(), any(Boolean.class));
 		Mockito.doNothing().when(mockedCommonModule).generateCommonModuleClasses(anyString(),anyString());
         Mockito.doNothing().when(mockedBaseAppGen).CompileApplication(anyString());
-        Mockito.doNothing().when(mockedFrontendGenerator).generate(anyString(), anyString(),anyString(), anyString());
+        Mockito.doNothing().when(mockedFrontendGenerator).generate(anyString(), anyString(),any(HashMap.class), any(HashMap.class));
         Mockito.doNothing().when(mockedAuthClasses).generateAutheticationClasses(anyString(), anyString(), any(Boolean.class),anyString(), any(HashMap.class), any(HashMap.class));
         Mockito.doReturn(new HashMap<String,String>()).when(entityGeneratorUtils).parseConnectionString(anyString());
         Mockito.doNothing().when(mockedCodeGenerator).generateAll(anyString(), anyString(), anyString(), any(Boolean.class), anyString(), any(HashMap.class), anyString(), anyString(), any(HashMap.class));
@@ -246,7 +246,7 @@ public class ModulesGeneratorTest {
         Mockito.verify(mockedAuthClasses).generateAutheticationClasses(anyString(), anyString(), any(Boolean.class),anyString(), Matchers.<Map<String, String>>any(),Matchers.<Map<String, EntityDetails>>any());
 		Mockito.verify(mockedGitRepositoryManager,Mockito.times(0)).createUpgradeBranch();
 		Mockito.verify(mockedGitRepositoryManager,Mockito.times(1)).CopyGitFiles();
-		Mockito.verify(mockedFrontendGenerator,Mockito.times(1)).generate(anyString(), anyString(),anyString(), anyString());
+		Mockito.verify(mockedFrontendGenerator,Mockito.times(1)).generate(anyString(), anyString(),any(HashMap.class), any(HashMap.class));
 	}
 
 	

@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.json.simple.JSONArray;
@@ -52,12 +53,12 @@ public class FrontendBaseTemplateGenerator {
 
 		editTsConfigJsonFile(destination + "/" + clientSubfolder + "/tsconfig.json");
 
-		Map<String, Object> root = buildRootMap(appName, authenticationInput, entityDetails.keySet());
+		Map<String, Object> root = buildRootMap(appName, authenticationInput, entityDetails.keySet().stream().collect(Collectors.toList()));
 		codeGeneratorUtils.generateFiles(getTemplates(FRONTEND_BASE_TEMPLATE_FOLDER),root, destination + "/"+ clientSubfolder,FRONTEND_BASE_TEMPLATE_FOLDER);
 		copyAssets(destination + "/"+ clientSubfolder + "/src/assets");
 	}
 	
-	public Map<String, Object> buildRootMap(String appName, Map<String, String> authenticationInput, Set<String> entityList)
+	public Map<String, Object> buildRootMap(String appName, Map<String, String> authenticationInput, List<String> entityList)
 	{
 		String authType = authenticationInput.get(AuthenticationConstants.AUTHENTICATION_TYPE);
 		String customTable = authenticationInput.get(AuthenticationConstants.AUTHENTICATION_SCHEMA);
@@ -82,7 +83,7 @@ public class FrontendBaseTemplateGenerator {
 		return root;
 	}
 	
-	public Map<String, String> getEntityNamesList(Set<String> entityList, Map<String, String> authenticationInput){
+	public Map<String, String> getEntityNamesList(List<String> entityList, Map<String, String> authenticationInput){
 		Map<String, String> entityNamesList = new HashMap<String, String>();
 		for(String entity: entityList) {
 			String cName = entity.substring(entity.lastIndexOf(".") + 1);
@@ -238,8 +239,7 @@ public class FrontendBaseTemplateGenerator {
 		try {
 			FileUtils.copyDirectory(new File(System.getProperty("user.dir").replace("\\", "/") + FRONTEND_ASSETS), new File(dest));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logHelper.getLogger().error("FileNotFoundException Occured : ", e.getMessage());
 		}
 	}
 }

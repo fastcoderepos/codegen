@@ -26,7 +26,7 @@ public class ReverseMapping {
 		//directory : "src/main/java"
 		//tableName : "dbo.users,dbo.roles"
 
-		Options opts = new Options();
+		Options opts = new Options(); 
 		
 		try {
 			ReverseMappingTool.run(configureJdbc(connectionProps), configureCommandLineArguments(packageName,directory,schemaName,opts), opts);
