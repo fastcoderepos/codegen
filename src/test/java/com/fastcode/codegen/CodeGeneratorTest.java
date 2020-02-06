@@ -213,7 +213,7 @@ public class CodeGeneratorTest {
 		Mockito.when(mockEntityGeneratorUtils.parseConnectionString(anyString())).thenReturn(new HashMap<String, String>());
 
 		Mockito.doReturn(list).when(codeGenerator).generateAllModulesForEntities(any(HashMap.class), anyString(), anyString(), anyString(), any(Boolean.class),anyString(),anyString(),any(AuthenticationInfo.class));
-		Mockito.doNothing().when(codeGenerator).updateEntitiesJsonFile(anyString(),any(List.class),anyString());
+	//	Mockito.doNothing().when(codeGenerator).updateEntitiesJsonFile(anyString(),any(List.class),anyString());
 		Mockito.doNothing().when(contentReader).copyFileFromJar(anyString(), anyString());
 		Mockito.doReturn(new HashMap<String, Object>()).when(codeGenerator).getInfoForApplicationPropertiesFile(anyString(),anyString(), anyString(), anyString(),any(AuthenticationInfo.class), any(Boolean.class));
 		Mockito.doNothing().when(codeGenerator).generateApplicationProperties(any(HashMap.class), anyString());
@@ -552,55 +552,55 @@ public class CodeGeneratorTest {
 		Mockito.verify(codeGenerator,Mockito.times(1)).modifyMainClass(destPath.getAbsolutePath(),packageName);
 	}
 
-	@Test 
-	public void updateEntitiesJsonFile_parameterListIsValid_ReturnStringBuilder() throws IOException, ParseException
-	{
-		String className = "entities.json";
-		File newTempFolder = folder.newFolder("tempFolder","fAppClient","src","app","common","components","main-nav");
-
-		File tempFile = File.createTempFile("entities", ".json", newTempFolder);
-		File newFile = new File(newTempFolder.getAbsolutePath()+ "/" + className);
-		tempFile.renameTo(newFile);
-		FileUtils.writeStringToFile(newFile, "[]");
-
-		String path = destPath.getAbsolutePath()+"\\fAppClient\\src\\app\\common\\components\\main-nav\\entities.json";
-		JSONArray entityArray = mock(JSONArray.class);
-		String jsonString = "[entity2]";
-		Mockito.doReturn(entityArray).when(jsonUtils).readJsonFile(path);
-		Mockito.doReturn(jsonString).when(jsonUtils).beautifyJson(entityArray, "Array");
-		Mockito.doNothing().when(jsonUtils).writeJsonToFile(path, jsonString);
-		List<String> entities = new ArrayList<>();
-		entities.add(entityName);
-		entities.add("entity2");
-
-		codeGenerator.updateEntitiesJsonFile(path,entities,entityName);
-		Mockito.verify(jsonUtils).readJsonFile(anyString());
-		Mockito.verify(codeGenerator).updateEntitiesJsonFile(path,entities,entityName);
-	}
-
-	@Test 
-	public void updateEntitiesJsonFile_parameterListIsNotValid_ThrowIOException() throws IOException, ParseException
-	{
-		String className = "entities.json";
-		File newTempFolder = folder.newFolder("tempFolder","fAppClient","src","app","common","components","main-nav");
-
-		File tempFile = File.createTempFile("entities", ".json", newTempFolder);
-		File newFile = new File(newTempFolder.getAbsolutePath()+ "/" + className);
-		tempFile.renameTo(newFile);
-		FileUtils.writeStringToFile(newFile, "[]");
-
-		String path = destPath.getAbsolutePath()+"\\fAppClient\\src\\app\\common\\components\\main-nav\\entities.json";
-
-		Mockito.doThrow(new IOException()).when(jsonUtils).readJsonFile(path);
-
-		List<String> entities = new ArrayList<>();
-		entities.add(entityName);
-		entities.add("entity2");
-
-		codeGenerator.updateEntitiesJsonFile(path,entities,entityName);
-		Mockito.verify(jsonUtils).readJsonFile(anyString());
-
-	}
+//	@Test 
+//	public void updateEntitiesJsonFile_parameterListIsValid_ReturnStringBuilder() throws IOException, ParseException
+//	{
+//		String className = "entities.json";
+//		File newTempFolder = folder.newFolder("tempFolder","fAppClient","src","app","common","components","main-nav");
+//
+//		File tempFile = File.createTempFile("entities", ".json", newTempFolder);
+//		File newFile = new File(newTempFolder.getAbsolutePath()+ "/" + className);
+//		tempFile.renameTo(newFile);
+//		FileUtils.writeStringToFile(newFile, "[]");
+//
+//		String path = destPath.getAbsolutePath()+"\\fAppClient\\src\\app\\common\\components\\main-nav\\entities.json";
+//		JSONArray entityArray = mock(JSONArray.class);
+//		String jsonString = "[entity2]";
+//		Mockito.doReturn(entityArray).when(jsonUtils).readJsonFile(path);
+//		Mockito.doReturn(jsonString).when(jsonUtils).beautifyJson(entityArray, "Array");
+//		Mockito.doNothing().when(jsonUtils).writeJsonToFile(path, jsonString);
+//		List<String> entities = new ArrayList<>();
+//		entities.add(entityName);
+//		entities.add("entity2");
+//
+//		codeGenerator.updateEntitiesJsonFile(path,entities,entityName);
+//		Mockito.verify(jsonUtils).readJsonFile(anyString());
+//		Mockito.verify(codeGenerator).updateEntitiesJsonFile(path,entities,entityName);
+//	}
+//
+//	@Test 
+//	public void updateEntitiesJsonFile_parameterListIsNotValid_ThrowIOException() throws IOException, ParseException
+//	{
+//		String className = "entities.json";
+//		File newTempFolder = folder.newFolder("tempFolder","fAppClient","src","app","common","components","main-nav");
+//
+//		File tempFile = File.createTempFile("entities", ".json", newTempFolder);
+//		File newFile = new File(newTempFolder.getAbsolutePath()+ "/" + className);
+//		tempFile.renameTo(newFile);
+//		FileUtils.writeStringToFile(newFile, "[]");
+//
+//		String path = destPath.getAbsolutePath()+"\\fAppClient\\src\\app\\common\\components\\main-nav\\entities.json";
+//
+//		Mockito.doThrow(new IOException()).when(jsonUtils).readJsonFile(path);
+//
+//		List<String> entities = new ArrayList<>();
+//		entities.add(entityName);
+//		entities.add("entity2");
+//
+//		codeGenerator.updateEntitiesJsonFile(path,entities,entityName);
+//		Mockito.verify(jsonUtils).readJsonFile(anyString());
+//
+//	}
 
 
 }

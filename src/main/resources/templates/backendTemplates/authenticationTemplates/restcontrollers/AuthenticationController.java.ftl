@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 @RestController 
 @RequestMapping("/auth") 
 public class AuthenticationController { 
-    <#if AuthenticationType !="None" && AuthenticationType != "oidc">
+    <#if AuthenticationType !="none" && AuthenticationType != "oidc">
     
     @Autowired 
     private JWTAppService _jwtAppService; 
