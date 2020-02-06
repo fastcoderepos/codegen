@@ -62,13 +62,13 @@
           </mat-expansion-panel-header>
 
           <mat-nav-list class="subnav">
-            <#if !UserInput?? && !UserOnly> 
+            <#if !UserInput?? && UserOnly> 
             <a mat-list-item class="mat-sub-list-item" *ngIf="entityPermissions['user']" routerLink="user">Users </a>
             <a mat-list-item class="mat-sub-list-item" *ngIf="entityPermissions['userpermission']" routerLink="userpermission">User Permissions </a>
             <a mat-list-item class="mat-sub-list-item" *ngIf="entityPermissions['userroles']" routerLink="userrole">User Roles </a>
             <#elseif UserInput??> 
             <a mat-list-item class="mat-sub-list-item" *ngIf="entityPermissions['[=AuthenticationTable?lower_case]']" routerLink="[=AuthenticationTable?lower_case]">[=AuthenticationTable] </a> 
-            <#if !UserOnly>
+            <#if UserOnly>
             <a mat-list-item class="mat-sub-list-item" *ngIf="entityPermissions['[=AuthenticationTable?lower_case]permission']" routerLink="[=AuthenticationTable?lower_case]permission">[=AuthenticationTable] Permissions </a> 
             <a mat-list-item class="mat-sub-list-item" *ngIf="entityPermissions['[=AuthenticationTable?lower_case]role']" routerLink="[=AuthenticationTable?lower_case]role">[=AuthenticationTable] Roles </a> 
             </#if>

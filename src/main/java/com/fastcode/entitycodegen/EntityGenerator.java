@@ -301,7 +301,7 @@ public class EntityGenerator {
 			{
 				type="Boolean";
 			}
-			while(!selected.getFieldType().equalsIgnoreCase(type) || !selected.getIsNullable())
+			while(!selected.getFieldType().equalsIgnoreCase(type) || selected.getIsNullable())
 			{
 				System.out.println("Please choose valid required "+ type +" field");
 				index= userInput.getFieldsInput(fieldsList.size());

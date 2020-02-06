@@ -68,7 +68,7 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
         this.environment = ctx.getBean(Environment.class);
     	this.securityUtils = ctx.getBean(SecurityUtils.class);
     	<#if UserOnly>
-    	this._userMgr = ctx.getBean(IUserManager.class);
+    	this._userMgr = ctx.getBean(I[=AuthenticationTable]Manager.class);
     	<#else>
     	this._roleManager = ctx.getBean(IRoleManager.class);
     	</#if>

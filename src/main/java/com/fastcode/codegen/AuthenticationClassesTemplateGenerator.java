@@ -222,7 +222,7 @@ public class AuthenticationClassesTemplateGenerator {
 		String appName =packageName.substring(packageName.lastIndexOf(".") + 1);
 		String appFolderPath = destPath + "/" + appName + "Client/src/app/";
 	
-		List<String> authorizationEntities = getAuthorizatonEntities(destPath, appName, authType, userOnly);
+		List<String> authorizationEntities = getAuthorizatonEntities(destPath, appName, authenticationInfo);
 		
 		for(String entity: authorizationEntities) {
 			String entityPath = FRONTEND_AUTHORIZATION_TEMPLATE_FOLDER + "/" + entity;
@@ -240,8 +240,11 @@ public class AuthenticationClassesTemplateGenerator {
 
 	}
 
-	public List<String> getAuthorizatonEntities(String destPath, String appName, AuthenticationType authType, Boolean userOnly)
+	public List<String> getAuthorizatonEntities(String destPath, String appName, AuthenticationInfo authenticationInfo)
 	{
+		String customUser = authenticationInfo.getAuthenticationTable();
+		AuthenticationType authType = authenticationInfo.getAuthenticationType();
+		Boolean userOnly = authenticationInfo.getUserOnly();
 		List<String> authorizationEntities = new ArrayList<String>();
 
 		authorizationEntities.add("role");
@@ -259,6 +262,9 @@ public class AuthenticationClassesTemplateGenerator {
 
 		if(authType.equals(AuthenticationType.DATABASE) || (!authType.equals(AuthenticationType.DATABASE) && userOnly) )
 		{
+			if(customUser == null) {
+				authorizationEntities.add("user");
+			}
 			authorizationEntities.add("userpermission");
 			authorizationEntities.add("userrole");
 		}
