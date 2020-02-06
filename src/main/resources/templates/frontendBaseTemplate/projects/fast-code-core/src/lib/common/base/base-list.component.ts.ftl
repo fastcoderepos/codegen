@@ -1,22 +1,17 @@
 import { Component, OnInit, ChangeDetectorRef, ViewChild, HostListener } from '@angular/core';
-//import {MatDialog} from '@angular/material';
-import { MatDialog, MatDialogRef, MAT_DIALOG_DATA, MatSort, MatTableDataSource } from '@angular/material';
-//import { Observable } from 'rxjs';
-import { IBase } from './ibase';
-
+import { MatDialog, MatDialogRef, MatSort } from '@angular/material';
 import { GenericApiService } from '../core/generic-api.service';
 
 import { Router, ActivatedRoute } from '@angular/router';
 import { Globals } from '../../globals';
-import { IListColumn, listColumnType } from '../../common/ilistColumn';
+import { IListColumn } from '../../common/ilistColumn';
 import { IAssociationEntry } from '../core/iassociationentry';
 import { PickerDialogService } from '../../common/components/picker/picker-dialog.service';
 
-import { merge, of as observableOf, Observable, SubscriptionLike } from 'rxjs';
+import { of as observableOf, Observable } from 'rxjs';
 import { catchError, map, startWith, switchMap } from 'rxjs/operators';
-import { ISearchField, operatorType } from '../../common/components/list-filters/ISearchCriteria';
+import { ISearchField } from '../../common/components/list-filters/ISearchCriteria';
 import { IGlobalPermissionService } from '../core/iglobal-permission.service';
-//import { IPermission } from '../core/ipermission';
 import { ErrorService } from '../core/error.service';
 import { ServiceUtils } from '../utils/serviceUtils';
 import { ConfirmDialogComponent } from '../components/confirm-dialog/confirm-dialog.component';
@@ -36,18 +31,15 @@ export class BaseListComponent<E> implements OnInit {
   defaultDateFormat: string = "mediumDate";
   associations: IAssociationEntry[];
   selectedAssociation: IAssociationEntry;
- 
-  @ViewChild(MatSort,{  static: true }) sort: MatSort;
 
-  //users$: Object;
+  @ViewChild(MatSort, { static: true }) sort: MatSort;
+
   title: string = "title";
   entityName: string = "";
-  primaryKeys: string[] =  [];
+  primaryKeys: string[] = [];
   items: E[] = [];
   itemsObservable: Observable<E[]>;
-  //newItem:N;
   errorMessage = '';
-  // displayedColumns: IListColumn[] = ['firstName', 'email', 'lastName'];
   columns: IListColumn[] = [];
 
   selectedColumns: IListColumn[] = [];
@@ -65,8 +57,15 @@ export class BaseListComponent<E> implements OnInit {
   largerDeviceDialogWidthSize: string = "85%";
   largerDeviceDialogHeightSize: string = "85%";
 
+  /** 
+   * Guard against browser refresh, close, etc.
+   * Checks if user has some unsaved changes 
+   * before leaving the page.
+   */
   @HostListener('window:beforeunload')
   canDeactivate(): Observable<boolean> | boolean {
+    // returning true will navigate without confirmation
+    // returning false will show a confirm dialog before navigating away
     if (this.dialogRef && this.dialogRef.componentInstance && this.dialogRef.componentInstance.itemForm.dirty && !this.dialogRef.componentInstance.submitted) {
       return false;
     }
@@ -87,10 +86,11 @@ export class BaseListComponent<E> implements OnInit {
 
   }
 
+  /**
+   * Sets CRUD permissions for entity for
+   * currently logged in user.
+   */
   setPermissions = () => {
-    // this.globalService.getUserPermissions().subscribe(permissions=> { 
-    //   let perms = permissions;
-
     if (this.globalPermissionService) {
       let entityName = this.entityName.startsWith("I") ? this.entityName.substr(1) : this.entityName;
       this.IsCreatePermission = this.globalPermissionService.hasPermissionOnEntity(entityName, "CREATE");
@@ -104,8 +104,8 @@ export class BaseListComponent<E> implements OnInit {
         this.IsReadPermission = (this.IsDeletePermission || this.IsUpdatePermission) ? true : this.globalPermissionService.hasPermissionOnEntity(entityName, "READ");
       }
     }
-    //});
   }
+
   ngOnInit() {
     this.setPermissions();
     this.manageScreenResizing();
@@ -113,6 +113,11 @@ export class BaseListComponent<E> implements OnInit {
     this.setSort();
   }
 
+  /**
+   * Adds a listener to sort value change event to 
+   * load item data.
+   * also gets triggered on component initialization. 
+   */
   setSort() {
     this.sort.sortChange.pipe(
       startWith({}),
@@ -129,30 +134,30 @@ export class BaseListComponent<E> implements OnInit {
             this.currentPage * this.pageSize,
             this.pageSize,
             sortVal
-          )
+          ); // fetch filtered data based on selected association
         }
         else {
           return this.dataService.getAll(this.searchValue, this.currentPage * this.pageSize, this.pageSize, sortVal);
         }
       }),
       map(data => {
-        // Flip flag to show that loading has finished.
         this.isLoadingResults = false;
         return data;
       }),
       catchError(() => {
         this.isLoadingResults = false;
-        // Catch if some error occurred. Return empty data.
         this.errorService.showError("An error occured while fetching results");
         return observableOf([]);
       })
     ).subscribe(data => {
       this.items = data;
-      //manage pages for virtual scrolling
       this.updatePageInfo(data);
     });
   }
 
+  /**
+   * Manages screen resizing for responsiveness.
+   */
   manageScreenResizing() {
     this.global.isMediumDeviceOrLess$.subscribe(value => {
       this.isMediumDeviceOrLess = value;
@@ -175,6 +180,9 @@ export class BaseListComponent<E> implements OnInit {
     });
   }
 
+  /**
+   * Fetches item data from service.
+   */
   getItems() {
     this.isLoadingResults = true;
     this.initializePageInfo();
@@ -187,7 +195,7 @@ export class BaseListComponent<E> implements OnInit {
         this.currentPage * this.pageSize,
         this.pageSize,
         sortVal
-      )
+      );// fetch filtered data based on selected association
     }
     else {
       this.itemsObservable = this.dataService.getAll(
@@ -195,14 +203,19 @@ export class BaseListComponent<E> implements OnInit {
         this.currentPage * this.pageSize,
         this.pageSize,
         sortVal
-      )
+      );
     }
     this.processListObservable(this.itemsObservable, listProcessingType.Replace);
 
   }
 
-  openDialog(k, data) {
-    this.dialogRef = this.dialog.open(k, {
+  /**
+   * Opens a modal dialog containing the given component.
+   * @param component - type of component to load into dialog.
+   * @param data data to pass to dialog instance.
+   */
+  openDialog(component, data) {
+    this.dialogRef = this.dialog.open(component, {
       disableClose: true,
       height: this.isMediumDeviceOrLess ? this.mediumDeviceOrLessDialogSize : this.largerDeviceDialogHeightSize,
       width: this.isMediumDeviceOrLess ? this.mediumDeviceOrLessDialogSize : this.largerDeviceDialogWidthSize,
@@ -217,24 +230,32 @@ export class BaseListComponent<E> implements OnInit {
     });
   }
 
-  addNew(k) {
+  /**
+   * Opens a modal dialog to create new entry
+   * containing the given component.
+   * @param component - type of component to load into dialog.
+   */
+  addNew(component) {
     if (!this.selectedAssociation) {
-      this.openDialog(k, null);
+      this.openDialog(component, null);
       return;
     }
     else {
       let data: any = {}
-      // data[this.selectedAssociation.column.key] = this.selectedAssociation.column.value;
       this.selectedAssociation.column.forEach(col => {
         data[col.key] = col.value;
       });
       data[this.selectedAssociation.descriptiveField] = this.selectedAssociation.associatedObj[this.selectedAssociation.referencedDescriptiveField];
-      this.openDialog(k, data);
+      this.openDialog(component, data);
       return;
     }
 
   }
 
+  /**
+   * Fetches item data based on given filter criteria.
+   * @param filterCriteria Filters to be applied.
+   */
   applyFilter(filterCriteria: ISearchField[]): void {
     this.searchValue = filterCriteria;
     this.isLoadingResults = true;
@@ -261,6 +282,12 @@ export class BaseListComponent<E> implements OnInit {
     this.processListObservable(this.itemsObservable, listProcessingType.Replace)
   }
 
+  /**
+   * Checks if parameter for some association is passed,
+   * fetches object details against that association and 
+   * sets selectedAssociation.
+   * @param params Map of query params to check if some association column is there.
+   */
   checkForAssociations(params) {
     this.selectedAssociation = undefined;
     this.associations.forEach((association, associationIndex) => {
@@ -283,6 +310,10 @@ export class BaseListComponent<E> implements OnInit {
     })
   }
 
+  /**
+   * Calls service method to delete item.
+   * @param item Item to be deleted.
+   */
   deleteItem(item: E) {
     let id = ServiceUtils.encodeIdByObject(item, this.primaryKeys);
     this.dataService.delete(id).subscribe(result => {
@@ -296,6 +327,10 @@ export class BaseListComponent<E> implements OnInit {
     });
   }
 
+  /**
+   * Prompts user to confirm delete action.
+   * @param item Item to be deleted.
+   */
   delete(item: E): void {
     this.deleteDialogRef = this.dialog.open(ConfirmDialogComponent, {
       disableClose: true,
@@ -303,7 +338,7 @@ export class BaseListComponent<E> implements OnInit {
         confirmationType: "delete"
       }
     });
-    
+
     this.deleteDialogRef.afterClosed().subscribe(action => {
       if (action) {
         this.deleteItem(item);
@@ -311,16 +346,23 @@ export class BaseListComponent<E> implements OnInit {
     });
   }
 
-  openDetails(item: E){
+  /**
+   * Redirects to details page of given item.
+   * @param item 
+   */
+  openDetails(item: E) {
     this.router.navigate([`/${this.dataService.suffix.toLowerCase()}/${ServiceUtils.encodeIdByObject(item, this.primaryKeys)}`]);
   }
-  
-  back(){
+
+  /**
+   * Redirects back to the details page of selected association.
+   */
+  back() {
     let parentPrimaryKeys = this.selectedAssociation.column.map(c => c.referencedkey);
     let paramString = ServiceUtils.encodeIdByObject(this.selectedAssociation.associatedObj, parentPrimaryKeys);
     this.router.navigate([`/${this.selectedAssociation.table.toLowerCase()}/${paramString}`]);
   }
-  
+
   isLoadingResults = false;
 
   currentPage: number;
@@ -329,6 +371,9 @@ export class BaseListComponent<E> implements OnInit {
   hasMoreRecords: boolean;
   searchValue: ISearchField[] = [];
 
+  /**
+   * Initializes/Resets paging information.
+   */
   initializePageInfo() {
     this.hasMoreRecords = true;
     this.pageSize = 30;
@@ -336,7 +381,10 @@ export class BaseListComponent<E> implements OnInit {
     this.currentPage = 0;
   }
 
-  //manage pages for virtual scrolling
+  /**
+   * Manages paging for virtual scrolling.
+   * @param data Item data from the last service call.
+   */
   updatePageInfo(data) {
     if (data.length > 0) {
       this.currentPage++;
@@ -347,6 +395,10 @@ export class BaseListComponent<E> implements OnInit {
     }
   }
 
+  /**
+   * Loads more item data when list is
+   * scrolled to the bottom (virtual scrolling).
+   */
   onTableScroll() {
     if (!this.isLoadingResults && this.hasMoreRecords && this.lastProcessedOffset < this.items.length) {
       this.isLoadingResults = true;
@@ -361,6 +413,12 @@ export class BaseListComponent<E> implements OnInit {
     }
   }
 
+  /**
+   * Gets field based on which table is 
+   * currently sorted and sort direction
+   * from matSort.
+   * @returns String containing sort information.
+   */
   getSortValue(): string {
     let sortVal = '';
     if (this.sort.active && this.sort.direction) {
@@ -369,6 +427,12 @@ export class BaseListComponent<E> implements OnInit {
     return sortVal;
   }
 
+  /**
+   * Processes observable response data gotten from the service.
+   * @param listObservable observable item data.
+   * @param type processing type to determine whether to append to
+   * or replace existing item data.
+   */
   processListObservable(listObservable: Observable<E[]>, type: listProcessingType) {
     listObservable.subscribe(
       items => {
@@ -389,11 +453,21 @@ export class BaseListComponent<E> implements OnInit {
     )
   }
 
+  /**
+   * Splits camelCase string to space separated.
+   * @param field String to be splitted.
+   * @returns Space separated string.
+   */
   getFieldLabel(field: string) {
     field = field.charAt(0).toUpperCase() + field.slice(1);
     return field.replace(/([a-z])([A-Z])/g, '$1 $2');
   }
-  
+
+  /**
+   * Checks whether the table is sortable based on a given column.
+   * @param columnDef Column to be checked.
+   * @returns Boolean flag.
+   */
   isColumnSortable(columnDef: string) {
     return this.columns.find(x => x.column == columnDef).sort;
   }

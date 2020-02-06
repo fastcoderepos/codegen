@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor } from '@angular/common/http';
 import { Observable } from 'rxjs';
+<#if AuthenticationType == "oidc">
 import { AuthOidcConfig } from 'src/environments/environment';
+</#if>
 import { AuthenticationService } from './authentication.service';
 
 @Injectable()

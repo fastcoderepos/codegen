@@ -53,15 +53,12 @@ public class FrontendBaseTemplateGenerator {
 	//	contentReader.copyDirectoryFromJar("frontend_static/assets", destination + "/"+ clientSubfolder + "/src/assets");
 
 		editTsConfigJsonFile(destination + "/" + clientSubfolder + "/tsconfig.json");
-
-
 		Map<String, Object> root = buildRootMap(appName, authenticationInfo, entityDetails.keySet().stream().collect(Collectors.toList()));
 
 		codeGeneratorUtils.generateFiles(getTemplates(FRONTEND_BASE_TEMPLATE_FOLDER),root, destination + "/"+ clientSubfolder,FRONTEND_BASE_TEMPLATE_FOLDER);
 		copyAssets(destination + "/"+ clientSubfolder + "/src/assets");
 	}
 	
-
 	public Map<String, Object> buildRootMap(String appName, AuthenticationInfo authenticationInfo, List<String> entityList)
 	{
 		AuthenticationType authType = authenticationInfo.getAuthenticationType();
@@ -71,7 +68,10 @@ public class FrontendBaseTemplateGenerator {
 		Map<String, Object> root = new HashMap<>();
 		root.put("AppName", appName);
 		root.put("EntityNames", getEntityNamesList(entityList, authenticationInfo));
+		root.put("AuthEntityList", getAuthEntitiesNamesList(authenticationInfo));
+		root.put("EntityList", entityList);
 		root.put("AuthenticationType", authType.getName());
+		root.put("UserOnly", userOnly);
 		root.put("ExcludeRoleNew", !authType.equals(AuthenticationType.DATABASE) && !userOnly);
 		root.put("ExcludeUserNew", !authType.equals(AuthenticationType.DATABASE));
 		
@@ -100,19 +100,37 @@ public class FrontendBaseTemplateGenerator {
 		Boolean userOnly = authenticationInfo.getUserOnly();
 
 		if(!authType.equals(AuthenticationType.NONE)) {
-			entityNamesList.put(codeGeneratorUtils.camelCaseToKebabCase("Role"), "Role");
-			entityNamesList.put(codeGeneratorUtils.camelCaseToKebabCase("Permission"), "Permission");
-			entityNamesList.put(codeGeneratorUtils.camelCaseToKebabCase("Rolepermission"), "Rolepermission");
+			List<String> authEntitiesList = getAuthEntitiesNamesList(authenticationInfo);
+			for(String authEntity: authEntitiesList) {
+				entityNamesList.put(codeGeneratorUtils.camelCaseToKebabCase(authEntity), authEntity);
+			}
+		}
+		
+		
+		return entityNamesList;
+	}
+	
+	public List<String> getAuthEntitiesNamesList(AuthenticationInfo authenticationInfo){
+		List<String> entityNamesList = new ArrayList<String>();
+		
+		String customUser = authenticationInfo.getAuthenticationTable();
+		AuthenticationType authType = authenticationInfo.getAuthenticationType();
+		Boolean userOnly = authenticationInfo.getUserOnly();
+
+		if(!authType.equals(AuthenticationType.NONE)) {
+			entityNamesList.add("Role");
+			entityNamesList.add("Permission");
+			entityNamesList.add("Rolepermission");
 
 			if(authType.equals(AuthenticationType.DATABASE) || (!authType.equals(AuthenticationType.DATABASE) && userOnly) )
 			{
 				if(customUser == null) {
-					entityNamesList.put(codeGeneratorUtils.camelCaseToKebabCase("User"), "User");
-					entityNamesList.put(codeGeneratorUtils.camelCaseToKebabCase("Userpermission"), "Userpermission");
-					entityNamesList.put(codeGeneratorUtils.camelCaseToKebabCase("Userrole"), "Userrole");
+					entityNamesList.add("User");
+					entityNamesList.add("Userpermission");
+					entityNamesList.add("Userrole");
 				} else {
-					entityNamesList.put(codeGeneratorUtils.camelCaseToKebabCase(customUser + "permission"), customUser + "permission");
-					entityNamesList.put(codeGeneratorUtils.camelCaseToKebabCase(customUser + "role"), customUser + "role");
+					entityNamesList.add(customUser + "permission");
+					entityNamesList.add(customUser + "role");
 				}
 			}
 		}

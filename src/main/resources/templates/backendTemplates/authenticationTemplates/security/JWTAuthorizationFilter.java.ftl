@@ -166,6 +166,7 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
                         .collect(Collectors.toList());
                         
             <#elseif AuthenticationType =="oidc">
+
     		<#if !UserOnly>
             List<String> groups = new ArrayList<String>();
     		</#if>

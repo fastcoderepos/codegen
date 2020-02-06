@@ -401,51 +401,53 @@ public class EntityGenerator {
 		return templates;
 	}
 	
-	public void generateAutheticationEntities(Map<String,EntityDetails> details, String schemaName, String packageName,
-			String destPath, AuthenticationInfo authenticationInfo) {
-		Map<String, Object> root =buildRootMap(details.get(authenticationInfo.getAuthenticationTable()), authenticationInfo.getAuthenticationTable(), packageName, schemaName, authenticationInfo);
-//		root.put("PackageName", packageName);
-//		root.put("CommonModulePackage" , packageName.concat(".commonmodule"));
-//		root.put("AuthenticationType",authenticationInfo.getAuthenticationType().getName());
-//		root.put("SchemaName",schemaName);
-//		root.put("UserOnly", authenticationInfo.getUserOnly());
-//		if(authenticationInfo.getAuthenticationTable()!=null) {
-//			root.put("UserInput","true");
-//			root.put("AuthenticationTable", authenticationInfo.getAuthenticationTable());
-//		}
-//		else
-//		{ 
-//			root.put("UserInput",null);
-//			root.put("AuthenticationTable", "User");	
-//		}
-//
-//		EntityDetails entityDetails = details.get(authenticationInfo.getAuthenticationTable());
-//		if(entityDetails!=null)
-//		{
-//			root.put("ClassName",authenticationInfo.getAuthenticationTable());
-//			root.put("IdClass", entityDetails.getIdClass());
-//			root.put("TableName", entityDetails.getEntityTableName());
-//			root.put("CompositeKeyClasses",entityDetails.getCompositeKeyClasses());
-//			root.put("Fields", entityDetails.getFieldsMap());
-//			root.put("AuthenticationFields", entityDetails.getAuthenticationFieldsMap());
-//		//	root.put("DescriptiveField", entityDetails.getEntitiesDescriptiveFieldMap());
-//			root.put("PrimaryKeys", entityDetails.getPrimaryKeys());
-//		}
-     
-		String destinationFolder = destPath + "/" + packageName.replaceAll("\\.", "/") + "/domain/model";
-		Map<String, Object> templates = new HashMap<String, Object>();
+    public void generateAutheticationEntities(Map<String,EntityDetails> entityDetails, String schemaName, String packageName,
+            String destPath, AuthenticationInfo authenticationInfo) {
+        Map<String, Object> root = new HashMap<>();
+        root.put("PackageName", packageName);
+        root.put("CommonModulePackage" , packageName.concat(".commonmodule"));
+        root.put("AuthenticationType",authenticationInfo.getAuthenticationType().getName());
+        root.put("SchemaName",schemaName);
+        root.put("UserOnly", authenticationInfo.getUserOnly());
+        if(authenticationInfo.getAuthenticationTable()!=null) {
+            root.put("UserInput","true");
+            root.put("AuthenticationTable", authenticationInfo.getAuthenticationTable());
+        }
+        else
+        {
+            root.put("UserInput",null);
+            root.put("AuthenticationTable", "User");    
+        }
 
-		if(authenticationInfo.getAuthenticationType().equals(AuthenticationType.DATABASE) || 
-				(!authenticationInfo.getAuthenticationType().equals(AuthenticationType.DATABASE) && authenticationInfo.getUserOnly()))
-		{
-			templates = getAuthenticationEntitiesTemplates(ENTITIES_TEMPLATE_FOLDER, authenticationInfo.getAuthenticationTable());
+        for(Map.Entry<String,EntityDetails> entry : entityDetails.entrySet())
+        {
+            String className=entry.getKey().substring(entry.getKey().lastIndexOf(".") + 1);
+            if(className.equalsIgnoreCase(authenticationInfo.getAuthenticationTable()))
+            {
+                root.put("ClassName", className);
+                root.put("IdClass", entry.getValue().getIdClass());
+                root.put("TableName", entry.getValue().getEntityTableName());
+                root.put("CompositeKeyClasses",entry.getValue().getCompositeKeyClasses());
+                root.put("Fields", entry.getValue().getFieldsMap());
+                root.put("AuthenticationFields", entry.getValue().getAuthenticationFieldsMap());
+                root.put("PrimaryKeys", entry.getValue().getPrimaryKeys());
+            }
+        }
 
-		}
-		else if(!authenticationInfo.getAuthenticationType().equals(AuthenticationType.DATABASE) && !authenticationInfo.getUserOnly())
-		{
-			templates = getAuthenticationEntitiesTemplatesForUserGroupCase(ENTITIES_TEMPLATE_FOLDER);
-		}
-		codeGeneratorUtils.generateFiles(templates, root, destinationFolder,ENTITIES_TEMPLATE_FOLDER);
+        String destinationFolder = destPath + "/" + packageName.replaceAll("\\.", "/") + "/domain/model";
+        Map<String, Object> templates = new HashMap<String, Object>();
+
+        if(authenticationInfo.getAuthenticationType().equals(AuthenticationType.DATABASE) || 
+                (!authenticationInfo.getAuthenticationType().equals(AuthenticationType.DATABASE) && authenticationInfo.getUserOnly()))
+        {
+            templates = getAuthenticationEntitiesTemplates(ENTITIES_TEMPLATE_FOLDER, authenticationInfo.getAuthenticationTable());
+
+        }
+        else if(!authenticationInfo.getAuthenticationType().equals(AuthenticationType.DATABASE) && !authenticationInfo.getUserOnly())
+        {
+            templates = getAuthenticationEntitiesTemplatesForUserGroupCase(ENTITIES_TEMPLATE_FOLDER);
+        }
+        codeGeneratorUtils.generateFiles(templates, root, destinationFolder,ENTITIES_TEMPLATE_FOLDER);
 
 	}
 
