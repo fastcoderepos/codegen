@@ -11,7 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestMapping; 
 import org.springframework.web.bind.annotation.RequestMethod; 
 import org.springframework.web.bind.annotation.RestController; 
-<#if AuthenticationType == "oidc" && ClassName == AuthenticationTable>
+<#if AuthenticationType == "oidc">
 import javax.servlet.http.HttpServletRequest;
 import [=PackageName].security.SecurityConstants;
 import [=PackageName].security.SecurityUtils;
@@ -48,7 +48,7 @@ public class AuthenticationController {
     } 
     
     </#if>
-    <#if AuthenticationType == "oidc" && ClassName == AuthenticationTable>
+    <#if AuthenticationType == "oidc">
     <#if UserOnly>
     
     @Autowired

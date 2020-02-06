@@ -451,11 +451,15 @@ public class EntityGenerator {
 
 	public Map<String, Object> buildRootMap(EntityDetails entityDetails,String className, String packageName, String schemaName, AuthenticationInfo authenticationInfo)
 	{
-		String entityClassName = className.concat("Entity");
 		Map<String, Object> root = new HashMap<>();
-
+		
+		if(className !=null)
+		{
+		String entityClassName = className.concat("Entity");
 		root.put("EntityClassName", entityClassName);
 		root.put("ClassName", className);
+		}
+		
 		root.put("PackageName", packageName); 
 		root.put("CommonModulePackage", packageName.concat(".commonmodule"));
 		root.put("SchemaName", schemaName);
@@ -467,7 +471,7 @@ public class EntityGenerator {
 		}
 		else 
 		{ 
-			root.put("UserInput",null);
+			root.put("UserInput",null); 
 			root.put("AuthenticationTable", "User");	
 		}
 

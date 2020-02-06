@@ -33,7 +33,7 @@ public class AuthenticationClassesTemplateGenerator {
 
 		generateBackendFiles(authenticationInfo,root,backendAppFolder,backendTestFolder);
 		generateFrontendAuthorization(destination, packageName,authenticationInfo, root);
-		generateAppStartupRunner(details, backendAppFolder,root);
+		generateAppStartupRunner(details, backendAppFolder,root); 
 	}
 
 	public void generateBackendFiles(AuthenticationInfo authenticationInfo, Map<String, Object> root,String backendAppFolder, String backendTestFolder )
