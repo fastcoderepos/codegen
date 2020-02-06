@@ -21,6 +21,7 @@ public class  UserEntity implements Serializable {
     private String emailAddress;
     private String userName;
     <#if AuthenticationType == "database">
+    private Boolean isActive;
     private String password;
     private String passwordResetCode;
     private Boolean shouldChangePasswordOnNextLogin;
@@ -35,7 +36,6 @@ public class  UserEntity implements Serializable {
     private String authenticationSource;
     private Boolean isEmailConfirmed;
     private String emailConfirmationCode;
-    private Boolean isActive;
     private Boolean isLockoutEnabled;
     private Date lockoutEndDateUtc;
     private String isPhoneNumberConfirmed;
@@ -94,16 +94,6 @@ public class  UserEntity implements Serializable {
 
     public void setEmailConfirmationCode(String emailConfirmationCode) {
         this.emailConfirmationCode = emailConfirmationCode;
-    }
-
-    @Basic
-    @Column(name = "IsActive", nullable = false)
-    public Boolean getIsActive() {
-        return isActive;
-    }
-
-    public void setIsActive(Boolean active) {
-        isActive = active;
     }
 
     @Basic
@@ -170,7 +160,17 @@ public class  UserEntity implements Serializable {
     }
     </#if>
     <#if AuthenticationType == "database">
+    
+    @Basic
+    @Column(name = "IsActive", nullable = false)
+    public Boolean getIsActive() {
+        return isActive;
+    }
 
+    public void setIsActive(Boolean active) {
+        isActive = active;
+    }
+    
     @Basic
     @Column(name = "Password", nullable = true, length = 128)
     public String getPassword() {

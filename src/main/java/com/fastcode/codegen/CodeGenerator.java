@@ -122,7 +122,7 @@ public class CodeGenerator {
 			Boolean cache, String destPath,Map<String,EntityDetails> details, String connectionString,
 			String schema, AuthenticationInfo authenticationInfo) {
 
-		String appName = sourcePackageName.substring(sourcePackageName.lastIndexOf(".") + 1);
+		//String appName = sourcePackageName.substring(sourcePackageName.lastIndexOf(".") + 1);
 		//to generate all modules for list of entities
 		List<String> entityNames = generateAllModulesForEntities(details, backEndRootFolder, clientRootFolder, sourcePackageName, cache, destPath,schema, authenticationInfo);
 
@@ -404,7 +404,7 @@ public class CodeGenerator {
 		
 		if((authType.equals(AuthenticationType.DATABASE) ||
 				userOnly) && 
-				authSchema !=null && className.equalsIgnoreCase(authSchema))
+				authSchema !=null && className.equalsIgnoreCase(authSchema))  
 		{
 			if(authFields !=null && authFields.containsKey("UserName")) {
 				backEndTemplate.put("backendTemplates/Dto/customUserDto/userDto/FindCustomUserByNameOutput.java.ftl", "Find"+ authSchema +"By"+authFields.get("UserName").getFieldName().substring(0, 1).toUpperCase() + authFields.get("UserName").getFieldName().substring(1)+"Output.java");
@@ -451,7 +451,9 @@ public class CodeGenerator {
 	{
 		Map<String, Object> backEndTemplate = new HashMap<>();
 		backEndTemplate.put("backendTemplates/application.properties.ftl", "application.properties");
-		backEndTemplate.put("backendTemplates/application-bootstrap.properties.ftl", "application-bootstrap.properties");
+		if(!root.get("AuthenticationType").equals("none"))
+			backEndTemplate.put("backendTemplates/application-bootstrap.properties.ftl", "application-bootstrap.properties");
+		  
 		backEndTemplate.put("backendTemplates/application-local.properties.ftl", "application-local.properties");
 		backEndTemplate.put("backendTemplates/application-test.properties.ftl", "application-test.properties");
 		new File(destPath).mkdirs();

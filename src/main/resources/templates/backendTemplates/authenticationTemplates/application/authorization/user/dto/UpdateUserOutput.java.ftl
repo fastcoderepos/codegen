@@ -9,7 +9,6 @@ public class UpdateUserOutput {
     private String emailAddress;
     private String emailConfirmationCode;
     private String googleAuthenticatorKey;
-    private Boolean isActive;
     private Boolean isEmailConfirmed;
     private Boolean isLockoutEnabled;
     private Boolean isPhoneNumberConfirmed;
@@ -21,6 +20,7 @@ public class UpdateUserOutput {
     private String scimId;
     </#if>
     <#if AuthenticationType =="database">
+    private Boolean isActive;
     private Boolean shouldChangePasswordOnNextLogin;
     private String passwordResetCode;
     </#if>
@@ -79,14 +79,6 @@ public class UpdateUserOutput {
         this.googleAuthenticatorKey = googleAuthenticatorKey;
     }
 
-    public Boolean getIsActive() {
-        return isActive;
-    }
-
-    public void setIsActive(Boolean active) {
-        isActive = active;
-    }
-
     public Boolean getIsEmailConfirmed() {
         return isEmailConfirmed;
     }
@@ -142,6 +134,7 @@ public class UpdateUserOutput {
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
+    
     <#if AuthenticationType =="oidc">
   
   	public String getScimId() {
@@ -151,9 +144,17 @@ public class UpdateUserOutput {
   	public void setScimId(String scimId){
   		this.scimId = scimId;
   	}
+  	
   	</#if>
-<#if AuthenticationType =="database">
+	<#if AuthenticationType =="database">
+	public Boolean getIsActive() {
+        return isActive;
+    }
 
+    public void setIsActive(Boolean active) {
+        isActive = active;
+    }
+    
     public String getPasswordResetCode() {
         return passwordResetCode;
     }
@@ -170,7 +171,7 @@ public class UpdateUserOutput {
         this.shouldChangePasswordOnNextLogin = shouldChangePasswordOnNextLogin;
     }
     
-</#if>
+	</#if>
     public String getPhoneNumber() {
         return phoneNumber;
     }
@@ -217,14 +218,6 @@ public class UpdateUserOutput {
 
     public void setUserName(String userName) {
         this.userName = userName;
-    }
-
-    public Boolean isActive() {
-        return isActive;
-    }
-
-    public void setActive(Boolean active) {
-        isActive = active;
     }
 
 }

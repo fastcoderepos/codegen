@@ -25,7 +25,7 @@ public class CodegenApplication implements ApplicationRunner {
 		generator.generateCode(userInput.composeInput(root)); 
 	}  
 
-	@Override 
+	@Override  
 	public void run(ApplicationArguments args) throws Exception {
 		System.out.println("# NonOptionArgs: " + args.getNonOptionArgs().size());
 

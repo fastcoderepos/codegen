@@ -58,7 +58,7 @@ public class RoleController {
 		this._rolepermissionAppService = rolepermissionAppService;
 	}
 
-   <#if AuthenticationType == "database">
+   <#if AuthenticationType == "database" || UserOnly>
     // CRUD Operations
     // ------------ Create a role ------------
     @PreAuthorize("hasAnyAuthority('ROLEENTITY_CREATE')")

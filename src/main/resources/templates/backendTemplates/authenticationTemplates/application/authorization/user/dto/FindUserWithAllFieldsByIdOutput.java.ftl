@@ -7,7 +7,6 @@ public class FindUserWithAllFieldsByIdOutput {
     private Long id;
     private int accessFailedCount;
     private String emailAddress;
-    private Boolean isActive;
     private Boolean isEmailConfirmed;
     private Boolean isLockoutEnabled;
     private Boolean isPhoneNumberConfirmed;
@@ -17,6 +16,7 @@ public class FindUserWithAllFieldsByIdOutput {
     private String phoneNumber;
     private Long profilePictureId;
     <#if AuthenticationType =="database">
+    private Boolean isActive;
     private Boolean shouldChangePasswordOnNextLogin;
     private String password;
     </#if>
@@ -54,14 +54,6 @@ public class FindUserWithAllFieldsByIdOutput {
 
     public void setEmailAddress(String emailAddress) {
         this.emailAddress = emailAddress;
-    }
-
-    public Boolean getIsActive() {
-        return isActive;
-    }
-
-    public void setIsActive(Boolean active) {
-        isActive = active;
     }
 
     public Boolean getIsEmailConfirmed() {
@@ -127,7 +119,15 @@ public class FindUserWithAllFieldsByIdOutput {
     public void setProfilePictureId(Long profilePictureId) {
         this.profilePictureId = profilePictureId;
     }
+    
  <#if AuthenticationType =="database">
+    public Boolean getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(Boolean active) {
+        isActive = active;
+    }
     public Boolean isShouldChangePasswordOnNextLogin() {
         return shouldChangePasswordOnNextLogin;
     }
@@ -143,6 +143,7 @@ public class FindUserWithAllFieldsByIdOutput {
   	public void setPassword(String password){
   		this.password = password;
   	}
+  	
 </#if>
     public String getLastName() {
         return lastName;

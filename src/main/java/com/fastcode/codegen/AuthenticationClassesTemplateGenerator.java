@@ -105,13 +105,17 @@ public class AuthenticationClassesTemplateGenerator {
 
 		for (String filePath : filesList) {
 			String outputFileName = filePath.substring(0, filePath.lastIndexOf('.'));
+			if(!(authenticationType.equals(AuthenticationType.OIDC) && (outputFileName.contains("IJwtRepository") || outputFileName.contains("JWTAppService"))))
+			{
 			Boolean includeTemplates = (outputFileName.contains("UserDetailsServiceImpl") && authenticationType.equals(AuthenticationType.DATABASE)) || outputFileName.contains("LoginUser");
+			
 			if(!(outputFileName.toLowerCase().contains("user") && !includeTemplates))
 			{ 	
 				if(!(outputFileName.contains("JWTAuthentication") && authenticationType.equals(AuthenticationType.OIDC)))
 				{
 					templates.put(filePath, outputFileName);
 				}
+			}
 			}
 		}
 
@@ -126,7 +130,8 @@ public class AuthenticationClassesTemplateGenerator {
 
 		for (String filePath : filesList) {
 			String outputFileName = filePath.substring(0, filePath.lastIndexOf('.'));
-
+			if(!(authType.equals(AuthenticationType.OIDC) && (outputFileName.contains("IJwtRepository") || outputFileName.contains("JWTAppService"))))
+			{
 			if(authTable==null)
 			{
 				if(shouldIncludeTemplatesIfDefaultUser(outputFileName, authType))
@@ -151,6 +156,7 @@ public class AuthenticationClassesTemplateGenerator {
 					templates.put(filePath, outputFileName);
 				}
 
+			}
 			}
 		}
 

@@ -144,7 +144,8 @@ public class UserInput {
 		index= getFieldsInput(fieldsList.size());
 
 		FieldDetails selected = fieldsList.get(index - 1);
-		while(!selected.getFieldType().equalsIgnoreCase("String") || !selected.getIsNullable())
+		
+		while(!selected.getFieldType().equalsIgnoreCase("String") || selected.getIsNullable())
 		{
 			System.out.println("Please choose valid required String field");
 			index= getFieldsInput(fieldsList.size());

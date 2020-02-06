@@ -30,9 +30,6 @@ public class CreateUserInput {
   private String scimId;
   
   </#if>
-  @NotNull(message = "isActive Should not be null")
-  private Boolean isActive;
-  
   private Boolean isEmailConfirmed;
   
   private Boolean isLockoutEnabled;
@@ -49,6 +46,9 @@ public class CreateUserInput {
   private Date lockoutEndDateUtc;
   
   <#if AuthenticationType =="database">
+  @NotNull(message = "isActive Should not be null")
+  private Boolean isActive;
+  
   @NotNull(message = "password Should not be null")
   @Length(max = 128, message = "password must be less than 128 characters")
   private String password;
@@ -118,14 +118,6 @@ public class CreateUserInput {
   }
   </#if>
   
-  public Boolean getIsActive() {
-  return isActive;
-  }
-
-  public void setIsActive(Boolean isActive){
-  this.isActive = isActive;
-  }
-  
   public Boolean getIsEmailConfirmed() {
   return isEmailConfirmed;
   }
@@ -174,6 +166,15 @@ public class CreateUserInput {
   this.lockoutEndDateUtc = lockoutEndDateUtc;
   }
   <#if AuthenticationType =="database">
+  
+  public Boolean getIsActive() {
+  return isActive;
+  }
+
+  public void setIsActive(Boolean isActive){
+  this.isActive = isActive;
+  }
+  
   public String getPassword() {
   return password;
   }

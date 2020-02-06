@@ -53,7 +53,9 @@ import [=PackageName].domain.irepository.IPermissionRepository;
 import [=PackageName].domain.irepository.I[=AuthenticationTable]Repository;
 import [=PackageName].domain.irepository.I[=AuthenticationTable]permissionRepository;
 import [=PackageName].domain.model.PermissionEntity;
+<#if AuthenticationType != "oidc">
 import [=PackageName].security.JWTAppService;
+</#if>
 import [=PackageName].domain.model.[=AuthenticationTable]Entity;
 import [=PackageName].domain.model.[=AuthenticationTable]permissionEntity;
 <#if CompositeKeyClasses?? && CompositeKeyClasses?seq_contains(ClassName)>
@@ -95,9 +97,11 @@ public class [=AuthenticationTable]permissionControllerTest {
 	
 	@SpyBean
 	private LoggingHelper logHelper;
+	<#if AuthenticationType != "oidc">
 	
 	@SpyBean
 	private JWTAppService jwtAppService;
+	</#if>
 	
 	@Mock
 	private Logger loggerMock;
@@ -201,13 +205,13 @@ public class [=AuthenticationTable]permissionControllerTest {
 		[=AuthenticationTable]Entity [=AuthenticationTable?uncap_first] = new [=AuthenticationTable]Entity();
 		<#if (AuthenticationType!="none" && !UserInput??)>
 		[=AuthenticationTable?uncap_first].setId(DEFAULT_USER_ID);
-	    [=AuthenticationTable?uncap_first].setIsActive(true);
 	    [=AuthenticationTable?uncap_first].set[=AuthenticationTable]Name("u1");
 	    [=AuthenticationTable?uncap_first].setEmailAddress("u1@g.com");
 	    [=AuthenticationTable?uncap_first].setFirstName("U");
 	    [=AuthenticationTable?uncap_first].setLastName("1");
 	    <#if AuthenticationType =="database">
 	    [=AuthenticationTable?uncap_first].setPassword("secret");
+	    [=AuthenticationTable?uncap_first].setIsActive(true);
 	    </#if>
 		<#else>
   		<#list Fields as key,value>
@@ -262,7 +266,9 @@ public class [=AuthenticationTable]permissionControllerTest {
 	
 	    <#if (AuthenticationType!="none" && !UserInput??)>
 	    [=AuthenticationTable?uncap_first].setId(1L);
+	    <#if AuthenticationType == "database">
 	    [=AuthenticationTable?uncap_first].setIsActive(true);
+	    </#if>
 	    [=AuthenticationTable?uncap_first].set[=AuthenticationTable]Name("u1");
 	    [=AuthenticationTable?uncap_first].setEmailAddress("u1@g.com");
 	    [=AuthenticationTable?uncap_first].setFirstName("U");
@@ -311,8 +317,8 @@ public class [=AuthenticationTable]permissionControllerTest {
 		[=AuthenticationTable?uncap_first].set[=AuthenticationTable]Name("u2");
 		<#if AuthenticationType =="database">
 		[=AuthenticationTable?uncap_first].setPassword("secret");
-		</#if>
 		[=AuthenticationTable?uncap_first].setIsActive(true);
+		</#if>
 		[=AuthenticationTable?uncap_first].setFirstName("U2");
 		[=AuthenticationTable?uncap_first].setEmailAddress("u2@gil.com");
 		[=AuthenticationTable?uncap_first].setId(2L);
@@ -353,6 +359,7 @@ public class [=AuthenticationTable]permissionControllerTest {
 		[=AuthenticationTable?uncap_first]=[=AuthenticationTable?uncap_first]Repository.save([=AuthenticationTable?uncap_first]);
 		
 		PermissionEntity permission = createPermissionEntity();
+		permission.setDisplayName("D2");
 		permission.setName("P2");
 		permission.setId(2L);
 		permission=permissionRepository.save(permission);
@@ -385,9 +392,9 @@ public class [=AuthenticationTable]permissionControllerTest {
 		[=AuthenticationTable?uncap_first].setEmailAddress("u5@gma.com");
 		[=AuthenticationTable?uncap_first].setId(5L);
 		<#if AuthenticationType =="database">
+		[=AuthenticationTable?uncap_first].setIsActive(true);
 		[=AuthenticationTable?uncap_first].setPassword("secret");
 		</#if>
-		[=AuthenticationTable?uncap_first].setIsActive(true);
 		<#else>
   		<#list Fields as key,value>
   		<#if value.isNullable==false>
@@ -426,6 +433,7 @@ public class [=AuthenticationTable]permissionControllerTest {
 		
 		PermissionEntity permission = createPermissionEntity();
 		permission.setName("P5");
+		permission.setDisplayName("D5");
 		permission.setId(5L);
 		permission=permissionRepository.save(permission);
 		[=AuthenticationTable]permissionEntity [=AuthenticationTable?uncap_first]permission = new [=AuthenticationTable]permissionEntity();
@@ -454,7 +462,7 @@ public class [=AuthenticationTable]permissionControllerTest {
         <#if Cache !false>
         evictAllCaches();
         </#if>
-        final [=AuthenticationTable]permissionController [=AuthenticationTable?uncap_first]permissionController = new [=AuthenticationTable]permissionController([=AuthenticationTable?uncap_first]permissionAppService,[=AuthenticationTable?uncap_first]AppService,jwtAppService,logHelper);
+        final [=AuthenticationTable]permissionController [=AuthenticationTable?uncap_first]permissionController = new [=AuthenticationTable]permissionController([=AuthenticationTable?uncap_first]permissionAppService, [=AuthenticationTable?uncap_first]AppService,<#if AuthenticationType != "oidc"> jwtAppService,</#if> logHelper);
         
         when(logHelper.getLogger()).thenReturn(loggerMock);
 		doNothing().when(loggerMock).error(anyString());
@@ -517,13 +525,13 @@ public class [=AuthenticationTable]permissionControllerTest {
 		[=AuthenticationTable]Entity [=AuthenticationTable?uncap_first] = new [=AuthenticationTable]Entity();
 	    <#if (AuthenticationType!="none" && !UserInput??)>
         [=AuthenticationTable?uncap_first].setId(3L);
-	    [=AuthenticationTable?uncap_first].setIsActive(true);
 	    [=AuthenticationTable?uncap_first].set[=AuthenticationTable]Name("u3");
 	    [=AuthenticationTable?uncap_first].setEmailAddress("u3@g.com");
 	    [=AuthenticationTable?uncap_first].setFirstName("U");
 	    [=AuthenticationTable?uncap_first].setLastName("3");
 	    <#if AuthenticationType =="database">
 	    [=AuthenticationTable?uncap_first].setPassword("secret");
+	    [=AuthenticationTable?uncap_first].setIsActive(true);
 	    </#if>
 		<#else>
   		<#list Fields as key,value>
@@ -562,7 +570,7 @@ public class [=AuthenticationTable]permissionControllerTest {
 	    [=AuthenticationTable?uncap_first]=[=AuthenticationTable?uncap_first]Repository.save([=AuthenticationTable?uncap_first]);
 	    
 	    PermissionEntity permission = new PermissionEntity();
-	    permission.setDisplayName("D1");
+	    permission.setDisplayName("D3");
 	    permission.setId(3L);
 	    permission.setName("P3");
 	    
@@ -632,7 +640,9 @@ public class [=AuthenticationTable]permissionControllerTest {
 	   
 	     doReturn(output).when([=AuthenticationTable?uncap_first]permissionAppService).FindById(new [=AuthenticationTable]permissionId(up.getPermissionId(),<#if (AuthenticationType!="none" && !UserInput??)>up.get[=AuthenticationTable]Id()<#else><#if PrimaryKeys??><#list PrimaryKeys as key,value>up.get[=AuthenticationTable][=key?cap_first]()<#sep>,</#list></#if></#if>));
 	     Mockito.when([=AuthenticationTable?uncap_first]AppService.FindById(<#if (AuthenticationType!="none" && !UserInput??)>up.get[=AuthenticationTable]Id()<#elseif AuthenticationType!="none" && UserInput??><#if CompositeKeyClasses??><#if CompositeKeyClasses?seq_contains(ClassName)>new [=AuthenticationTable]Id(</#if></#if><#if PrimaryKeys??><#list PrimaryKeys as key,value>up.get[=AuthenticationTable][=key?cap_first]()<#sep>,</#list></#if></#if><#if CompositeKeyClasses??><#if CompositeKeyClasses?seq_contains(ClassName)>)</#if></#if>)).thenReturn(create[=AuthenticationTable]ByIdOuput());
+	     <#if AuthenticationType != "oidc">
 	     doNothing().when(jwtAppService).deleteAllUserTokens(anyString());
+	     </#if>
 	     
 	     mvc.perform(delete("/[=AuthenticationTable?uncap_first]permission/permissionId:"+up.getPermissionId() + ",<#if (AuthenticationType!="none" && !UserInput??)>[=AuthenticationTable?uncap_first]Id:" + up.get[=AuthenticationTable]Id()<#else><#if PrimaryKeys??><#list PrimaryKeys as key,value>[=AuthenticationTable?uncap_first][=key?cap_first]:" + up.get[=AuthenticationTable][=key?cap_first]()<#sep>+ ",</#list></#if></#if>)
      			 .contentType(MediaType.APPLICATION_JSON))
@@ -737,7 +747,9 @@ public class [=AuthenticationTable]permissionControllerTest {
 	
 		doReturn(output).when([=AuthenticationTable?uncap_first]permissionAppService).FindById(new [=AuthenticationTable]permissionId(up.getPermissionId(),<#if (AuthenticationType!="none" && !UserInput??)>up.get[=AuthenticationTable]Id()<#else><#if PrimaryKeys??><#list PrimaryKeys as key,value>up.get[=AuthenticationTable][=key?cap_first]()<#sep>,</#list></#if></#if>));
     	Mockito.when([=AuthenticationTable?uncap_first]AppService.FindById(<#if (AuthenticationType!="none" && !UserInput??)>up.get[=AuthenticationTable]Id()<#elseif AuthenticationType!="none" && UserInput??><#if CompositeKeyClasses??><#if CompositeKeyClasses?seq_contains(ClassName)>new [=AuthenticationTable]Id(</#if></#if><#if PrimaryKeys??><#list PrimaryKeys as key,value>up.get[=AuthenticationTable][=key?cap_first]()<#sep>,</#list></#if></#if><#if CompositeKeyClasses??><#if CompositeKeyClasses?seq_contains(ClassName)>)</#if></#if>)).thenReturn(create[=AuthenticationTable]ByIdOuput());
+     	<#if AuthenticationType != "oidc">
      	doNothing().when(jwtAppService).deleteAllUserTokens(anyString());
+    	</#if>
     	
 		ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
 		String json = ow.writeValueAsString([=AuthenticationTable?uncap_first]permission);

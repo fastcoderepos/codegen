@@ -170,7 +170,7 @@ public class EntityGenerator {
 				}
 
 				//get and set descriptive field
-				if(!(descriptiveFieldEntities.containsKey(entry.getValue().geteName()))){
+				if(!(descriptiveFieldEntities.containsKey(entry.getValue().geteName()))) {
 					descriptiveFieldEntities = findAndSetDescriptiveField(descriptiveFieldEntities,entry.getValue());
 				}
 
@@ -296,18 +296,29 @@ public class EntityGenerator {
 			index= userInput.getFieldsInput(fieldsList.size());
 
 			FieldDetails selected=fieldsList.get(index - 1);
+
 			String type = "String";
+			Boolean isInValidField = !selected.getFieldType().equalsIgnoreCase(type) || selected.getIsNullable();
+			
 			if(authFieldsEntry.getKey().equals("IsActive"))
 			{
-				type="Boolean";
+				type= "Boolean";
+				isInValidField = !selected.getFieldType().equalsIgnoreCase(type);
 			}
-			while(!selected.getFieldType().equalsIgnoreCase(type) || !selected.getIsNullable())
+			
+			while(isInValidField)
 			{
-				System.out.println("Please choose valid required "+ type +" field");
+				System.out.println("Please choose valid required " + type + " field");
 				index= userInput.getFieldsInput(fieldsList.size());
 				selected=fieldsList.get(index - 1);
+				if(authFieldsEntry.getKey().equals("IsActive"))
+					isInValidField = !selected.getFieldType().equalsIgnoreCase(type);
+				else
+					isInValidField = !selected.getFieldType().equalsIgnoreCase(type) || selected.getIsNullable();
 			}
+			
 			fieldsList.remove(index-1);
+			selected.setIsNullable(false);
 			authFields.replace(authFieldsEntry.getKey(), selected);
 		}
 		return authFields;
@@ -330,7 +341,7 @@ public class EntityGenerator {
 	{
 		Map<String,FieldDetails> authFields=new HashMap<String, FieldDetails>();
 		authFields.put("UserName", null);
-	
+
 		if(authenticationType.equals(AuthenticationType.DATABASE))
 		{
 			authFields.put("IsActive", null);
@@ -344,12 +355,17 @@ public class EntityGenerator {
 				List<FieldDetails> fieldsList = getFieldsList(entry.getValue());
 				authFields= displayAuthFieldsAndGetMapping(authFields, fieldsList);
 				entry.getValue().setAuthenticationFieldsMap(authFields);
+//				if(authFields.containsKey("IsActive"))
+//				{
+//					System.out.println(" AA " + entry.getValue().getFieldsMap().get(authFields.get("IsActive").getFieldName()).getFieldName());
+//				entry.getValue().getFieldsMap().get(authFields.get("IsActive").getFieldName()).setIsNullable(false);
+//				}
 			}
 		}
 		return entityDetails;
 	}
 
-	public Map<String, Object> getAuthenticationEntitiesTemplates(String templatePath, String authenticationTable) {
+	public Map<String, Object> getAuthenticationEntitiesTemplates(String templatePath, String authenticationTable,AuthenticationType authenticationType) {
 
 		List<String> filesList = codeGeneratorUtils.readFilesFromDirectory(templatePath);
 		filesList = codeGeneratorUtils.replaceFileNames(filesList, templatePath);
@@ -359,22 +375,26 @@ public class EntityGenerator {
 		for (String filePath : filesList) {
 			String outputFileName = filePath.substring(0, filePath.lastIndexOf('.'));
 
-			if(authenticationTable==null)
+			if(!(authenticationType.equals(AuthenticationType.OIDC) && outputFileName.contains("JwtEntity")))
 			{
-				templates.put(filePath, outputFileName);
-			}
-			else
-			{
-				if((outputFileName.toLowerCase().contains("userpermission") || outputFileName.toLowerCase().contains("userrole")))
+				if(authenticationTable==null )
 				{
-					outputFileName = outputFileName.replace("User", authenticationTable);
-					outputFileName = outputFileName.replace("user", authenticationTable.toLowerCase());
-				} 
-               
-                if(!(outputFileName.toLowerCase().contains("user") && !(outputFileName.toLowerCase().contains(authenticationTable.toLowerCase().concat("permission"))
-                		|| outputFileName.toLowerCase().contains(authenticationTable.toLowerCase().concat("role")))))
-				{ 		
 					templates.put(filePath, outputFileName);
+				}
+				else
+				{
+					if((outputFileName.toLowerCase().contains("userpermission") || outputFileName.toLowerCase().contains("userrole")))
+					{
+						outputFileName = outputFileName.replace("User", authenticationTable);
+						outputFileName = outputFileName.replace("user", authenticationTable.toLowerCase());
+					} 
+
+					if(!(outputFileName.toLowerCase().contains("user") && !(outputFileName.toLowerCase().contains(authenticationTable.toLowerCase().concat("permission"))
+							|| outputFileName.toLowerCase().contains(authenticationTable.toLowerCase().concat("role")))))
+					{ 	
+
+						templates.put(filePath, outputFileName);
+					}
 				}
 			}
 
@@ -400,40 +420,40 @@ public class EntityGenerator {
 
 		return templates;
 	}
-	
-    public void generateAutheticationEntities(Map<String,EntityDetails> details, String schemaName, String packageName,
-            String destPath, AuthenticationInfo authenticationInfo) {
-        
-        Map<String, Object> root =buildRootMap(details.get(authenticationInfo.getAuthenticationTable()), authenticationInfo.getAuthenticationTable(), packageName, schemaName, authenticationInfo);
-   			
-        String destinationFolder = destPath + "/" + packageName.replaceAll("\\.", "/") + "/domain/model";
-        Map<String, Object> templates = new HashMap<String, Object>();
 
-        if(authenticationInfo.getAuthenticationType().equals(AuthenticationType.DATABASE) || 
-                (!authenticationInfo.getAuthenticationType().equals(AuthenticationType.DATABASE) && authenticationInfo.getUserOnly()))
-        {
-            templates = getAuthenticationEntitiesTemplates(ENTITIES_TEMPLATE_FOLDER, authenticationInfo.getAuthenticationTable());
+	public void generateAutheticationEntities(Map<String,EntityDetails> details, String schemaName, String packageName,
+			String destPath, AuthenticationInfo authenticationInfo) {
 
-        }
-        else if(!authenticationInfo.getAuthenticationType().equals(AuthenticationType.DATABASE) && !authenticationInfo.getUserOnly())
-        {
-            templates = getAuthenticationEntitiesTemplatesForUserGroupCase(ENTITIES_TEMPLATE_FOLDER);
-        }
-        codeGeneratorUtils.generateFiles(templates, root, destinationFolder,ENTITIES_TEMPLATE_FOLDER);
+		Map<String, Object> root =buildRootMap(details.get(authenticationInfo.getAuthenticationTable()), authenticationInfo.getAuthenticationTable(), packageName, schemaName, authenticationInfo);
+
+		String destinationFolder = destPath + "/" + packageName.replaceAll("\\.", "/") + "/domain/model";
+		Map<String, Object> templates = new HashMap<String, Object>();
+
+		if(authenticationInfo.getAuthenticationType().equals(AuthenticationType.DATABASE) || 
+				(!authenticationInfo.getAuthenticationType().equals(AuthenticationType.DATABASE) && authenticationInfo.getUserOnly()))
+		{
+			templates = getAuthenticationEntitiesTemplates(ENTITIES_TEMPLATE_FOLDER, authenticationInfo.getAuthenticationTable(), authenticationInfo.getAuthenticationType());
+
+		}
+		else if(!authenticationInfo.getAuthenticationType().equals(AuthenticationType.DATABASE) && !authenticationInfo.getUserOnly())
+		{
+			templates = getAuthenticationEntitiesTemplatesForUserGroupCase(ENTITIES_TEMPLATE_FOLDER);
+		}
+		codeGeneratorUtils.generateFiles(templates, root, destinationFolder,ENTITIES_TEMPLATE_FOLDER);
 
 	}
 
 	public Map<String, Object> buildRootMap(EntityDetails entityDetails,String className, String packageName, String schemaName, AuthenticationInfo authenticationInfo)
 	{
 		Map<String, Object> root = new HashMap<>();
-		
+
 		if(className !=null)
 		{
-		String entityClassName = className.concat("Entity");
-		root.put("EntityClassName", entityClassName); 
-		root.put("ClassName", className);
+			String entityClassName = className.concat("Entity");
+			root.put("EntityClassName", entityClassName); 
+			root.put("ClassName", className);
 		} 
-		
+
 		root.put("PackageName", packageName);  
 		root.put("CommonModulePackage", packageName.concat(".commonmodule"));
 		root.put("SchemaName", schemaName);

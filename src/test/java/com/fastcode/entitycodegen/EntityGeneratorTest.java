@@ -625,7 +625,7 @@ public class EntityGeneratorTest {
 		root.put("DescriptiveField", entityDetails.getEntitiesDescriptiveFieldMap());
 		root.put("PrimaryKeys", entityDetails.getPrimaryKeys());
 
-		Mockito.doReturn(new HashMap<String, Object>()).when(entityGenerator).getAuthenticationEntitiesTemplates(anyString(), anyString());
+		Mockito.doReturn(new HashMap<String, Object>()).when(entityGenerator).getAuthenticationEntitiesTemplates(anyString(), anyString(),any(AuthenticationType.class));
 		Mockito.doNothing().when(mockedCodeGeneratorUtils).generateFiles(any(HashMap.class), any(HashMap.class),  anyString(),  anyString());
 		AuthenticationInfo authenticationInfo = new AuthenticationInfo();
 		authenticationInfo.setAuthenticationTable(AUTHENTICATION_TABLE);
@@ -651,7 +651,7 @@ public class EntityGeneratorTest {
 		Mockito.doReturn(filesList).when(mockedCodeGeneratorUtils).readFilesFromDirectory(anyString());
 		Mockito.doReturn(filesList).when(mockedCodeGeneratorUtils).replaceFileNames(any(List.class),anyString());
 
-		Assertions.assertThat(entityGenerator.getAuthenticationEntitiesTemplates(destPath.getAbsolutePath(), "NewUser")).isEqualTo(expectedList);
+		Assertions.assertThat(entityGenerator.getAuthenticationEntitiesTemplates(destPath.getAbsolutePath(), "NewUser", AuthenticationType.DATABASE)).isEqualTo(expectedList);
 	}
 
 	@Test
@@ -672,7 +672,7 @@ public class EntityGeneratorTest {
 		Mockito.doReturn(filesList).when(mockedCodeGeneratorUtils).readFilesFromDirectory(anyString());
 		Mockito.doReturn(filesList).when(mockedCodeGeneratorUtils).replaceFileNames(any(List.class),anyString());
 
-		Assertions.assertThat(entityGenerator.getAuthenticationEntitiesTemplates(destPath.getAbsolutePath(), null)).isEqualTo(expectedList);
+		Assertions.assertThat(entityGenerator.getAuthenticationEntitiesTemplates(destPath.getAbsolutePath(), null, AuthenticationType.DATABASE)).isEqualTo(expectedList);
 	}
 
 	@Test

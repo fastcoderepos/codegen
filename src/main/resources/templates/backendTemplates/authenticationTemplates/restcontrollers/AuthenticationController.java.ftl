@@ -81,13 +81,13 @@ public class AuthenticationController {
 		<#if UserOnly>
 		// Add all the roles and permissions in a list and then convert the list into all permissions, removing duplicates
 		List<String> permissions=null;
-		[=AuthenticationTable]Entity user = _userMgr.FindBy<#if AuthenticationFields?? && AuthenticationFields.UserName??>[=AuthenticationFields.UserName.fieldName?cap_first]</#if>(userName);  
+		[=AuthenticationTable]Entity user = _userMgr.FindBy<#if AuthenticationFields?? && AuthenticationFields.UserName??>[=AuthenticationFields.UserName.fieldName?cap_first]<#else>UserName</#if>(userName);  
 		if(user !=null )
 		{
 			permissions = utils.getAllPermissionsFromUserAndRole(user);
 		}
 		else
-			throw new EntityNotFoundException(
+			throw new EntityNotFoundException (
 					String.format("There does not exist a user with a name=%s", userName));
 		return new ResponseEntity(permissions, HttpStatus.OK);
 		<#else>

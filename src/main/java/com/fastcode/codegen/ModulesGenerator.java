@@ -65,37 +65,12 @@ public class ModulesGenerator {
 			System.exit(1);  
 		}
 
-		gitRepositoryManager.setDestinationPath(input.getDestinationPath());
-		String sourceBranch = "";
-		if(gitRepositoryManager.isGitInstalled()) { 
-			if(!gitRepositoryManager.isGitInitialized()) {
-				gitRepositoryManager.initializeGit();
-				logHelper.getLogger().info("Git repository initialized.");
-			}
-			//Clean up old files if needed
-		}
-		else {
-			logHelper.getLogger().error("Git repository could not be initialized, as Git is not installed on your system.");
-			System.exit(1);
+		String sourceBranch = checkGitRequirements(input.getDestinationPath(),input.getUpgrade());
+		if(sourceBranch ==null)
+		{
+			System.exit(1);  
 		}
 		
-		if(input.getUpgrade()) {
-			if(gitRepositoryManager.hasUncommittedChanges()) {
-				logHelper.getLogger().info("\nGit has uncommitted changes. ");
-				System.exit(1);
-			}
-			else {
-				sourceBranch = gitRepositoryManager.getCurrentBranch();
-				if(!gitRepositoryManager.createUpgradeBranch()) {
-					logHelper.getLogger().error("Unable to create upgrade branch.");
-					System.exit(1);
-				}
-			}
-		}
-		else {
-			gitRepositoryManager.CopyGitFiles();
-		}
-
 		String groupArtifactId = input.getGroupArtifactId().isEmpty() ? "com.group.demo" : input.getGroupArtifactId();
 		groupArtifactId = groupArtifactId.toLowerCase();
 		String artifactId = groupArtifactId.substring(groupArtifactId.lastIndexOf(".") + 1);
@@ -113,7 +88,7 @@ public class ModulesGenerator {
 		{
 			dependencies = dependencies.concat(",security");
 		}
-
+  
 		baseAppGen.CreateBaseApplication(input.getDestinationPath(), artifactId, groupId, dependencies,
 				true, "-n=" + artifactId + "  -j=1.8 ");
 		try { 
@@ -148,8 +123,42 @@ public class ModulesGenerator {
 			System.exit(1);
 		} 
 		
+	}
+	
+	public String checkGitRequirements(String destinationPath, Boolean upgrade)
+	{
+		gitRepositoryManager.setDestinationPath(destinationPath);
+		String sourceBranch = "";
+		if(gitRepositoryManager.isGitInstalled()) { 
+			if(!gitRepositoryManager.isGitInitialized()) {
+				gitRepositoryManager.initializeGit();
+				logHelper.getLogger().info("Git repository initialized.");
+			}
+			//Clean up old files if needed
+		}
+		else {
+			logHelper.getLogger().error("Git repository could not be initialized, as Git is not installed on your system.");
+			return null;
+		}
 		
-
+		if(upgrade) {
+			if(gitRepositoryManager.hasUncommittedChanges()) {
+				logHelper.getLogger().info("\nGit has uncommitted changes. ");
+				return null;
+			}
+			else {
+				sourceBranch = gitRepositoryManager.getCurrentBranch();
+				if(!gitRepositoryManager.createUpgradeBranch()) {
+					logHelper.getLogger().error("Unable to create upgrade branch.");
+					return null;
+				}
+			}
+		}
+		else {
+			gitRepositoryManager.CopyGitFiles();
+		}
+		
+		return sourceBranch;
 	}
 
 }

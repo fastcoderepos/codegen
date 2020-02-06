@@ -46,7 +46,9 @@ import org.springframework.cache.CacheManager;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import [=CommonModulePackage].logging.LoggingHelper;
+<#if AuthenticationType != "oidc">
 import [=PackageName].security.JWTAppService;
+</#if>
 import [=PackageName].application.authorization.user.UserAppService;
 import [=PackageName].application.authorization.user.dto.CreateUserInput;
 import [=PackageName].application.authorization.user.dto.FindUserByIdOutput;
@@ -87,9 +89,11 @@ public class UserControllerTest {
 	@SpyBean
 	private PasswordEncoder pEncoder;
 	</#if>
-	
+	<#if AuthenticationType != "oidc">
+	 
 	@SpyBean
 	private JWTAppService jwtAppService;
+	</#if>
 	
 	@Mock
 	private Logger loggerMock;
@@ -133,12 +137,13 @@ public class UserControllerTest {
 		user.setUserName(DEFAULT_USER_NAME);
 		user.setId(1L);
 		<#if AuthenticationType == "database">
+		user.setIsActive(true);
 		user.setPassword("secret");
 		</#if>
 		user.setFirstName("U1");
 		user.setLastName("11");
 		user.setEmailAddress("u11@g.com");
-		user.setIsActive(true);
+		
 		return user;
 	}
 
@@ -147,12 +152,12 @@ public class UserControllerTest {
 		
 		user.setUserName("newUser");
 		<#if AuthenticationType == "database">
+		user.setIsActive(true);
 		user.setPassword("secret");
 		</#if>
 		user.setFirstName("U22");
 		user.setLastName("122");
 		user.setEmailAddress("u122@g.com");
-		user.setIsActive(true);
 
 		return user;
 	}
@@ -161,13 +166,13 @@ public class UserControllerTest {
 		UserEntity user = new UserEntity();
 		user.setId(2L);
 		<#if AuthenticationType == "database">
+		user.setIsActive(true);
 		user.setPassword("secret");
 		</#if>
 		user.setUserName("U25");
 		user.setFirstName("U25");
 		user.setLastName("125");
 		user.setEmailAddress("u125@g.com");
-		user.setIsActive(true);
 
 		return user;
 	}
@@ -178,7 +183,7 @@ public class UserControllerTest {
         <#if Cache !false>
         evictAllCaches();
         </#if>
-        final UserController userController = new UserController(userAppService,userpermissionAppService,userroleAppService,<#if AuthenticationType == "database">pEncoder,</#if>jwtAppService,logHelper);
+        final UserController userController = new UserController(userAppService, userpermissionAppService, userroleAppService,<#if AuthenticationType == "database"> pEncoder,</#if><#if AuthenticationType != "oidc"> jwtAppService,</#if> logHelper);
         
         when(logHelper.getLogger()).thenReturn(loggerMock);
 		doNothing().when(loggerMock).error(anyString());
@@ -243,7 +248,9 @@ public class UserControllerTest {
 	    output.setFirstName("U23");
 	    output.setLastName("123");
 	    output.setEmailAddress("u123@g.com");
+	    <#if AuthenticationType == "database">
 	    output.setIsActive(true);
+	    </#if>
 
 	    Mockito.when(userAppService.FindByUserName(anyString())).thenReturn(output);
         
@@ -278,7 +285,9 @@ public class UserControllerTest {
 	    output.setFirstName("U33");
 	    output.setLastName("133");
 	    output.setEmailAddress("u133@g.com");
+	    <#if AuthenticationType == "database">
 	    output.setIsActive(true);
+	    </#if>
 	    
 	    Mockito.when(userAppService.FindById(anyLong())).thenReturn(output);
 		
@@ -298,7 +307,9 @@ public class UserControllerTest {
 		user.setFirstName("U116");
 		user.setLastName("116");
 		user.setEmailAddress("u116@g.com");
+		<#if AuthenticationType == "database">
 		user.setIsActive(true);
+		</#if>
 		
  		ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
 		String json = ow.writeValueAsString(user);
@@ -318,8 +329,8 @@ public class UserControllerTest {
 	    output.setFirstName(ue.getFirstName());
 	    output.setLastName(ue.getLastName());
 	    output.setEmailAddress(ue.getEmailAddress());
-	    output.setIsActive(ue.getIsActive());
 	    <#if AuthenticationType == "database">
+	    output.setIsActive(ue.getIsActive());
 	    output.setPassword(ue.getPassword());
 	    </#if>
 	    
@@ -333,7 +344,9 @@ public class UserControllerTest {
 		user.setFirstName("U1");
 		user.setLastName("16");
 		user.setEmailAddress("u16@g.com");
+		<#if AuthenticationType == "database">
 		user.setIsActive(true);
+		</#if>
 		ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
 		String json = ow.writeValueAsString(user);
       

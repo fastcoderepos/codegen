@@ -169,7 +169,7 @@ public class EntityDetails {
 				JoinDetails joinDetails=new JoinDetails();
 				String str = field.getType().toString();
 				int index = str.lastIndexOf(".") + 1;
-
+                details.setIsNullable(true);
 				details.setFieldName(field.getName());
 				String fieldType=str.substring(index);
 				if(fieldType.equals("int"))
@@ -183,9 +183,11 @@ public class EntityDetails {
 				for (Annotation a : annotations) {
 
 					if (a.annotationType().toString().equals("interface javax.persistence.Column")) {
+						
 						Column column=(javax.persistence.Column) a;
-						if(!details.getIsPrimaryKey())
+						if(!details.getIsPrimaryKey()){
 							details.setIsNullable(column.nullable());
+						}
 
 						details.setLength(column.length());
 						String colDef=column.columnDefinition();

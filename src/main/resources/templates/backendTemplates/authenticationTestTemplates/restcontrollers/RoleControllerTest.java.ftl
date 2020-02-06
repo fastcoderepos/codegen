@@ -192,7 +192,7 @@ public class RoleControllerTest {
 	    		  .andExpect(status().isNotFound());
 	
 	}    
-<#if AuthenticationType == "database">
+<#if AuthenticationType == "database" || UserOnly>
 	@Test
 	public void CreateRole_RoleAlreadyExists_ThrowEntityExistsException() throws Exception {
 

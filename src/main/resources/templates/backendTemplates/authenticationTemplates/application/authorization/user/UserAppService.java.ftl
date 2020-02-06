@@ -4,8 +4,6 @@ import [=CommonModulePackage].search.SearchCriteria;
 import [=CommonModulePackage].search.SearchFields;
 import [=CommonModulePackage].search.SearchUtils;
 import [=PackageName].application.authorization.user.dto.*;
-import [=PackageName].domain.irepository.IJwtRepository;
-import [=PackageName].domain.model.JwtEntity;
 import [=PackageName].domain.authorization.user.IUserManager;
 import [=PackageName].domain.model.UserEntity;
 import [=PackageName].domain.model.QUserEntity;
@@ -192,7 +190,9 @@ public class UserAppService implements IUserAppService {
         	builder.or(user.phoneNumber.eq(value));
         	builder.or(user.userName.eq(value));
         	if(value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")) {
+        		<#if AuthenticationType == "database">
 		    	builder.or(user.isActive.eq(Boolean.parseBoolean(value)));
+		    	</#if>	
 		    	builder.or(user.isEmailConfirmed.eq(Boolean.parseBoolean(value)));
 		    	builder.or(user.isLockoutEnabled.eq(Boolean.parseBoolean(value)));
 		    	builder.or(user.isTwoFactorEnabled.eq(Boolean.parseBoolean(value)));
@@ -221,7 +221,6 @@ public class UserAppService implements IUserAppService {
 		 list.get(i).replace("%20","").trim().equals("emailConfirmationCode") ||
 		 list.get(i).replace("%20","").trim().equals("firstName") ||
 		 list.get(i).replace("%20","").trim().equals("id") ||
-		 list.get(i).replace("%20","").trim().equals("isActive") ||
 		 list.get(i).replace("%20","").trim().equals("isEmailConfirmed") ||
 		 list.get(i).replace("%20","").trim().equals("isLockoutEnabled") ||
 		 list.get(i).replace("%20","").trim().equals("isPhoneNumberConfirmed") ||
@@ -229,6 +228,7 @@ public class UserAppService implements IUserAppService {
 		 list.get(i).replace("%20","").trim().equals("lastName") ||
 		 list.get(i).replace("%20","").trim().equals("lockoutEndDateUtc") ||
 		 <#if AuthenticationType == "database">
+		 list.get(i).replace("%20","").trim().equals("isActive") ||
 		 list.get(i).replace("%20","").trim().equals("password") ||
 		 list.get(i).replace("%20","").trim().equals("passwordResetCode") ||
 		 </#if>
@@ -278,10 +278,6 @@ public class UserAppService implements IUserAppService {
 				else if(operator.equals("equals"))
 					builder.or(user.firstName.eq(value));
 			}
-			if(list.get(i).replace("%20","").trim().equals("isActive")) {
-				if(operator.equals("equals") && (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")))
-					builder.or(user.isActive.eq(Boolean.parseBoolean(value)));
-			}
 			if(list.get(i).replace("%20","").trim().equals("isEmailConfirmed")) {
 				if(operator.equals("equals") && (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")))
 					builder.or(user.isEmailConfirmed.eq(Boolean.parseBoolean(value)));
@@ -311,6 +307,10 @@ public class UserAppService implements IUserAppService {
 					builder.or(user.lockoutEndDateUtc.eq(SearchUtils.stringToDate(value)));
 			}
 			<#if AuthenticationType == "database">
+			if(list.get(i).replace("%20","").trim().equals("isActive")) {
+				if(operator.equals("equals") && (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")))
+					builder.or(user.isActive.eq(Boolean.parseBoolean(value)));
+			}
             if(list.get(i).replace("%20","").trim().equals("password")) {
 				if(operator.equals("contains"))
 					builder.or(user.password.likeIgnoreCase("%"+ value + "%"));
@@ -400,12 +400,6 @@ public class UserAppService implements IUserAppService {
 				else if(details.getValue().getOperator().equals("notEqual"))
 					builder.and(user.firstName.ne(details.getValue().getSearchValue()));
 			}
-			if(details.getKey().replace("%20","").trim().equals("isActive")) {
-				if(details.getValue().getOperator().equals("equals") && (details.getValue().getSearchValue().equalsIgnoreCase("true") || details.getValue().getSearchValue().equalsIgnoreCase("false")))
-					builder.and(user.isActive.eq(Boolean.parseBoolean(details.getValue().getSearchValue())));
-				else if(details.getValue().getOperator().equals("notEqual") && (details.getValue().getSearchValue().equalsIgnoreCase("true") || details.getValue().getSearchValue().equalsIgnoreCase("false")))
-					builder.and(user.isActive.ne(Boolean.parseBoolean(details.getValue().getSearchValue())));
-			}
 			if(details.getKey().replace("%20","").trim().equals("isEmailConfirmed")) {
 				if(details.getValue().getOperator().equals("equals") && (details.getValue().getSearchValue().equalsIgnoreCase("true") || details.getValue().getSearchValue().equalsIgnoreCase("false")))
 					builder.and(user.isEmailConfirmed.eq(Boolean.parseBoolean(details.getValue().getSearchValue())));
@@ -471,6 +465,12 @@ public class UserAppService implements IUserAppService {
                    
 			}
 			<#if AuthenticationType == "database">
+			if(details.getKey().replace("%20","").trim().equals("isActive")) {
+				if(details.getValue().getOperator().equals("equals") && (details.getValue().getSearchValue().equalsIgnoreCase("true") || details.getValue().getSearchValue().equalsIgnoreCase("false")))
+					builder.and(user.isActive.eq(Boolean.parseBoolean(details.getValue().getSearchValue())));
+				else if(details.getValue().getOperator().equals("notEqual") && (details.getValue().getSearchValue().equalsIgnoreCase("true") || details.getValue().getSearchValue().equalsIgnoreCase("false")))
+					builder.and(user.isActive.ne(Boolean.parseBoolean(details.getValue().getSearchValue())));
+			}
             if(details.getKey().replace("%20","").trim().equals("password")) {
 				if(details.getValue().getOperator().equals("contains"))
 					builder.and(user.password.likeIgnoreCase("%"+ details.getValue().getSearchValue() + "%"));
