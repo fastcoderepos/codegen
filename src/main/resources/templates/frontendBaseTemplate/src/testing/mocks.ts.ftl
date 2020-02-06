@@ -1,6 +1,6 @@
 export { ActivatedRoute } from '@angular/router';
 import { Input, Injectable, Directive } from "@angular/core";
-import { of, Observable } from "rxjs";
+import { of, Observable, Subject } from "rxjs";
 import { ITokenDetail } from 'projects/fast-code-core/src/public_api';
 
 @Directive({
@@ -37,7 +37,8 @@ export class PickerDialogServiceMock { }
 <#if AuthenticationType != "none">
 @Injectable()
 export class AuthenticationServiceMock {
-
+	permissionsChange = new Subject();
+	
   configure() {}
 
   getMainUsers(): Observable<any> { return of([{id: 1, username: "user1"}]); }

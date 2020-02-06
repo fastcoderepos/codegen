@@ -89,15 +89,16 @@ public class FrontendBaseTemplateGenerator {
 	
 	public Map<String, String> getEntityNamesList(List<String> entityList, AuthenticationInfo authenticationInfo){
 
-		Map<String, String> entityNamesList = new HashMap<String, String>();
-		for(String entity: entityList) {
-			String cName = entity.substring(entity.lastIndexOf(".") + 1);
-			entityNamesList.put(codeGeneratorUtils.camelCaseToKebabCase(cName), cName);
-		}
-		
 		String customUser = authenticationInfo.getAuthenticationTable();
 		AuthenticationType authType = authenticationInfo.getAuthenticationType();
-		Boolean userOnly = authenticationInfo.getUserOnly();
+		
+		Map<String, String> entityNamesList = new HashMap<String, String>();
+		for(String entity: entityList) {
+			String className = entity.substring(entity.lastIndexOf(".") + 1);
+			if(!className.equalsIgnoreCase(customUser)) {
+				entityNamesList.put(codeGeneratorUtils.camelCaseToKebabCase(className), className);
+			}
+		}
 
 		if(!authType.equals(AuthenticationType.NONE)) {
 			List<String> authEntitiesList = getAuthEntitiesNamesList(authenticationInfo);
@@ -121,6 +122,9 @@ public class FrontendBaseTemplateGenerator {
 			entityNamesList.add("Role");
 			entityNamesList.add("Permission");
 			entityNamesList.add("Rolepermission");
+			if(customUser != null) {
+				entityNamesList.add(customUser);
+			}
 
 			if(authType.equals(AuthenticationType.DATABASE) || (!authType.equals(AuthenticationType.DATABASE) && userOnly) )
 			{

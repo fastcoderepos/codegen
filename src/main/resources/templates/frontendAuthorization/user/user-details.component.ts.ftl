@@ -60,7 +60,9 @@ export class UserDetailsComponent extends BaseDetailsComponent<IUser> implements
       phoneNumber: [''],
       profilePictureId: [''],
       twoFactorEnabled: [false],
-      userName: ['', Validators.required]
+      userName: ['', Validators.required],
+      <#if AuthenticationType == "oidc">
+    	scimId: ['', Validators.required],</#if>
     });
 	}
   

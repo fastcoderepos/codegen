@@ -7,7 +7,7 @@ import { BaseListComponent, Globals, IListColumn, listColumnType, PickerDialogSe
 import { IRole } from './irole';
 import { RoleService } from './role.service';
 <#if !ExcludeRoleNew>
-export { RoleNewComponent } from './role-new.component';
+import { RoleNewComponent } from './role-new.component';
 </#if>
 import { GlobalPermissionService } from '../core/global-permission.service';
 
