@@ -33,6 +33,7 @@ export class MainNavComponent {
 	
 	<#if AuthenticationType != "none">
 	entityPermissions = {};
+	authEntityList = AuthEntities;
 	</#if>
 	
 	constructor(
@@ -54,11 +55,11 @@ export class MainNavComponent {
 		});
 		
 		this.selectedLanguage = localStorage.getItem('selectedLanguage');
-		<#if AuthenticationType == "oidc">
+		<#if AuthenticationType != "none">
 		this.authenticationService.permissionsChange.subscribe(() => {
 			this.setPermissions();
-		})
-		<#elseif AuthenticationType != "none">
+		});
+		<#elseif AuthenticationType != "oidc">
 		this.setPermissions();
 		</#if>
 	}

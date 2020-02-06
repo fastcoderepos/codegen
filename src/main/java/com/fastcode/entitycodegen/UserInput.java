@@ -257,6 +257,9 @@ public class UserInput {
 					authenticationInfo.setLogonName(logonName);
 				}
 			}
+			else {
+				authenticationInfo.setUserOnly(false);
+			}
 
 			System.out.print("\nDo you have a User table in your data model? (y/n)");
 			String str= scanner.nextLine();
