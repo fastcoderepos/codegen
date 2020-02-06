@@ -62,7 +62,7 @@
           </mat-expansion-panel-header>
 
           <mat-nav-list class="subnav">
-	          <ng-container *ngFor="let entity of AuthEntities">
+	          <ng-container *ngFor="let entity of authEntityList">
 	            <a *ngIf="entityPermissions[entity]" mat-list-item class="mat-sub-list-item" [routerLink]="[entity]">
 	             {{entity}}
 	            </a>

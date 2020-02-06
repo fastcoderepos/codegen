@@ -28,12 +28,14 @@ export class LoginComponent implements OnInit {
       this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || 'dashboard';
     }
 
-    if (!this.authenticationService.isTokenExpired()) {
-      this.router.navigate([this.returnUrl]);
-      return;
-    }
-    else {
-      this.authenticationService.logout();
+    if(this.authenticationService.token){
+      if (!this.authenticationService.isTokenExpired()) {
+        this.router.navigate([this.returnUrl]);
+        return;
+      }
+      else {
+        this.authenticationService.logout();
+      }
     }
     this.itemForm = this.formBuilder.group({
 
