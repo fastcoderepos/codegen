@@ -59,7 +59,6 @@ import { BottomTabNavComponent } from './common/components/bottom-tab-nav/bottom
 /** end of common components and filters **/
 
 import { environment } from '../environments/environment';
-import { Globals } from './globals';
 
 <#list EntityNames as module,entity>
 <#if !(entity == AuthenticationTable && ExcludeUserNew) && !(entity == "Role" && ExcludeRoleNew)>
@@ -159,7 +158,6 @@ export function HttpLoaderFactory(httpClient: HttpClient) {
 		},
 		</#if>
 		</#if>
-		Globals
 	],
   bootstrap: [AppComponent],
   entryComponents: [

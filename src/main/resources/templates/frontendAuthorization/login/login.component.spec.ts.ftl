@@ -99,10 +99,10 @@ describe('LoginComponent', () => {
     component.itemForm.patchValue(data);
     component.itemForm.enable();
     fixture.detectChanges();
-    spyOn(component.authenticationService, "postLogin").withArgs(data).and.returnValue(of({}));
+    spyOn(component.authenticationService, "login").withArgs(data).and.returnValue(of({}));
     el = fixture.debugElement.query(By.css('button[name=login]'));
     el.nativeElement.click();
-    expect(component.authenticationService.postLogin).toHaveBeenCalledWith(data);
+    expect(component.authenticationService.login).toHaveBeenCalledWith(data);
 
   });
 
@@ -116,7 +116,7 @@ describe('LoginComponent', () => {
     component.itemForm.patchValue(data);
     component.itemForm.enable();
     fixture.detectChanges();
-    spyOn(component.authenticationService, "postLogin").withArgs(data).and.returnValue(of({}));
+    spyOn(component.authenticationService, "login").withArgs(data).and.returnValue(of({}));
     el = fixture.debugElement.query(By.css('button[name=login]'));
     el.nativeElement.click();
 
@@ -132,7 +132,7 @@ describe('LoginComponent', () => {
     component.itemForm.patchValue(data);
     component.itemForm.enable();
     fixture.detectChanges();
-    spyOn(component.authenticationService, "postLogin").withArgs(data).and.returnValue(Observable.create(observer => {
+    spyOn(component.authenticationService, "login").withArgs(data).and.returnValue(Observable.create(observer => {
         observer.error(new Error("invalid username or password"))
       })
     );
@@ -146,7 +146,7 @@ describe('LoginComponent', () => {
   // it('login button should be disable when form is not valid', async () => {
 
   //   fixture.detectChanges();
-  //   spyOn(component.authenticationService, "postLogin").withArgs(data).and.returnValue(of({}));
+  //   spyOn(component.authenticationService, "login").withArgs(data).and.returnValue(of({}));
   //   el = fixture.debugElement.query(By.css('button[name=login]'));
   //   expect(el.nativeElement.disabled).toBe(true);
 
