@@ -132,18 +132,18 @@ public class CodeGenerator {
 
 		//generate configuration files for backend
 		generateApplicationProperties(propertyInfo, destPath + "/" + backEndRootFolder + "/src/main/resources");
-		generateBeanConfig(sourcePackageName,backEndRootFolder,destPath,authenticationInfo.getAuthenticationType(),details,cache,authenticationInfo.getAuthenticationTable());
+		generateBeanConfig(sourcePackageName, backEndRootFolder, destPath, authenticationInfo, details, cache);
 		if(cache) {
 			modifyMainClass(destPath + "/" + backEndRootFolder + "/src/main/java", sourcePackageName);
 		}
 	}
 
 	//generate bean configuration file
-	public void generateBeanConfig(String packageName,String backEndRootFolder, String destPath,AuthenticationType authenticationType,Map<String,EntityDetails> details,Boolean cache,String authenticationTable){
+	public void generateBeanConfig(String packageName,String backEndRootFolder, String destPath, AuthenticationInfo authenticationInfo, Map<String,EntityDetails> details,Boolean cache){
 
 		String backendAppFolder = backEndRootFolder + "/src/main/java";
 
-		Map<String, Object> root = getInfoForBeanConfig(details, packageName, authenticationType, authenticationTable);
+		Map<String, Object> root = getInfoForBeanConfig(details, packageName, authenticationInfo, cache);
 		Map<String, Object> template = new HashMap<>();
 		template.put("backendTemplates/BeanConfig.java.ftl", "BeanConfig.java");
 		String destFolder = destPath + "/" + backendAppFolder + "/" + packageName.replace(".", "/");
@@ -171,9 +171,14 @@ public class CodeGenerator {
 	}
 
 	// build root map for bean configuration and audit controller
-	public Map<String,Object> getInfoForBeanConfig(Map<String, EntityDetails> details,String packageName, AuthenticationType authenticationType,String authenticationTable) {
+	public Map<String,Object> getInfoForBeanConfig(Map<String, EntityDetails> details,String packageName, AuthenticationInfo authenticationInfo, Boolean cache) {
 
+		AuthenticationType authenticationType = authenticationInfo.getAuthenticationType();
+		String customAuthTable = authenticationInfo.getAuthenticationTable();
+		Boolean userOnly = authenticationInfo.getUserOnly();
+		
 		Map<String, Object> entitiesMap = new HashMap<String,Object>();
+		
 		//set details for each entity in root map
 		for(Map.Entry<String,EntityDetails> entry : details.entrySet())
 		{
@@ -191,14 +196,16 @@ public class CodeGenerator {
 		}
 
 		Map<String, Object> root = new HashMap<>();
-		root.put("entitiesMap", entitiesMap);
+		root.put("EntitiesMap", entitiesMap);
+		root.put("Cache", cache);
 		root.put("PackageName", packageName);
 		root.put("AuthenticationType", authenticationType.getName());
+		root.put("UserOnly", userOnly); 
 		root.put("CommonModulePackage" , packageName.concat(".commonmodule"));
 
-		if(authenticationTable!=null) {
+		if(customAuthTable!=null) {
 			root.put("UserInput","true");
-			root.put("AuthenticationTable", authenticationTable);
+			root.put("AuthenticationTable", customAuthTable);
 		}
 		else
 		{
@@ -451,9 +458,11 @@ public class CodeGenerator {
 	{
 		Map<String, Object> backEndTemplate = new HashMap<>();
 		backEndTemplate.put("backendTemplates/application.properties.ftl", "application.properties");
-		if(!root.get("AuthenticationType").equals(AuthenticationType.NONE))
-			backEndTemplate.put("backendTemplates/application-bootstrap.properties.ftl", "application-bootstrap.properties");
-		  
+
+		if(!root.get("AuthenticationType").equals(AuthenticationType.NONE)) {
+			backEndTemplate.put("backendTemplates/application-bootstrap.properties.ftl", "application-bootstrap.properties");	
+		}
+
 		backEndTemplate.put("backendTemplates/application-local.properties.ftl", "application-local.properties");
 		backEndTemplate.put("backendTemplates/application-test.properties.ftl", "application-test.properties");
 		new File(destPath).mkdirs();

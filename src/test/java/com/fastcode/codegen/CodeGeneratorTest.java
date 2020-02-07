@@ -217,7 +217,7 @@ public class CodeGeneratorTest {
 		Mockito.doNothing().when(contentReader).copyFileFromJar(anyString(), anyString());
 		Mockito.doReturn(new HashMap<String, Object>()).when(codeGenerator).getInfoForApplicationPropertiesFile(anyString(),anyString(), anyString(), anyString(),any(AuthenticationInfo.class), any(Boolean.class));
 		Mockito.doNothing().when(codeGenerator).generateApplicationProperties(any(HashMap.class), anyString());
-		Mockito.doNothing().when(codeGenerator).generateBeanConfig(anyString(),anyString(),anyString(),any(AuthenticationType.class),any(HashMap.class),any(Boolean.class),anyString());
+		Mockito.doNothing().when(codeGenerator).generateBeanConfig(anyString(),anyString(),anyString(),any(AuthenticationInfo.class),any(HashMap.class),any(Boolean.class));
 		Mockito.doNothing().when(codeGenerator).modifyMainClass(anyString(),anyString());
 
 		codeGenerator.generateAll(testValue, testValue, packageName, true,destPath.getAbsolutePath(),details, connStr, testValue, authenticationInfo);
@@ -232,10 +232,9 @@ public class CodeGeneratorTest {
 	@Test
 	public void generateBeanConfig_parametersAreValid_ReturnNothing()
 	{ 
-
+	    Mockito.doReturn(new HashMap<String, Object>()).when(codeGenerator).getInfoForBeanConfig(any(HashMap.class), any(String.class), any(AuthenticationInfo.class), any(Boolean.class));
 		Mockito.doNothing().when(mockedUtils).generateFiles(any(HashMap.class),any(HashMap.class),anyString(),anyString());
-
-		codeGenerator.generateBeanConfig(packageName, testValue,destPath.getAbsolutePath(), AuthenticationType.DATABASE, new HashMap<String, EntityDetails>(), true, testValue);
+		codeGenerator.generateBeanConfig(packageName, testValue,destPath.getAbsolutePath(), new AuthenticationInfo(), new HashMap<String, EntityDetails>(), true);
 		Mockito.verify(mockedUtils,Mockito.times(1)).generateFiles(Matchers.<Map<String, Object>>any(),Matchers.<Map<String, Object>>any(),anyString(),anyString());
 
 	}
@@ -267,8 +266,13 @@ public class CodeGeneratorTest {
 	}
 
 	@Test 
-	public void getInfoForAuditControllerAndBeanConfig_parameterListIsValid_ReturnMap()
+	public void getInfoForBeanConfig_parameterListIsValid_ReturnMap()
 	{
+		AuthenticationInfo authenticationInfo = new AuthenticationInfo();
+		authenticationInfo.setAuthenticationTable(testValue);
+		authenticationInfo.setAuthenticationType(AuthenticationType.DATABASE);
+		authenticationInfo.setUserOnly(true);
+		
 		Map<String,EntityDetails> details = new HashMap<String, EntityDetails>();
 		details.put("Entity1",new EntityDetails());
 		details.put("Entity2",new EntityDetails());
@@ -291,16 +295,16 @@ public class CodeGeneratorTest {
 
 		Map<String, Object> root = new HashMap<>();
 
-		root.put("entitiesMap", entitiesMap);
+		root.put("EntitiesMap", entitiesMap);
+		root.put("Cache", true);
 		root.put("PackageName", packageName);
 		root.put("AuthenticationType", AuthenticationType.DATABASE.getName());
 		root.put("CommonModulePackage" , packageName.concat(".commonmodule"));
-
+		root.put("UserOnly",authenticationInfo.getUserOnly());
 		root.put("UserInput","true");
 		root.put("AuthenticationTable", testValue);
 
-		Assertions.assertThat(codeGenerator.getInfoForBeanConfig(details,packageName,AuthenticationType.DATABASE,testValue)
-				).isEqualTo(root);
+		Assertions.assertThat(codeGenerator.getInfoForBeanConfig(details,packageName,authenticationInfo,true)).isEqualTo(root);
 	}
 
 	@Test 
