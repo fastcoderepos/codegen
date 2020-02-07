@@ -8,6 +8,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.fastcode.entitycodegen.AuthenticationType;
 import com.fastcode.entitycodegen.BaseAppGen;
 import com.fastcode.entitycodegen.EntityDetails;
 import com.fastcode.entitycodegen.EntityGenerator;
@@ -84,7 +85,7 @@ public class ModulesGenerator {
 			dependencies = dependencies.concat(",cache");
 		}
 		
-		if(!input.getAuthenticationInfo().getAuthenticationType().equals("none"))
+		if(!input.getAuthenticationInfo().getAuthenticationType().equals(AuthenticationType.NONE))
 		{
 			dependencies = dependencies.concat(",security");
 		}
