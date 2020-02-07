@@ -647,6 +647,9 @@ public class [=AuthenticationTable]permissionControllerTest {
 	     mvc.perform(delete("/[=AuthenticationTable?uncap_first]permission/permissionId:"+up.getPermissionId() + ",<#if (AuthenticationType!="none" && !UserInput??)>[=AuthenticationTable?uncap_first]Id:" + up.get[=AuthenticationTable]Id()<#else><#if PrimaryKeys??><#list PrimaryKeys as key,value>[=AuthenticationTable?uncap_first][=key?cap_first]:" + up.get[=AuthenticationTable][=key?cap_first]()<#sep>+ ",</#list></#if></#if>)
      			 .contentType(MediaType.APPLICATION_JSON))
 		  .andExpect(status().isNoContent());
+		  
+		  [=AuthenticationTable?uncap_first]Repository.delete(up.get[=AuthenticationTable]());
+	      permissionRepository.delete(up.getPermission());
      	 
 	}  
 	
@@ -758,7 +761,7 @@ public class [=AuthenticationTable]permissionControllerTest {
         .contentType(MediaType.APPLICATION_JSON).content(json))
 	    .andExpect(status().isOk());
 
-        [=AuthenticationTable]permissionEntity entity= createNewEntityForUpdate();
+        [=AuthenticationTable]permissionEntity entity= new [=AuthenticationTable]permissionEntity();
         <#if (AuthenticationType!="none" && !UserInput??)>
 		entity.set[=AuthenticationTable]Id(up.get[=AuthenticationTable]Id());
 		<#else>
@@ -772,7 +775,8 @@ public class [=AuthenticationTable]permissionControllerTest {
 		</#if>
         entity.setPermissionId(up.getPermissionId());
         [=AuthenticationTable?uncap_first]permissionRepository.delete(entity);
-       
+        [=AuthenticationTable?uncap_first]Repository.delete(up.get[=AuthenticationTable]());
+		permissionRepository.delete(up.getPermission());
 	}    
 	
 	@Test

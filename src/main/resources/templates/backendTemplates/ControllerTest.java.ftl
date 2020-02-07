@@ -173,7 +173,7 @@ public class [=ClassName]ControllerTest {
 		<#if relationValue.relation == "ManyToOne" || relationValue.relation == "OneToOne">
 		<#if relationValue.isParent==false>
 		[=relationValue.eName?cap_first]Entity [=relationValue.eName?uncap_first] = create[=relationValue.eName?cap_first]Entity();
-		if([=relationValue.eName?uncap_first]Repository.findAll().isEmpty())
+		if(![=relationValue.eName?uncap_first]Repository.findAll().contains([=relationValue.eName?uncap_first]))
 		{
 			[=relationValue.eName?uncap_first]=[=relationValue.eName?uncap_first]Repository.save([=relationValue.eName?uncap_first]);
 		}
@@ -347,8 +347,8 @@ public class [=ClassName]ControllerTest {
 
 		[=ClassName?uncap_first]= createEntity();
 		List<[=ClassName]Entity> list= [=ClassName?uncap_first]_repository.findAll();
-		if(list.isEmpty()) {
-		   [=ClassName?uncap_first]_repository.save([=ClassName?uncap_first]);
+		if(!list.contains([=ClassName?uncap_first])) {
+		   [=ClassName?uncap_first]=[=ClassName?uncap_first]_repository.save([=ClassName?uncap_first]);
 		}
 
 	}
@@ -356,7 +356,7 @@ public class [=ClassName]ControllerTest {
 	@Test
 	public void FindById_IdIsValid_ReturnStatusOk() throws Exception {
 	
-		mvc.perform(get("/[=ClassName?uncap_first]/<#if CompositeKeyClasses?seq_contains(ClassName)><#list PrimaryKeys as key,value>[=key]:1<#sep>,</#list><#else><#list PrimaryKeys as key,value>1</#list></#if>")
+		mvc.perform(get("/[=ClassName?uncap_first]/<#if CompositeKeyClasses?seq_contains(ClassName)><#list PrimaryKeys as key,value>[=key]:" + [=ClassName?uncap_first].get[=key?cap_first]() <#sep>+ ",</#list><#else><#list PrimaryKeys as key,value>" + [=ClassName?uncap_first].get[=key?cap_first]()</#list></#if>)
 				.contentType(MediaType.APPLICATION_JSON))
 		.andExpect(status().isOk());
 	}  
@@ -371,6 +371,7 @@ public class [=ClassName]ControllerTest {
 	}    
 	<#if !((AuthenticationType == "ldap" || AuthenticationType == "oidc") && ClassName == AuthenticationTable)>
 	<#if (AuthenticationType == "database" || UserOnly) && ClassName == AuthenticationTable>
+	@Test
 	public void Create[=AuthenticationTable]_[=AuthenticationTable]DoesNotExist_ReturnStatusOk() throws Exception {
 	    <#if AuthenticationFields??>
 		<#list AuthenticationFields as authKey,authValue>
@@ -773,7 +774,7 @@ public class [=ClassName]ControllerTest {
 	@Test
 	public void Get[=relationValue.eName?cap_first]_searchIsNotEmptyAndPropertyIsValid_ReturnList() throws Exception {
 	
-	   mvc.perform(get("/[=ClassName?uncap_first]/<#if CompositeKeyClasses?seq_contains(ClassName)><#list PrimaryKeys as key,value>[=key]:1<#sep>,</#list><#else><#list PrimaryKeys as key,value>1</#list></#if>/[=relationValue.eName?uncap_first]")
+	   mvc.perform(get("/[=ClassName?uncap_first]/<#if CompositeKeyClasses?seq_contains(ClassName)><#list PrimaryKeys as key,value>[=key]:" + [=ClassName?uncap_first].get[=key?cap_first]()<#sep>+ ",</#list><#else><#list PrimaryKeys as key,value>" + [=ClassName?uncap_first].get[=key?cap_first]()</#list></#if>+ "/[=relationValue.eName?uncap_first]")
 				.contentType(MediaType.APPLICATION_JSON))
 	    		  .andExpect(status().isOk());
 	}  

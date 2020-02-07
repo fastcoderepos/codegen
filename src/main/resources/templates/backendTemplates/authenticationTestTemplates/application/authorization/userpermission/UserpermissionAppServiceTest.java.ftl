@@ -240,10 +240,11 @@ public class [=AuthenticationTable]permissionAppServiceTest {
 		Pageable pageable = mock(Pageable.class);
 		List<Find[=AuthenticationTable]permissionByIdOutput> output = new ArrayList<>();
 		SearchCriteria search= new SearchCriteria();
-		search.setType(1);
-		search.setValue("xyz");
-		search.setOperator("equals");
+//		search.setType(1);
+//		search.setValue("xyz");
+//		search.setOperator("equals");
 
+		Mockito.when(_appService.Search(any(SearchCriteria.class))).thenReturn(new BooleanBuilder());
 		Mockito.when(_[=AuthenticationTable?uncap_first]permissionManager.FindAll(any(Predicate.class),any(Pageable.class))).thenReturn(foundPage);
 		Assertions.assertThat(_appService.Find(search, pageable)).isEqualTo(output);
 	}
@@ -258,10 +259,12 @@ public class [=AuthenticationTable]permissionAppServiceTest {
 		Pageable pageable = mock(Pageable.class);
 		List<Find[=AuthenticationTable]permissionByIdOutput> output = new ArrayList<>();
         SearchCriteria search= new SearchCriteria();
-		search.setType(1);
-		search.setValue("xyz");
-		search.setOperator("equals");
+//		search.setType(1);
+//		search.setValue("xyz");
+//		search.setOperator("equals");
 		output.add(_mapper.[=AuthenticationTable]permissionEntityToFind[=AuthenticationTable]permissionByIdOutput([=AuthenticationTable?uncap_first]permission));
+    	
+    	Mockito.when(_appService.Search(any(SearchCriteria.class))).thenReturn(new BooleanBuilder());
     	Mockito.when(_[=AuthenticationTable?uncap_first]permissionManager.FindAll(any(Predicate.class),any(Pageable.class))).thenReturn(foundPage);
 		Assertions.assertThat(_appService.Find(search, pageable)).isEqualTo(output);
 	}

@@ -236,10 +236,11 @@ public class [=AuthenticationTable]roleAppServiceTest {
 		Pageable pageable = mock(Pageable.class);
 		List<Find[=AuthenticationTable]roleByIdOutput> output = new ArrayList<>();
 		SearchCriteria search= new SearchCriteria();
-		search.setType(1);
-		search.setValue("xyz");
-		search.setOperator("equals");
+//		search.setType(1);
+//		search.setValue("xyz");
+//		search.setOperator("equals");
 
+		Mockito.when(_appService.Search(any(SearchCriteria.class))).thenReturn(new BooleanBuilder());
 		Mockito.when(_[=AuthenticationTable?uncap_first]roleManager.FindAll(any(Predicate.class),any(Pageable.class))).thenReturn(foundPage);
 		Assertions.assertThat(_appService.Find(search, pageable)).isEqualTo(output);
 	}
@@ -254,10 +255,12 @@ public class [=AuthenticationTable]roleAppServiceTest {
 		Pageable pageable = mock(Pageable.class);
 		List<Find[=AuthenticationTable]roleByIdOutput> output = new ArrayList<>();
         SearchCriteria search= new SearchCriteria();
-		search.setType(1);
-		search.setValue("xyz");
-		search.setOperator("equals");
+//		search.setType(1);
+//		search.setValue("xyz");
+//		search.setOperator("equals");
 		output.add(_mapper.[=AuthenticationTable]roleEntityToFind[=AuthenticationTable]roleByIdOutput([=AuthenticationTable?uncap_first]role));
+    	
+    	Mockito.when(_appService.Search(any(SearchCriteria.class))).thenReturn(new BooleanBuilder());
     	Mockito.when(_[=AuthenticationTable?uncap_first]roleManager.FindAll(any(Predicate.class),any(Pageable.class))).thenReturn(foundPage);
 		Assertions.assertThat(_appService.Find(search, pageable)).isEqualTo(output);
 	}

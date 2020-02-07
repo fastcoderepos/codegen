@@ -19,6 +19,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Spy;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -44,6 +45,7 @@ import com.querydsl.core.types.Predicate;
 public class RoleAppServiceTest {
 
 	@InjectMocks
+	@Spy
 	RoleAppService roleAppService;
 
 	@Mock
@@ -150,10 +152,11 @@ public class RoleAppServiceTest {
 
 		List<FindRoleByIdOutput> output = new ArrayList<>();
 		SearchCriteria search= new SearchCriteria();
-		search.setType(1);
-		search.setValue("xyz");
-		search.setOperator("equals");
+//		search.setType(1);
+//		search.setValue("xyz");
+//		search.setOperator("equals");
 
+		Mockito.when(roleAppService.Search(any(SearchCriteria.class))).thenReturn(new BooleanBuilder());
 		Mockito.when(roleManager.FindAll(any(Predicate.class),any(Pageable.class))).thenReturn(foundPage);
 		Assertions.assertThat(roleAppService.Find(search,pageable)).isEqualTo(output);
 
@@ -168,12 +171,13 @@ public class RoleAppServiceTest {
 		Page<RoleEntity> foundPage = new PageImpl(list);
 		Pageable pageable =mock(Pageable.class);
 		SearchCriteria search= new SearchCriteria();
-		search.setType(1);
-		search.setValue("xyz");
-		search.setOperator("equals");
+//		search.setType(1);
+//		search.setValue("xyz");
+//		search.setOperator("equals");
 
 		List<FindRoleByIdOutput> output = new ArrayList<>();
 		output.add(roleMapper.RoleEntityToFindRoleByIdOutput(role));
+		Mockito.when(roleAppService.Search(any(SearchCriteria.class))).thenReturn(new BooleanBuilder());
 		Mockito.when(roleManager.FindAll(any(Predicate.class),any(Pageable.class))).thenReturn(foundPage);
 		Assertions.assertThat(roleAppService.Find(search,pageable)).isEqualTo(output);
 

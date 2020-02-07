@@ -239,7 +239,7 @@ public class [=ClassName]AppService implements I[=ClassName]AppService {
 	
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	<#if Cache !false>
-	@Cacheable(value = "[=ClassName?uncap_first]", key = "#p0")
+	@Cacheable(value = "[=ClassName]", key = "#p0")
 	</#if>
 	public Find[=ClassName]By[=authValue.fieldName?cap_first]Output FindBy[=authValue.fieldName?cap_first](String [=authValue.fieldName?uncap_first]) {
 

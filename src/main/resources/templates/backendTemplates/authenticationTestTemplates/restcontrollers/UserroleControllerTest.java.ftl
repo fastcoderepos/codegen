@@ -664,135 +664,134 @@ public class [=AuthenticationTable]roleControllerTest {
 				.contentType(MediaType.APPLICATION_JSON))
 		.andExpect(status().isNoContent());
 
+        [=AuthenticationTable?uncap_first]Repository.delete(up.get[=AuthenticationTable]());
+	    roleRepository.delete(up.getRole());
 	}  
 
-//	@Test
-//	public void Update[=AuthenticationTable]role_IdIsNotParseable_ThrowEntityNotFoundException() throws Exception {
-//
-//		Update[=AuthenticationTable]roleInput [=AuthenticationTable?uncap_first]role = new Update[=AuthenticationTable]roleInput();
-//		<#if (AuthenticationType!="none" && !UserInput??)>
-//		[=AuthenticationTable?uncap_first]role.set[=AuthenticationTable]Id(21L);
-//		<#else>
-//		<#if PrimaryKeys??>
-//  	<#list PrimaryKeys as key,value>
-//		<#if value?lower_case == "long">
-//		[=AuthenticationTable?uncap_first]role.set[=AuthenticationTable][=key?cap_first](21L);
-//		<#elseif value?lower_case == "integer" || value?lower_case == "short">
-//		[=AuthenticationTable?uncap_first]role.set[=AuthenticationTable][=key?cap_first](21);
-//		<#elseif value?lower_case == "double">
-//		[=AuthenticationTable?uncap_first]role.set[=AuthenticationTable][=key?cap_first](21D);
-//		<#elseif value?lower_case == "string">
-//  		[=AuthenticationTable?uncap_first]role.set[=AuthenticationTable][=key?cap_first]("21");
-//		</#if> 
-//		</#list>
-//		</#if> 
-//		</#if>
-//		[=AuthenticationTable?uncap_first]role.setRoleId(21L);
-//		ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-//		String json = ow.writeValueAsString([=AuthenticationTable?uncap_first]role);
-//
-//		org.assertj.core.api.Assertions.assertThatThrownBy(() ->  mvc.perform(put("/[=AuthenticationTable?uncap_first]role/21")
-//				.contentType(MediaType.APPLICATION_JSON).content(json))
-//				.andExpect(status().isOk())).hasCause(new EntityNotFoundException("Invalid id=21"));
-//
-//	}  
-//
-//	@Test
-//	public void Update[=AuthenticationTable]role_IdIsNotValid_ReturnNotFound() throws Exception {
-//		Update[=AuthenticationTable]roleInput [=AuthenticationTable?uncap_first]role = new Update[=AuthenticationTable]roleInput();
-//		<#if (AuthenticationType!="none" && !UserInput??)>
-//		[=AuthenticationTable?uncap_first]role.set[=AuthenticationTable]Id(32L);
-//		<#else>
-//		<#if PrimaryKeys??>
-//  	<#list PrimaryKeys as key,value>
-//		<#if value?lower_case == "long">
-//		[=AuthenticationTable?uncap_first]role.set[=AuthenticationTable][=key?cap_first](32L);
-//		<#elseif value?lower_case == "integer" || value?lower_case == "short">
-//		[=AuthenticationTable?uncap_first]role.set[=AuthenticationTable][=key?cap_first](32);
-//		<#elseif value?lower_case == "double">
-//		[=AuthenticationTable?uncap_first]role.set[=AuthenticationTable][=key?cap_first](32D);
-//		<#elseif value?lower_case == "string">
-//  		[=AuthenticationTable?uncap_first]role.set[=AuthenticationTable][=key?cap_first]("32");
-//		</#if> 
-//		</#list>
-//		</#if> 
-//		</#if>
-//		[=AuthenticationTable?uncap_first]role.setRoleId(32L);
-//		ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-//		String json = ow.writeValueAsString([=AuthenticationTable?uncap_first]role);
-//      
-//		doReturn(null).when([=AuthenticationTable?uncap_first]roleAppService).FindById(new [=AuthenticationTable]roleId(32L,<#if (AuthenticationType!="none" && !UserInput??)>32L<#elseif AuthenticationType!="none" && UserInput??><#list PrimaryKeys as key,value><#if value?lower_case == "long">32L<#elseif value?lower_case == "integer" || value?lower_case == "short">32<#elseif value?lower_case == "double">32D<#elseif value?lower_case == "boolean">true<#elseif value?lower_case == "date">new Date()<#elseif value?lower_case == "string">"32"</#if><#sep>,</#list></#if>));
-//		org.assertj.core.api.Assertions.assertThatThrownBy(() ->  mvc.perform(put("/[=AuthenticationTable?uncap_first]role/roleId:32,<#if (AuthenticationType!="none" && !UserInput??)>[=AuthenticationTable?uncap_first]Id:32<#else><#if PrimaryKeys??><#list PrimaryKeys as key,value>[=AuthenticationTable?uncap_first][=key?cap_first]:32<#sep>,</#list></#if></#if>")
-//				.contentType(MediaType.APPLICATION_JSON).content(json))
-//				.andExpect(status().isNotFound()));
-//
-//	}
-//
-//	@Test
-//	public void Update[=AuthenticationTable]role_[=AuthenticationTable]roleExists_ReturnStatusOk() throws Exception {
-//
-//		[=AuthenticationTable]roleEntity up = [=AuthenticationTable?uncap_first]roleRepository.save(createNewEntityForUpdate());
-//		Find[=AuthenticationTable]roleByIdOutput output= new Find[=AuthenticationTable]roleByIdOutput();
-//		<#if (AuthenticationType!="none" && !UserInput??)>
-//		output.set[=AuthenticationTable]Id(up.get[=AuthenticationTable]Id());
-//		<#else>
-//		<#if PrimaryKeys??>
-//  		<#list PrimaryKeys as key,value>
-//		<#if value?lower_case == "long" || value?lower_case == "integer" || value?lower_case == "short" || value?lower_case == "double" || value?lower_case == "string">
-//		output.set[=AuthenticationTable][=key?cap_first](up.get[=AuthenticationTable][=key?cap_first]());
-//		</#if> 
-//		</#list>
-//		</#if> 
-//		</#if>
-//		output.setRoleId(up.getRoleId());
-//
-//		Update[=AuthenticationTable]roleInput [=AuthenticationTable?uncap_first]role = new Update[=AuthenticationTable]roleInput();
-//		<#if (AuthenticationType!="none" && !UserInput??)>
-//		[=AuthenticationTable?uncap_first]role.set[=AuthenticationTable]Id(up.get[=AuthenticationTable]Id());
-//		<#else>
-//		<#if PrimaryKeys??>
-// 		<#list PrimaryKeys as key,value>
-//		<#if value?lower_case == "long" || value?lower_case == "integer" || value?lower_case == "short" || value?lower_case == "double" || value?lower_case == "string">
-//		[=AuthenticationTable?uncap_first]role.set[=AuthenticationTable][=key?cap_first](up.get[=AuthenticationTable][=key?cap_first]());
-//		</#if> 
-//		</#list>
-//		</#if> 
-//		</#if>
-//		[=AuthenticationTable?uncap_first]role.setRoleId(up.getRoleId());
-//
-//		doReturn(output).when([=AuthenticationTable?uncap_first]roleAppService).FindById(new [=AuthenticationTable]roleId(up.getRoleId(),<#if (AuthenticationType!="none" && !UserInput??)>up.get[=AuthenticationTable]Id()<#else><#if PrimaryKeys??><#list PrimaryKeys as key,value>up.get[=AuthenticationTable][=key?cap_first]()<#sep>,</#list></#if></#if>));
-//		Mockito.when([=AuthenticationTable?uncap_first]AppService.FindById(<#if (AuthenticationType!="none" && !UserInput??)>up.get[=AuthenticationTable]Id()<#else><#if PrimaryKeys??><#list PrimaryKeys as key,value>up.get[=AuthenticationTable][=key?cap_first]()<#sep>,</#list></#if></#if>)).thenReturn(create[=AuthenticationTable]ByIdOuput());
-//      <#if AuthenticationType != "oidc">
-//		doNothing().when(jwtAppService).deleteAllUserTokens(anyString());
-//      </#if>
-//      ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-//		String json = ow.writeValueAsString([=AuthenticationTable?uncap_first]role);
-//      
-//
-//		mvc.perform(put("/[=AuthenticationTable?uncap_first]role/roleId:"+up.getRoleId() + ",<#if (AuthenticationType!="none" && !UserInput??)>[=AuthenticationTable?uncap_first]Id:" + up.get[=AuthenticationTable]Id()<#else><#if PrimaryKeys??><#list PrimaryKeys as key,value>[=AuthenticationTable?uncap_first][=key?cap_first]:" + up.get[=AuthenticationTable][=key?cap_first]()<#sep>+ ",</#list></#if></#if>)
-//		.contentType(MediaType.APPLICATION_JSON).content(json))
-//		.andExpect(status().isOk());
-//
-//		[=AuthenticationTable]roleEntity entity= createNewEntityForUpdate();
-//		<#if (AuthenticationType!="none" && !UserInput??)>
-//		entity.set[=AuthenticationTable]Id(up.get[=AuthenticationTable]Id());
-//		<#else>
-//		<#if PrimaryKeys??>
-//  		<#list PrimaryKeys as key,value>
-//		<#if value?lower_case == "long" || value?lower_case == "integer" || value?lower_case == "short" || value?lower_case == "double" || value?lower_case == "string">
-//		entity.set[=AuthenticationTable][=key?cap_first](up.get[=AuthenticationTable][=key?cap_first]());
-//		</#if> 
-//		</#list>
-//		</#if> 
-//		</#if>
-//		entity.setRoleId(up.getRoleId());
-//		[=AuthenticationTable?uncap_first]roleRepository.delete(entity);
-//		[=AuthenticationTable?uncap_first]Repository.delete(up.get[=AuthenticationTable]());
-//		roleRepository.delete(up.getRole());
-//		<#if Flowable!false>
-//		idmIdentityService.deleteUserGroupMapping(up.get[=AuthenticationTable]().get<#if AuthenticationType!= "none"><#if AuthenticationFields??><#list AuthenticationFields as authKey,authValue><#if authKey== "UserName">[=authValue.fieldName?cap_first]</#if></#list><#else>UserName</#if></#if>(), up.getRole().getName());
-//	    </#if>
-//	}    
+	@Test
+	public void Update[=AuthenticationTable]role_IdIsNotParseable_ThrowEntityNotFoundException() throws Exception {
+
+		Update[=AuthenticationTable]roleInput [=AuthenticationTable?uncap_first]role = new Update[=AuthenticationTable]roleInput();
+		<#if (AuthenticationType!="none" && !UserInput??)>
+		[=AuthenticationTable?uncap_first]role.set[=AuthenticationTable]Id(21L);
+		<#else>
+		<#if PrimaryKeys??>
+  		<#list PrimaryKeys as key,value>
+		<#if value?lower_case == "long">
+		[=AuthenticationTable?uncap_first]role.set[=AuthenticationTable][=key?cap_first](21L);
+		<#elseif value?lower_case == "integer" || value?lower_case == "short">
+		[=AuthenticationTable?uncap_first]role.set[=AuthenticationTable][=key?cap_first](21);
+		<#elseif value?lower_case == "double">
+		[=AuthenticationTable?uncap_first]role.set[=AuthenticationTable][=key?cap_first](21D);
+		<#elseif value?lower_case == "string">
+  		[=AuthenticationTable?uncap_first]role.set[=AuthenticationTable][=key?cap_first]("21");
+		</#if> 
+		</#list>
+		</#if> 
+		</#if>
+		[=AuthenticationTable?uncap_first]role.setRoleId(21L);
+		ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+		String json = ow.writeValueAsString([=AuthenticationTable?uncap_first]role);
+
+		org.assertj.core.api.Assertions.assertThatThrownBy(() ->  mvc.perform(put("/[=AuthenticationTable?uncap_first]role/21")
+				.contentType(MediaType.APPLICATION_JSON).content(json))
+				.andExpect(status().isOk())).hasCause(new EntityNotFoundException("Invalid id=21"));
+
+	}  
+
+	@Test
+	public void Update[=AuthenticationTable]role_IdIsNotValid_ReturnNotFound() throws Exception {
+		Update[=AuthenticationTable]roleInput [=AuthenticationTable?uncap_first]role = new Update[=AuthenticationTable]roleInput();
+		<#if (AuthenticationType!="none" && !UserInput??)>
+		[=AuthenticationTable?uncap_first]role.set[=AuthenticationTable]Id(32L);
+		<#else>
+		<#if PrimaryKeys??>
+	  	<#list PrimaryKeys as key,value>
+		<#if value?lower_case == "long">
+		[=AuthenticationTable?uncap_first]role.set[=AuthenticationTable][=key?cap_first](32L);
+		<#elseif value?lower_case == "integer" || value?lower_case == "short">
+		[=AuthenticationTable?uncap_first]role.set[=AuthenticationTable][=key?cap_first](32);
+		<#elseif value?lower_case == "double">
+		[=AuthenticationTable?uncap_first]role.set[=AuthenticationTable][=key?cap_first](32D);
+		<#elseif value?lower_case == "string">
+  		[=AuthenticationTable?uncap_first]role.set[=AuthenticationTable][=key?cap_first]("32");
+		</#if> 
+		</#list>
+		</#if> 
+		</#if>
+		[=AuthenticationTable?uncap_first]role.setRoleId(32L);
+		ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+		String json = ow.writeValueAsString([=AuthenticationTable?uncap_first]role);
+		doReturn(null).when([=AuthenticationTable?uncap_first]roleAppService).FindById(new [=AuthenticationTable]roleId(32L,<#if (AuthenticationType!="none" && !UserInput??)>32L<#elseif AuthenticationType!="none" && UserInput??><#list PrimaryKeys as key,value><#if value?lower_case == "long">32L<#elseif value?lower_case == "integer" || value?lower_case == "short">32<#elseif value?lower_case == "double">32D<#elseif value?lower_case == "boolean">true<#elseif value?lower_case == "date">new Date()<#elseif value?lower_case == "string">"32"</#if><#sep>,</#list></#if>));
+		
+		mvc.perform(put("/[=AuthenticationTable?uncap_first]role/roleId:32,<#if (AuthenticationType!="none" && !UserInput??)>[=AuthenticationTable?uncap_first]Id:32<#else><#if PrimaryKeys??><#list PrimaryKeys as key,value>[=AuthenticationTable?uncap_first][=key?cap_first]:32<#sep>,</#list></#if></#if>")
+     			 .contentType(MediaType.APPLICATION_JSON).content(json))
+		  .andExpect(status().isNotFound());
+	}
+
+	@Test
+	public void Update[=AuthenticationTable]role_[=AuthenticationTable]roleExists_ReturnStatusOk() throws Exception {
+
+		[=AuthenticationTable]roleEntity up = [=AuthenticationTable?uncap_first]roleRepository.save(createNewEntityForUpdate());
+		Find[=AuthenticationTable]roleByIdOutput output= new Find[=AuthenticationTable]roleByIdOutput();
+		<#if (AuthenticationType!="none" && !UserInput??)>
+		output.set[=AuthenticationTable]Id(up.get[=AuthenticationTable]Id());
+		<#else>
+		<#if PrimaryKeys??>
+  		<#list PrimaryKeys as key,value>
+		<#if value?lower_case == "long" || value?lower_case == "integer" || value?lower_case == "short" || value?lower_case == "double" || value?lower_case == "string">
+		output.set[=AuthenticationTable][=key?cap_first](up.get[=AuthenticationTable][=key?cap_first]());
+		</#if> 
+		</#list>
+		</#if> 
+		</#if>
+		output.setRoleId(up.getRoleId());
+
+		Update[=AuthenticationTable]roleInput [=AuthenticationTable?uncap_first]role = new Update[=AuthenticationTable]roleInput();
+		<#if (AuthenticationType!="none" && !UserInput??)>
+		[=AuthenticationTable?uncap_first]role.set[=AuthenticationTable]Id(up.get[=AuthenticationTable]Id());
+		<#else>
+		<#if PrimaryKeys??>
+ 		<#list PrimaryKeys as key,value>
+		<#if value?lower_case == "long" || value?lower_case == "integer" || value?lower_case == "short" || value?lower_case == "double" || value?lower_case == "string">
+		[=AuthenticationTable?uncap_first]role.set[=AuthenticationTable][=key?cap_first](up.get[=AuthenticationTable][=key?cap_first]());
+		</#if> 
+		</#list>
+		</#if> 
+		</#if>
+		[=AuthenticationTable?uncap_first]role.setRoleId(up.getRoleId());
+
+		doReturn(output).when([=AuthenticationTable?uncap_first]roleAppService).FindById(new [=AuthenticationTable]roleId(up.getRoleId(),<#if (AuthenticationType!="none" && !UserInput??)>up.get[=AuthenticationTable]Id()<#else><#if PrimaryKeys??><#list PrimaryKeys as key,value>up.get[=AuthenticationTable][=key?cap_first]()<#sep>,</#list></#if></#if>));
+		Mockito.when([=AuthenticationTable?uncap_first]AppService.FindById(<#if (AuthenticationType!="none" && !UserInput??)>up.get[=AuthenticationTable]Id()<#else><#if PrimaryKeys??><#list PrimaryKeys as key,value>up.get[=AuthenticationTable][=key?cap_first]()<#sep>,</#list></#if></#if>)).thenReturn(create[=AuthenticationTable]ByIdOuput());
+       <#if AuthenticationType != "oidc">
+		doNothing().when(jwtAppService).deleteAllUserTokens(anyString());
+        </#if>
+        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+		String json = ow.writeValueAsString([=AuthenticationTable?uncap_first]role);
+      
+
+		mvc.perform(put("/[=AuthenticationTable?uncap_first]role/roleId:"+up.getRoleId() + ",<#if (AuthenticationType!="none" && !UserInput??)>[=AuthenticationTable?uncap_first]Id:" + up.get[=AuthenticationTable]Id()<#else><#if PrimaryKeys??><#list PrimaryKeys as key,value>[=AuthenticationTable?uncap_first][=key?cap_first]:" + up.get[=AuthenticationTable][=key?cap_first]()<#sep>+ ",</#list></#if></#if>)
+		.contentType(MediaType.APPLICATION_JSON).content(json))
+		.andExpect(status().isOk());
+
+		[=AuthenticationTable]roleEntity entity= new [=AuthenticationTable]roleEntity();
+		<#if (AuthenticationType!="none" && !UserInput??)>
+		entity.set[=AuthenticationTable]Id(up.get[=AuthenticationTable]Id());
+		<#else>
+		<#if PrimaryKeys??>
+  		<#list PrimaryKeys as key,value>
+		<#if value?lower_case == "long" || value?lower_case == "integer" || value?lower_case == "short" || value?lower_case == "double" || value?lower_case == "string">
+		entity.set[=AuthenticationTable][=key?cap_first](up.get[=AuthenticationTable][=key?cap_first]());
+		</#if> 
+		</#list>
+		</#if> 
+		</#if>
+		entity.setRoleId(up.getRoleId());
+		[=AuthenticationTable?uncap_first]roleRepository.delete(entity);
+		[=AuthenticationTable?uncap_first]Repository.delete(up.get[=AuthenticationTable]());
+		roleRepository.delete(up.getRole());
+
+	}    
 
 	@Test
 	public void FindAll_SearchIsNotNullAndPropertyIsValid_ReturnStatusOk() throws Exception {

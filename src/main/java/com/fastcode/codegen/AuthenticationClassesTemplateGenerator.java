@@ -50,12 +50,11 @@ public class AuthenticationClassesTemplateGenerator {
 		{
 			templates=getBackendAuthorizationFiles(AUTHORIZATION_TEMPLATE_FOLDER, authSchema, authType);
 			testTemplates=getBackendAuthorizationTestFiles(AUTHORIZATION_TEST_TEMPLATE_FOLDER,authSchema);
-
 		}
 		else
 		{
 			templates = getAuthenticationTemplatesForUserGroupCase(AUTHORIZATION_TEMPLATE_FOLDER, authType);
-			testTemplates = getAuthenticationTemplatesForUserGroupCase(AUTHORIZATION_TEST_TEMPLATE_FOLDER, authType);
+			testTemplates=getAuthenticationTemplatesForUserGroupCase(AUTHORIZATION_TEST_TEMPLATE_FOLDER,authType);
 		}
 
 		codeGeneratorUtils.generateFiles(templates, root, backendAppFolder,AUTHORIZATION_TEMPLATE_FOLDER);
@@ -190,7 +189,7 @@ public class AuthenticationClassesTemplateGenerator {
 		filesList = codeGeneratorUtils.replaceFileNames(filesList, templatePath);
 
 		Map<String, Object> templates = new HashMap<>(); 
-
+	
 		for (String filePath : filesList) { 
 			String outputFileName = filePath.substring(0, filePath.lastIndexOf('.'));
 			if(authTable==null)
@@ -204,9 +203,9 @@ public class AuthenticationClassesTemplateGenerator {
 					outputFileName = outputFileName.replace("User", authTable);
 					outputFileName = outputFileName.replace("user", authTable.toLowerCase());
 				}
-                String fName = outputFileName.toLowerCase(); 
-				if( !fName.contains("user") && (fName.contains(authTable.toLowerCase().concat("permission")) 
-						|| fName.contains(authTable.toLowerCase().concat("role"))))
+               
+				if(!(outputFileName.toLowerCase().contains("user") && !(outputFileName.toLowerCase().contains(authTable.toLowerCase().concat("permission")) 
+						|| outputFileName.toLowerCase().contains(authTable.toLowerCase().concat("role")))))
 				{ 		
 					templates.put(filePath, outputFileName);
 				}

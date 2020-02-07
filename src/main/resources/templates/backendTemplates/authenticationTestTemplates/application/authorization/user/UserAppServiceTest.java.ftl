@@ -24,6 +24,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.slf4j.Logger;
@@ -46,6 +47,7 @@ import static org.mockito.Mockito.*;
 public class UserAppServiceTest {
 
 	@InjectMocks
+	@Spy
 	UserAppService userAppService;
 
 	@Mock
@@ -154,7 +156,7 @@ public class UserAppServiceTest {
 	public void deleteUser_UserIsNotNullAndUserExists_UserRemoved() {
 
 		UserEntity user=mock(UserEntity.class);
-
+        Mockito.when(userManager.FindById(anyLong())).thenReturn(user);
 		userAppService.Delete(ID);
 		verify(userManager).Delete(user);
 	}
@@ -200,11 +202,11 @@ public class UserAppServiceTest {
 
 		List<FindUserByIdOutput> output = new ArrayList<>();
 		SearchCriteria search= new SearchCriteria();
-		search.setType(1);
-		search.setValue("xyz");
-		search.setOperator("equals");
+//		search.setType(1);
+//		search.setValue("xyz");
+//		search.setOperator("equals");
 
-
+		Mockito.when(userAppService.Search(any(SearchCriteria.class))).thenReturn(new BooleanBuilder());
 		Mockito.when(userManager.FindAll(any(Predicate.class),any(Pageable.class))).thenReturn(foundPage);
 		Assertions.assertThat(userAppService.Find(search,pageable)).isEqualTo(output);
 
@@ -219,12 +221,14 @@ public class UserAppServiceTest {
 		Page<UserEntity> foundPage = new PageImpl(list);
 		Pageable pageable =mock(Pageable.class);
 		SearchCriteria search= new SearchCriteria();
-		search.setType(1);
-		search.setValue("xyz");
-		search.setOperator("equals");
+//		search.setType(1);
+//		search.setValue("xyz");
+//		search.setOperator("equals");
 
 		List<FindUserByIdOutput> output = new ArrayList<>();
 		output.add(userMapper.UserEntityToFindUserByIdOutput(user));
+		
+		Mockito.when(userAppService.Search(any(SearchCriteria.class))).thenReturn(new BooleanBuilder());
 		Mockito.when(userManager.FindAll(any(Predicate.class),any(Pageable.class))).thenReturn(foundPage);
 		Assertions.assertThat(userAppService.Find(search,pageable)).isEqualTo(output);
 
