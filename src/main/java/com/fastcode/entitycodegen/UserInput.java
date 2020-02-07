@@ -160,7 +160,7 @@ public class UserInput {
 
 		// jdbc:postgresql://localhost:5432/FCV2Db?username=postgres;password=fastcode
 		// jdbc:postgresql://localhost:5432/Demo?username=postgres;password=fastcode
-		input.setUpgrade(root.get("upgrade") == null
+		input.setUpgrade(root.get("upgrade") == null  
 				? false: (root.get("upgrade").toLowerCase().equals("true") ? true : false));
 		input.setConnectionStr(root.get("conn") != null ? root.get("conn") : null);
 		input = validateConnectionStringAndSetSchema(input, root.get("s"), scanner);

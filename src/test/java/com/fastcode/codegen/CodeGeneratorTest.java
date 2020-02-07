@@ -525,6 +525,7 @@ public class CodeGeneratorTest {
 	{
 		Map<String,Object> root= new HashMap<String, Object>();
 		root.put("ClassName", entityName);
+		root.put("AuthenticationType", AuthenticationType.DATABASE);
 
 		Mockito.doNothing().when(mockedUtils).generateFiles(any(HashMap.class),any(HashMap.class),anyString(),anyString());
 		codeGenerator.generateApplicationProperties(root,destPath.getAbsolutePath());

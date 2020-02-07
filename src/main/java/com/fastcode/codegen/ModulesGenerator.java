@@ -69,7 +69,7 @@ public class ModulesGenerator {
 		if(sourceBranch ==null)
 		{
 			System.exit(1);  
-		}
+		}   
 		
 		String groupArtifactId = input.getGroupArtifactId().isEmpty() ? "com.group.demo" : input.getGroupArtifactId();
 		groupArtifactId = groupArtifactId.toLowerCase();

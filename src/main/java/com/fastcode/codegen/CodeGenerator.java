@@ -451,7 +451,7 @@ public class CodeGenerator {
 	{
 		Map<String, Object> backEndTemplate = new HashMap<>();
 		backEndTemplate.put("backendTemplates/application.properties.ftl", "application.properties");
-		if(!root.get("AuthenticationType").equals("none"))
+		if(!root.get("AuthenticationType").equals(AuthenticationType.NONE))
 			backEndTemplate.put("backendTemplates/application-bootstrap.properties.ftl", "application-bootstrap.properties");
 		  
 		backEndTemplate.put("backendTemplates/application-local.properties.ftl", "application-local.properties");

@@ -95,7 +95,7 @@ public class GitRepositoryManagerTest {
 		String response = "true";
 
 		Mockito.doReturn(response).when(mockedCommandUtils).runGitProcess(anyString(),anyString());
-		Assertions.assertThat(gitRepositoryManager.isGitInstalled()).isEqualTo(true);
+		Assertions.assertThat(gitRepositoryManager.isGitInitialized()).isEqualTo(true);
 	}
 	
 	@Test
@@ -104,7 +104,7 @@ public class GitRepositoryManagerTest {
 		String response = "false";
 
 		Mockito.doReturn(response).when(mockedCommandUtils).runGitProcess(anyString(),anyString());
-		Assertions.assertThat(gitRepositoryManager.isGitInstalled()).isEqualTo(true);
+		Assertions.assertThat(gitRepositoryManager.isGitInitialized()).isEqualTo(false);
 	}
 	
 	@Test

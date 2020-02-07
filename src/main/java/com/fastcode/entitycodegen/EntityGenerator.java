@@ -300,9 +300,9 @@ public class EntityGenerator {
 			String type = "String";
 			Boolean isInValidField = !selected.getFieldType().equalsIgnoreCase(type) || selected.getIsNullable();
 			
-			if(authFieldsEntry.getKey().equals("IsActive"))
+			if(authFieldsEntry.getKey().equals("IsActive"))  
 			{
-				type= "Boolean";
+				type= "Boolean";   
 				isInValidField = !selected.getFieldType().equalsIgnoreCase(type);
 			}
 			

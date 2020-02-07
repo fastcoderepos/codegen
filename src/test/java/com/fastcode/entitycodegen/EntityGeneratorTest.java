@@ -518,15 +518,18 @@ public class EntityGeneratorTest {
 		FieldDetails details = new FieldDetails();
 		details.setFieldName("blogName");
 		details.setFieldType("String");
+		details.setIsNullable(false);
 
 		FieldDetails details1 = new FieldDetails();
 		details1.setFieldName("blogId");
 		details1.setFieldType("Long");
+		details1.setIsNullable(false);
 
 		FieldDetails details2 = new FieldDetails();
 		details2.setFieldName("pass");
 		details2.setFieldType("String");
-
+		details2.setIsNullable(false);
+		
 		List<FieldDetails> fDetails = new ArrayList<FieldDetails>();
 		fDetails.add(details);
 		fDetails.add(details2);
@@ -674,7 +677,25 @@ public class EntityGeneratorTest {
 
 		Assertions.assertThat(entityGenerator.getAuthenticationEntitiesTemplates(destPath.getAbsolutePath(), null, AuthenticationType.DATABASE)).isEqualTo(expectedList);
 	}
+	
+	@Test
+	public void getAuthenticationEntitiesTemplatesForUserGroupCase_pathIsValid_returnTemplatesMap()
+	{
+		List<String> filesList = new ArrayList<String>();
+		filesList.add("/UserpermissionAppService.java.ftl");
+		filesList.add("/UserAppService.java.ftl");
+		filesList.add("/UserroleAppService.java.ftl");
+		filesList.add("/PermissionAppService.java.ftl");
 
+		Map<String,Object> expectedList = new HashMap<String,Object>();
+		expectedList.put("/PermissionAppService.java.ftl","/PermissionAppService.java");
+		
+		Mockito.doReturn(filesList).when(mockedCodeGeneratorUtils).readFilesFromDirectory(anyString());
+		Mockito.doReturn(filesList).when(mockedCodeGeneratorUtils).replaceFileNames(any(List.class),anyString());
+
+		Assertions.assertThat(entityGenerator.getAuthenticationEntitiesTemplatesForUserGroupCase(destPath.getAbsolutePath())).isEqualTo(expectedList);
+	}
+	
 	@Test
 	public void buildRootMap_autenticationTableIsNull_returnMap()
 	{

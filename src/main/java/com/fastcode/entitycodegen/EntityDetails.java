@@ -50,7 +50,6 @@ public class EntityDetails {
 		this.idClass = idClass;
 	}
 
-
 	public Map<String, String> getPrimaryKeys() {
 		return primaryKeys;
 	}
@@ -144,7 +143,7 @@ public class EntityDetails {
 		return StringUtils.join(splittedNames, "-");
 	}
 	public EntityDetails retreiveEntityFieldsAndRships(Class<?> entityClass, String entityName,
-			List<Class<?>> classList) {
+			List<Class<?>> classList) { 
 
 		Map<String, FieldDetails> fieldsMap = new HashMap<>();
 		Map<String, RelationDetails> relationsMap = new HashMap<>();
@@ -169,12 +168,12 @@ public class EntityDetails {
 				JoinDetails joinDetails=new JoinDetails();
 				String str = field.getType().toString();
 				int index = str.lastIndexOf(".") + 1;
-                details.setIsNullable(true);
+				details.setIsNullable(true);
 				details.setFieldName(field.getName());
 				String fieldType=str.substring(index);
 				if(fieldType.equals("int"))
 				{
-					fieldType="Integer";
+					fieldType="Integer"; 
 				}
 				fieldType=fieldType.substring(0, 1).toUpperCase() + fieldType.substring(1);
 				details.setFieldType(fieldType);

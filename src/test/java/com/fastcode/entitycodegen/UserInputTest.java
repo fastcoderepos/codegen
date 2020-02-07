@@ -98,11 +98,13 @@ public class UserInputTest {
 		FieldDetails details = new FieldDetails();
 		details.setFieldName("UserName");
 		details.setFieldType("String");
+		details.setIsNullable(false);
 		fieldsList.add(details);
 		
 		FieldDetails details1 = new FieldDetails();details = new FieldDetails();
 		details1.setFieldName("UserId");
 		details1.setFieldType("Long");
+		details1.setIsNullable(false);
 		fieldsList.add(details1);
 		
 		Mockito.doReturn(fieldsList).when(userInput).getFilteredFieldsList(fieldsList);

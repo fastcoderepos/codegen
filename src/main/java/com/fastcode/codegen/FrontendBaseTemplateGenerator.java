@@ -99,13 +99,13 @@ public class FrontendBaseTemplateGenerator {
 				entityNamesList.put(codeGeneratorUtils.camelCaseToKebabCase(className), className);
 			}
 		}
-
-		if(!authType.equals(AuthenticationType.NONE)) {
+  
+		if(!authType.equals(AuthenticationType.NONE)) {  
 			List<String> authEntitiesList = getAuthEntitiesNamesList(authenticationInfo);
 			for(String authEntity: authEntitiesList) {
 				entityNamesList.put(codeGeneratorUtils.camelCaseToKebabCase(authEntity), authEntity);
 			}
-		}
+		} 
 		
 		
 		return entityNamesList;
@@ -143,7 +143,7 @@ public class FrontendBaseTemplateGenerator {
 		return entityNamesList;
 	}
 	
-	public Map<String, Object> getTemplates(String path) {
+	public Map<String, Object> getTemplates(String path) {   
 		List<String> filesList = codeGeneratorUtils.readFilesFromDirectory(path);
 		filesList = codeGeneratorUtils.replaceFileNames(filesList, path);
 		Map<String, Object> templates = new HashMap<>();
@@ -245,7 +245,7 @@ public class FrontendBaseTemplateGenerator {
           JSONObject jsonObject = (JSONObject) jsonUtils.readJsonFile(path);
           JSONObject compilerOptions = (JSONObject) jsonObject.get("compilerOptions");
 
-          compilerOptions.put("resolveJsonModule",true);
+      //    compilerOptions.put("resolveJsonModule",true);
           compilerOptions.put("esModuleInterop",true);
           compilerOptions.put("allowSyntheticDefaultImports",true);
 

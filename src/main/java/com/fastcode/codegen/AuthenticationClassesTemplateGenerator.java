@@ -347,7 +347,7 @@ public class AuthenticationClassesTemplateGenerator {
 	}
 
 	public void generateSilentRefreshFile(String destination){
-
+   
 		Map<String, Object> template = new HashMap<>();
 		template.put("silent-refresh.html.ftl", "silent-refresh.html");
 		new File(destination).mkdirs();
