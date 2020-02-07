@@ -16,18 +16,21 @@ export class VirtualScrollDirective {
     this.element.addEventListener('scroll', this.scrollEventHandler, true);
   }
 
+  /**
+   * Handles scroll event of the element
+   * and emits onScroll event.
+   */
   scrollEventHandler = (e) =>{
     const tableViewHeight = e.target.offsetHeight // viewport
-      const tableScrollHeight = e.target.scrollHeight // length of all table
-      const scrollLocation = e.target.scrollTop; // how far user scrolled
-  
-      // If the user has scrolled within 40px of the bottom, add more data
-      const buffer = 40;
-      const limit = tableScrollHeight - tableViewHeight - buffer;
-  
-      if (scrollLocation > limit) {
-        this.onScroll.emit()
-      }
-  }
+    const tableScrollHeight = e.target.scrollHeight // length of all table
+    const scrollLocation = e.target.scrollTop; // how far user scrolled
 
+    // If the user has scrolled within 40px of the bottom, add more data
+    const buffer = 40;
+    const limit = tableScrollHeight - tableViewHeight - buffer;
+
+    if (scrollLocation > limit) {
+      this.onScroll.emit()
+    }
+  }
 }

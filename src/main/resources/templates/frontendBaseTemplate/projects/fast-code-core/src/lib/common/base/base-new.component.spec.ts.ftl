@@ -1,318 +1,271 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { By } from "@angular/platform-browser";
-import { MatDialogRef, MAT_DIALOG_DATA, MatOption } from '@angular/material';
-import { MatAutocompleteSelectedEvent, MatAutocomplete } from '@angular/material/autocomplete';
-import { of, Observable } from 'rxjs';
-import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { Router } from '@angular/router';
-import { RouterTestingModule } from '@angular/router/testing';
-import { Location } from '@angular/common';
+import { Component, OnInit, Inject, HostListener } from '@angular/core';
+import { MatDialogRef, MatDialog, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 
-import { TestingModule, checkValues } from 'src/testing/utils';
-import { IDummy, DummyService, DummyNewComponent, DummyListComponent } from './dummy/index';
-import { ISearchField, operatorType } from '../components/list-filters/ISearchCriteria';
+import { GenericApiService } from '../core/generic-api.service';
+import { ActivatedRoute, Router } from "@angular/router";
+import { FormBuilder, FormGroup } from '@angular/forms';
+import { first } from 'rxjs/operators';
+import { of as observableOf, Observable } from 'rxjs';
 
+import { Globals } from '../../globals';
 
-describe('BaseNewComponent', () => {
-	let component: DummyNewComponent;
-	let fixture: ComponentFixture<DummyNewComponent>;
-	const relationData = {
-		parentId: 1,
-		parentDescriptiveField: 'parent1'
-	};
-	let data: IDummy = {
-		id: 1,
-		name: 'name1',
-		...relationData
-	};
-	const parentData = [{id: 1, name: "parent1"}];
+import { IAssociationEntry } from '../core/iassociationentry';
+import { PickerDialogService } from '../../common/components/picker/picker-dialog.service';
+import { ISearchField, operatorType } from '../../common/components/list-filters/ISearchCriteria';
+import { IGlobalPermissionService } from '../core/iglobal-permission.service';
 
-	describe('', () => {
-		it('should set the passed data to form', async () => {
-			TestBed.configureTestingModule({
-				declarations: [
-					DummyNewComponent,
-					DummyListComponent
-				],
-				imports: [
-					TestingModule,
-					RouterTestingModule.withRoutes([
-						{ path: 'dummy', component: DummyListComponent }
-					])
-				],
-				providers: [
-					DummyService,
-					{ provide: MAT_DIALOG_DATA, useValue: relationData },
-					{ provide: MatDialogRef, useValue: { close: (dialogResult: any) => { }, updateSize: () => { } } },
-				],
-				schemas: [NO_ERRORS_SCHEMA]
-			}).compileComponents();
+import { CanDeactivateGuard } from '../core/can-deactivate.guard';
+import { ErrorService } from '../core/error.service';
+@Component({
 
-			fixture = TestBed.createComponent(DummyNewComponent);
-			component = fixture.componentInstance;
-			fixture.detectChanges();
+  template: ''
 
-			component.checkPassedData();
-			fixture.detectChanges();
-			expect(checkValues(component.itemForm.getRawValue(), relationData)).toBe(true);
+})
+export class BaseNewComponent<E> implements OnInit, CanDeactivateGuard {
 
-		});
-	});
+  /** 
+   * Guard against browser refresh, close, etc.
+   * Checks if user has some unsaved changes 
+   * before leaving the page.
+   */
+  @HostListener('window:beforeunload')
+  canDeactivate(): Observable<boolean> | boolean {
+    // returning true will navigate without confirmation
+    // returning false will show a confirm dialog before navigating away
+    if (this.itemForm.touched) {
+      return false
+    }
+    return true;
+  }
 
-	describe('', () => {
-		beforeEach(async(() => {
-			TestBed.configureTestingModule({
-				declarations: [
-					DummyNewComponent,
-					DummyListComponent
-				],
-				imports: [
-					TestingModule,
-					RouterTestingModule.withRoutes([
-						{ path: 'dummy', component: DummyListComponent }
-					])
-				],
-				providers: [
-					DummyService,
-					{ provide: MAT_DIALOG_DATA, useValue: {} },
-					{ provide: MatDialogRef, useValue: { close: (dialogResult: any) => { }, updateSize: () => { } } },
-				],
-				schemas: [NO_ERRORS_SCHEMA]
-			}).compileComponents();
-		}));
+  itemForm: FormGroup;
+  loading = false;
+  submitted = false;
+  title: string = "title";
 
-		beforeEach(() => {
-			fixture = TestBed.createComponent(DummyNewComponent);
-			component = fixture.componentInstance;
-			fixture.detectChanges();
-		});
+  pickerDialogRef: MatDialogRef<any>;
 
-		it('should create', () => {
-			expect(component).toBeTruthy();
-		});
+  associations: IAssociationEntry[];
+  parentAssociations: IAssociationEntry[];
 
-		it('should run #ngOnInit()', async () => {
-			spyOn(component.dataService, "getById").and.returnValue(of(data));
-			component.ngOnInit();
+  entityName: string = "";
+  IsReadPermission: Boolean = false;
+  IsCreatePermission: Boolean = false;
+  IsUpdatePermission: Boolean = false;
+  IsDeletePermission: Boolean = false;
+  globalPermissionService: IGlobalPermissionService;
 
-			expect(component.itemForm).toBeDefined();
-			expect(component.title.length).toBeGreaterThan(0);
-			expect(component.associations).toBeDefined();
-			expect(component.parentAssociations).toBeDefined();
-		});
+  isMediumDeviceOrLess: boolean;
+  mediumDeviceOrLessDialogSize: string = "100%";
+  largerDeviceDialogWidthSize: string = "65%";
+  largerDeviceDialogHeightSize: string = "75%";
 
-		it('should create new entry and close the dialog', async () => {
-			component.itemForm.patchValue(data);
-			component.itemForm.enable();
-			fixture.detectChanges();
-			spyOn(component.dataService, "create").and.returnValue(of(data));
-			spyOn(component.dialogRef, 'close').and.returnValue();
+  errorMessage = '';
 
-			component.onSubmit();
+  constructor(
+    public formBuilder: FormBuilder,
+    public router: Router,
+    public route: ActivatedRoute,
+    public dialog: MatDialog,
+    public dialogRef: MatDialogRef<any>,
+    @Inject(MAT_DIALOG_DATA) public data: any,
+    public global: Globals,
+    public pickerDialogService: PickerDialogService,
+    public dataService: GenericApiService<E>,
+    public errorService: ErrorService
+  ) { }
 
-			expect(component.dataService.create).toHaveBeenCalledWith(data);
-      expect(component.dialogRef.close).toHaveBeenCalledWith(data);
+  /**
+   * Sets CRUD permissions for entity for
+   * currently logged in user.
+   */
+  setPermissions = () => {
+    if (this.globalPermissionService) {
+      let entityName = this.entityName.startsWith("I") ? this.entityName.substr(1) : this.entityName;
+      this.IsCreatePermission = this.globalPermissionService.hasPermissionOnEntity(entityName, "CREATE");
+      if (this.IsCreatePermission) {
+        this.IsReadPermission = true;
+        this.IsDeletePermission = true;
+        this.IsUpdatePermission = true;
+      } else {
+        this.IsDeletePermission = this.globalPermissionService.hasPermissionOnEntity(entityName, "DELETE");
+        this.IsUpdatePermission = this.globalPermissionService.hasPermissionOnEntity(entityName, "UPDATE");
+        this.IsReadPermission = (this.IsDeletePermission || this.IsUpdatePermission) ? true : this.globalPermissionService.hasPermissionOnEntity(entityName, "READ");
+      }
+    }
+  }
 
-		});
+  ngOnInit() {
+    this.setPermissions();
+    this.manageScreenResizing();
+  }
 
-		it('should show error occurred while creating new entry and close the dialog', async () => {
+  /**
+   * Manages screen resizing for responsiveness.
+   */
+  manageScreenResizing() {
+    this.global.isMediumDeviceOrLess$.subscribe(value => {
+      this.isMediumDeviceOrLess = value;
+      if (this.dialogRef)
+        this.dialogRef.updateSize(value ? this.mediumDeviceOrLessDialogSize : this.largerDeviceDialogWidthSize,
+          value ? this.mediumDeviceOrLessDialogSize : this.largerDeviceDialogHeightSize);
+    });
+  }
 
-			spyOn(component.errorService, 'showError').and.returnValue();
-			spyOn(component.dialogRef, 'close').and.returnValue();
-			spyOn(component.dataService, 'create').and.returnValue(
-				Observable.create(observer => {
-					observer.error(new Error("an error occurred"))
-				})
-			);
+  /**
+   * Gets data from item form and calls 
+   * service method to create the item.
+   */
+  onSubmit() {
+    if (this.itemForm.invalid) {
+      return;
+    }
 
-			component.onSubmit();
+    this.submitted = true;
+    this.loading = true;
+    this.dataService.create(this.itemForm.getRawValue())
+      .pipe(first())
+      .subscribe(
+        data => {
+          // this.alertService.success('Registration successful', true);
+          // this.router.navigate(['/users']);
+          this.dialogRef.close(data);
+        },
+        error => {
+          this.errorService.showError("Error Occured while updating");
+          this.loading = false;
+          this.dialogRef.close(null)
 
-			expect(component.errorService.showError).toHaveBeenCalled();
-			expect(component.dialogRef.close).toHaveBeenCalledWith(null);
-		});
+        });
+  }
 
-		it('should return immediately if itemForm is invalid while creating', async () => {
-			component.itemForm.setErrors({ 'invalid': true });
-			component.onSubmit();
-			expect(component.submitted).toBe(false);
-		});
+  onCancel(): void {
+    this.dialogRef.close(null);
+  }
 
-		it('should close the dialog when onCancel is called', async () => {
-			spyOn(component.dialogRef, 'close').and.returnValue();
+  /**
+   * Loads records of given association from service.
+   * @param association 
+   */
+  selectAssociation(association: IAssociationEntry) {
+    this.initializePickerPageInfo();
+    association.data = [];
+    association.service.getAll(association.searchValue, this.currentPickerPage * this.pickerPageSize, this.pickerPageSize).subscribe(items => {
+      this.initializePickerPageInfo(); // resetting the picker page info in case callback order is messed up
+      this.isLoadingPickerResults = false;
+      association.data = items;
+      this.updatePickerPageInfo(items);
+    },
+      error => {
+        this.errorMessage = <any>error;
+        this.errorService.showError("An error occured while fetching results");
+      }
+    );
+  }
+  isLoadingPickerResults = true;
 
-			component.onCancel();
+  currentPickerPage: number;
+  pickerPageSize: number;
+  lastProcessedOffsetPicker: number;
+  hasMoreRecordsPicker: boolean;
 
-			expect(component.dialogRef.close).toHaveBeenCalledWith(null);
-		});
+  searchValuePicker: ISearchField[] = [];
+  pickerItemsObservable: Observable<any>;
 
-		it('should set all permissions', async () => {
-			spyOn(component.globalPermissionService, 'hasPermissionOnEntity').withArgs('Dummy', 'CREATE').and.returnValue(true);
-			component.setPermissions();
-			fixture.detectChanges();
+  /**
+   * Initializes/Resets paging information of data list 
+   * of association showing in autocomplete options.
+   */
+  initializePickerPageInfo() {
+    this.hasMoreRecordsPicker = true;
+    this.pickerPageSize = 30;
+    this.lastProcessedOffsetPicker = -1;
+    this.currentPickerPage = 0;
+  }
 
-			expect(component.IsCreatePermission).toBe(true);
-			expect(component.IsReadPermission).toBe(true);
-			expect(component.IsDeletePermission).toBe(true);
-			expect(component.IsUpdatePermission).toBe(true);
-		});
+  /**
+   * Manages paging for virtual scrolling for data list 
+   * of association showing in autocomplete options.
+   * @param data Item data from the last service call.
+   */
+  updatePickerPageInfo(data) {
+    if (data.length > 0) {
+      this.currentPickerPage++;
+      this.lastProcessedOffsetPicker += data.length;
+    }
+    else {
+      this.hasMoreRecordsPicker = false;
+    }
+  }
 
-		it('should set all permissions except Create', async () => {
-			spyOn(component.globalPermissionService, 'hasPermissionOnEntity')
-				.withArgs('Dummy', 'CREATE').and.returnValue(false)
-				.withArgs('Dummy', 'UPDATE').and.returnValue(true)
-				.withArgs('Dummy', 'DELETE').and.returnValue(true);
-			component.setPermissions();
-			fixture.detectChanges();
+  /**
+   * Loads more data of given association when 
+   * list is scrolled to the bottom (virtual scrolling).
+   * @param association 
+   */
+  onPickerScroll(association: IAssociationEntry) {
+    if (!this.isLoadingPickerResults && this.hasMoreRecordsPicker && this.lastProcessedOffsetPicker < association.data.length) {
+      this.isLoadingPickerResults = true;
+      association.service.getAll(association.searchValue, this.currentPickerPage * this.pickerPageSize, this.pickerPageSize).subscribe(
+        items => {
+          this.isLoadingPickerResults = false;
+          association.data = association.data.concat(items);
+          this.updatePickerPageInfo(items);
+        },
+        error => {
+          this.errorMessage = <any>error;
+          this.errorService.showError("An error occured while fetching more results");
+        }
+      );
+    }
+  }
 
-			expect(component.IsCreatePermission).toBe(false);
-			expect(component.IsReadPermission).toBe(true);
-			expect(component.IsDeletePermission).toBe(true);
-			expect(component.IsUpdatePermission).toBe(true);
-		});
+  /**
+   * Loads the data meeting given criteria of given association.
+   * @param searchValue Filters to be applied.
+   * @param association 
+   */
+  onPickerSearch(searchValue: string, association: IAssociationEntry) {
 
-		it('should be able to deactivate', async () => {
-			expect(component.canDeactivate()).toBe(true);
-		});
+    let searchField: ISearchField = {
+      fieldName: association.referencedDescriptiveField,
+      operator: operatorType.Contains,
+      searchValue: searchValue ? searchValue : ""
+    }
+    association.searchValue = [searchField];
+    this.selectAssociation(association);
+  }
 
-		it('should not be able to deactivate', async () => {
-			component.itemForm.markAsTouched();
-			expect(component.canDeactivate()).toBe(false);
-		});
+  /**
+   * Sets listener to change event of autocomplete
+   * fields.
+   */
+  setPickerSearchListener() {
+    this.associations.forEach(association => {
+      if (!association.isParent) {
+        this.itemForm.get(association.descriptiveField).valueChanges.subscribe(value => this.onPickerSearch(value, association));
+      }
+    })
+  }
 
-		it('should initialize picker info', async () => {
-			component.initializePickerPageInfo();
-			expect(component.hasMoreRecordsPicker).toEqual(true);
-			expect(component.pickerPageSize).toEqual(30);
-			expect(component.lastProcessedOffsetPicker).toEqual(-1);
-			expect(component.currentPickerPage).toEqual(0);
-		});
+  /**
+   * Sets form values for given associtaion 
+   * when some option is selected. 
+   * @param event 
+   * @param association 
+   */
+  onAssociationOptionSelected(event: MatAutocompleteSelectedEvent, association: IAssociationEntry) {
+    let selectedOption = event.option.value;
+    association.column.forEach(col => {
+      this.itemForm.get(col.key).setValue(selectedOption[col.referencedkey]);
+    });
+    this.itemForm.get(association.descriptiveField).setValue(selectedOption[association.referencedDescriptiveField]);
+  }
 
-		it('should update picker page info when more data is available', async () => {
-			let currentPickerPage = component.currentPickerPage;
-			let lastProcessedOffsetPicker = component.lastProcessedOffsetPicker;
-			component.updatePickerPageInfo([data]);
-
-			expect(component.currentPickerPage).toEqual(currentPickerPage + 1);
-			expect(component.lastProcessedOffsetPicker).toEqual(lastProcessedOffsetPicker + 1);
-		});
-
-		it('should update picker page info when more data is not available', async () => {
-			component.updatePickerPageInfo([]);
-			expect(component.hasMoreRecordsPicker).toEqual(false);
-		});
-
-		it('should get the list of associated parent', async () => {
-			let association = component.associations[0];
-			spyOn(component , "initializePickerPageInfo").and.callFake( () => {
-				component.hasMoreRecordsPicker = true;
-				component.pickerPageSize = 30;
-				component.lastProcessedOffsetPicker = -1;
-				component.currentPickerPage = 0;
-			});
-			spyOn(component, 'updatePickerPageInfo').and.returnValue();
-			spyOn(association.service, 'getAll').and.returnValue(of(parentData));
-			component.selectAssociation(association);
-
-			expect(component.updatePickerPageInfo).toHaveBeenCalled();
-			expect(association.data).toEqual(parentData);
-		});
-		
-		it('should show error while fetching the list of associated parent', async () => {
-			let association = component.associations[0];
-			spyOn(component , "initializePickerPageInfo").and.callFake( () => {
-				component.hasMoreRecordsPicker = true;
-				component.pickerPageSize = 30;
-				component.lastProcessedOffsetPicker = -1;
-				component.currentPickerPage = 0;
-			});
-			spyOn(component.errorService, 'showError').and.returnValue();
-			spyOn(association.service, 'getAll').and.returnValue(Observable.create(observer => {
-				observer.error(new Error("an error occurred"))
-			}));
-			component.selectAssociation(association);
-
-			expect(component.errorService.showError).toHaveBeenCalled();
-		});
-
-		it('should load more data for the list of associated parent when scrolled', async () => {
-			let association = component.associations[0];
-			association.data = parentData;
-			component.hasMoreRecordsPicker = true;
-			component.pickerPageSize = 30;
-			component.lastProcessedOffsetPicker = -1;
-			component.currentPickerPage = 0;
-			component.isLoadingPickerResults = false;
-
-			spyOn(association.service, 'getAll').and.returnValue(of(parentData));
-			spyOn(component, 'updatePickerPageInfo').and.returnValue();
-
-			component.onPickerScroll(association);
-
-			expect(association.data.length).toEqual(parentData.length * 2);
-			expect(component.isLoadingPickerResults).toEqual(false);
-			expect(component.updatePickerPageInfo).toHaveBeenCalled();
-		});
-		
-		it('should not load more data for the list of associated parent when scrolled', async () => {
-			let association = component.associations[0];
-			association.data = parentData;
-			component.hasMoreRecordsPicker = true;
-			component.pickerPageSize = 30;
-			component.lastProcessedOffsetPicker = -1;
-			component.currentPickerPage = 0;
-			component.isLoadingPickerResults = false;
-
-			spyOn(association.service, 'getAll').and.returnValue(Observable.create(observer => {
-				observer.error(new Error("an error occurred"))
-			}));
-			spyOn(component.errorService, 'showError').and.returnValue();
-
-			component.onPickerScroll(association);
-
-			expect(component.errorService.showError).toHaveBeenCalled();
-		});
-		
-		it('should not call getAll method of service if first condition is not true', async () => {
-			let association = component.associations[0];
-			component.isLoadingPickerResults = true;
-
-			spyOn(association.service, 'getAll').and.returnValue(of(null));
-			component.onPickerScroll(association);
-
-			expect(association.service.getAll).toHaveBeenCalledTimes(0);
-		});
-
-		it('should load more data for the list of associated parent when some input is entered', async () => {
-			let association = component.associations[0];
-			let searchValue: string = "test";
-			let searchField: ISearchField = {
-				fieldName: association.referencedDescriptiveField,
-				operator: operatorType.Contains,
-				searchValue: searchValue ? searchValue : ""
-			}
-			association.searchValue = [searchField];
-			
-			spyOn(component, 'selectAssociation').and.returnValue();
-
-			component.onPickerSearch(searchValue,association);
-
-			expect(component.selectAssociation).toHaveBeenCalledWith(association);
-		});
-		
-		it('should update the form when some option from autocomplete is selected for association', async () => {
-			
-			let association = component.associations[0];
-			let option: MatOption = new MatOption(null,null,null,null);
-			option.value = parentData[0];
-			let event:MatAutocompleteSelectedEvent = new MatAutocompleteSelectedEvent(null, option); 
-
-			component.onAssociationOptionSelected(event,association);
-
-			association.column.forEach(col => {
-				expect(component.itemForm.get(col.key).value).toEqual(parentData[0][col.referencedkey]);
-			});
-			expect(component.itemForm.get(association.descriptiveField).value).toEqual(parentData[0][association.referencedDescriptiveField]);
-		});
-	});
-
-});
+  checkPassedData() {
+    if (this.data) {
+      this.itemForm.patchValue(this.data);
+    }
+  }
+}
