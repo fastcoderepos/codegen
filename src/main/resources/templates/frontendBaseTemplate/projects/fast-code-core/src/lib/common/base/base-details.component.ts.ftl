@@ -126,7 +126,8 @@ export class BaseDetailsComponent<E> implements OnInit, CanDeactivateGuard {
   }
 
   /**
-   * Gets data from item form and call service method to update the item.
+   * Gets data from item form and calls
+   * service method to update the item.
    */
   onSubmit() {
     if (this.itemForm.invalid) {
@@ -187,7 +188,7 @@ export class BaseDetailsComponent<E> implements OnInit, CanDeactivateGuard {
 
   /**
    * Initializes/Resets paging information of data list 
-   * showing in autocomplete options.
+   * of association showing in autocomplete options.
    */
   initializePickerPageInfo() {
     this.hasMoreRecordsPicker = true;
@@ -198,7 +199,7 @@ export class BaseDetailsComponent<E> implements OnInit, CanDeactivateGuard {
 
   /**
    * Manages paging for virtual scrolling for data list 
-   * showing in autocomplete options.
+   * of association showing in autocomplete options.
    * @param data Item data from the last service call.
    */
   updatePickerPageInfo(data) {
@@ -233,7 +234,11 @@ export class BaseDetailsComponent<E> implements OnInit, CanDeactivateGuard {
     }
   }
 
-  // load the data meeting given criteria of given association
+  /**
+   * Loads the data meeting given criteria of given association.
+   * @param searchValue Filters to be applied.
+   * @param association 
+   */
   onPickerSearch(searchValue: string, association: IAssociationEntry) {
 
     let searchField: ISearchField = {
@@ -245,6 +250,10 @@ export class BaseDetailsComponent<E> implements OnInit, CanDeactivateGuard {
     this.selectAssociation(association);
   }
 
+  /**
+   * Sets listener to change event of autocomplete
+   * fields.
+   */
   setPickerSearchListener() {
     this.associations.forEach(association => {
       if (!association.isParent) {
@@ -253,6 +262,12 @@ export class BaseDetailsComponent<E> implements OnInit, CanDeactivateGuard {
     })
   }
 
+  /**
+   * Sets form values for given associtaion 
+   * when some option is selected. 
+   * @param event 
+   * @param association 
+   */
   onAssociationOptionSelected(event: MatAutocompleteSelectedEvent, association: IAssociationEntry) {
     let selectedOption = event.option.value;
     association.column.forEach(col => {
@@ -261,6 +276,12 @@ export class BaseDetailsComponent<E> implements OnInit, CanDeactivateGuard {
     this.itemForm.get(association.descriptiveField).setValue(selectedOption[association.referencedDescriptiveField]);
   }
 
+  /**
+   * Gets query parameters passed in url
+   * for given association.
+   * @param association
+   * @returns Object containing params as keys.
+   */
   getQueryParams(association: IAssociationEntry) {
     let queryParam: any = {};
     association.column.forEach(col => {
@@ -269,7 +290,11 @@ export class BaseDetailsComponent<E> implements OnInit, CanDeactivateGuard {
     return queryParam;
   }
 
-  // redirect to the list(if relationship is oneToMany) or details(if oneToOne) page of given association.
+  /**
+   * Redirects to the list(if relationship is oneToMany) or 
+   * details(if oneToOne) page of given association.
+   * @param association 
+   */
   openChildDetails(association: IAssociationEntry) {
     if (association.type == "OneToMany") {
       this.router.navigate(['/' + association.table.toLowerCase()], { queryParams: this.getQueryParams(association) });
