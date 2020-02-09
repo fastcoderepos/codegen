@@ -6,7 +6,9 @@ import [=PackageName].application.authorization.userrole.dto.FindUserroleByIdOut
 import [=PackageName].application.authorization.userpermission.dto.FindUserpermissionByIdOutput;
 import [=PackageName].application.authorization.user.UserAppService;
 import [=PackageName].application.authorization.user.dto.*;
+<#if AuthenticationType != "oidc">
 import [=PackageName].security.JWTAppService;
+</#if>
 import [=CommonModulePackage].search.SearchCriteria;
 import [=CommonModulePackage].search.SearchUtils;
 import [=CommonModulePackage].application.OffsetBasedPageRequest;
@@ -46,10 +48,13 @@ public class UserController {
 	<#if AuthenticationType == "database">
 	@Autowired
     private PasswordEncoder pEncoder;
-    </#if>
     
+    </#if>
+    <#if AuthenticationType != "oidc">
     @Autowired
  	private JWTAppService _jwtAppService;
+ 	
+ 	</#if>
 
 	@Autowired
 	private LoggingHelper logHelper;
@@ -58,12 +63,14 @@ public class UserController {
 	private Environment env;
 	
 	public UserController(UserAppService userAppService, UserpermissionAppService userpermissionAppService,
-			UserroleAppService userroleAppService,<#if AuthenticationType == "database">PasswordEncoder pEncoder,</#if>JWTAppService jwtAppService, LoggingHelper logHelper) {
+			UserroleAppService userroleAppService,<#if AuthenticationType == "database"> PasswordEncoder pEncoder,</#if><#if AuthenticationType != "oidc"> JWTAppService jwtAppService,</#if> LoggingHelper logHelper) {
 		super();
 		this._userAppService = userAppService;
 		this._userpermissionAppService = userpermissionAppService;
 		this._userroleAppService = userroleAppService;
+		<#if AuthenticationType != "oidc">
 		this._jwtAppService = jwtAppService;
+		</#if>
 		<#if AuthenticationType == "database">
 		this.pEncoder = pEncoder;
 		</#if>
@@ -125,13 +132,16 @@ public class UserController {
 			logHelper.getLogger().error("Unable to update. User with id {} not found.", id);
 			return new ResponseEntity(new EmptyJsonResponse(), HttpStatus.NOT_FOUND);
 		}
+		
 		<#if AuthenticationType == "database">
 		user.setPassword(currentUser.getPassword());
-		</#if>
 		if(currentUser.getIsActive() && !user.getIsActive()) { 
- 
             _jwtAppService.deleteAllUserTokens(currentUser.getUserName()); 
         } 
+        <#elseif AuthenticationType == "ldap">
+        _jwtAppService.deleteAllUserTokens(currentUser.getUserName()); 
+		</#if>
+		
     return new ResponseEntity(_userAppService.Update(Long.valueOf(id),user), HttpStatus.OK);
 	}
 </#if>

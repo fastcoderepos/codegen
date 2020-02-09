@@ -6,6 +6,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -120,6 +121,9 @@ public class FrontendBaseTemplateGeneratorTest {
 
 		Map<String, Object> root = new HashMap<>();
 		root.put("AppName", testValue);
+		root.put("AuthEntityList",new ArrayList<String>());
+		root.put("EntityList", new ArrayList<String>());
+		root.put("UserOnly", authenticationInfo.getUserOnly());
 		root.put("AuthenticationType","database");
 		root.put("UserInput","true");
 		root.put("AuthenticationTable", testValue);
@@ -128,6 +132,7 @@ public class FrontendBaseTemplateGeneratorTest {
 		root.put("ExcludeUserNew", false);
 
 		Mockito.doReturn(new HashMap()).when(frontendBaseTemplateGenerator).getEntityNamesList(any(List.class),any(AuthenticationInfo.class));
+		Mockito.doReturn(new ArrayList<String>()).when(frontendBaseTemplateGenerator).getAuthEntitiesNamesList(authenticationInfo);
 		Assertions.assertThat(frontendBaseTemplateGenerator.buildRootMap(testValue,authenticationInfo, new ArrayList<String>())).isEqualTo(root);
 	}
 
@@ -141,6 +146,9 @@ public class FrontendBaseTemplateGeneratorTest {
 		
 		Map<String, Object> root = new HashMap<>();
 		root.put("AppName", testValue);
+		root.put("AuthEntityList",new ArrayList<String>());
+		root.put("EntityList", new ArrayList<String>());
+		root.put("UserOnly", authenticationInfo.getUserOnly());
 		root.put("AuthenticationType", "database");
 		root.put("UserInput",null);
 		root.put("AuthenticationTable", "User");
@@ -149,13 +157,20 @@ public class FrontendBaseTemplateGeneratorTest {
 		root.put("ExcludeUserNew", false);
 	
 		Mockito.doReturn(new HashMap()).when(frontendBaseTemplateGenerator).getEntityNamesList(any(List.class),any(AuthenticationInfo.class));
+		Mockito.doReturn(new ArrayList<String>()).when(frontendBaseTemplateGenerator).getAuthEntitiesNamesList(authenticationInfo);
+		
 		Assertions.assertThat(frontendBaseTemplateGenerator.buildRootMap(testValue, authenticationInfo, new ArrayList<String>())).isEqualTo(root);
 
 	} 
 	
 	@Test
-	public void getEntityNamesList_authenticationTypeIsDatabaseAndAuthenticationTableIsNull_returnMap()
+	public void getEntityNamesList_authenticationTypeIsNoneAndAuthenticationTableIsNull_returnMap()
 	{
+		AuthenticationInfo authenticationInfo = new AuthenticationInfo();
+		authenticationInfo.setAuthenticationTable(null);
+		authenticationInfo.setAuthenticationType(AuthenticationType.DATABASE);
+		authenticationInfo.setUserOnly(false);
+		
 		List<String> list = new ArrayList<String>();
 		list.add("entity1");
 		list.add("entity2");
@@ -163,69 +178,93 @@ public class FrontendBaseTemplateGeneratorTest {
 		Map<String, String> entityNamesList = new HashMap<String, String>();
 		entityNamesList.put("entity-1", "entity1");
 		entityNamesList.put("entity-2", "entity2");
-		entityNamesList.put("role", "Role");
-		entityNamesList.put("permission", "Permission");
-		entityNamesList.put("role-permission", "Rolepermission");
-		entityNamesList.put("user", "User");
-		entityNamesList.put("user-permission", "Userpermission");
-		entityNamesList.put("user-role", "Userrole");
 		
-		Mockito.doReturn("entity-1", "entity-2","role", "permission", "role-permission", "user", "user-permission", "user-role").when(mockedUtils).camelCaseToKebabCase(anyString());
-	//    Assertions.assertThat()
+		Mockito.doReturn("entity-1", "entity-2").when(mockedUtils).camelCaseToKebabCase(anyString());
+	    Mockito.doReturn(new ArrayList<String>()).when(frontendBaseTemplateGenerator).getAuthEntitiesNamesList(authenticationInfo);
+		Assertions.assertThat(frontendBaseTemplateGenerator.getEntityNamesList(list, authenticationInfo)).isEqualTo(entityNamesList);
 	}
-	
+	  
 	@Test
 	public void getEntityNamesList_authenticationTypeIsDatabaseAndAuthenticationTableIsNotNull_returnMap()
 	{
+		AuthenticationInfo authenticationInfo = new AuthenticationInfo();
+		authenticationInfo.setAuthenticationTable("entity1");
+		authenticationInfo.setAuthenticationType(AuthenticationType.LDAP);
+		authenticationInfo.setUserOnly(true);
+		
 		List<String> list = new ArrayList<String>();
 		list.add("entity1");
 		list.add("entity2");
 		
+		List<String> authList = new ArrayList<String>();
+		authList.add("Role");
+		authList.add("Permission");
+		authList.add("Rolepermission");
+		
 		Map<String, String> entityNamesList = new HashMap<String, String>();
-		entityNamesList.put("entity-1", "entity1");
 		entityNamesList.put("entity-2", "entity2");
 		entityNamesList.put("role", "Role");
 		entityNamesList.put("permission", "Permission");
 		entityNamesList.put("role-permission", "Rolepermission");
-		entityNamesList.put("user", "User");
-		entityNamesList.put("user-permission", "Userpermission");
-		entityNamesList.put("user-role", "Userrole");
-		
-		Mockito.doReturn("entity-1", "entity-2","role", "permission", "role-permission", "user", "user-permission", "user-role").when(mockedUtils).camelCaseToKebabCase(anyString());
+
+		Mockito.doReturn("entity-2","role", "permission", "role-permission").when(mockedUtils).camelCaseToKebabCase(anyString());
+		Mockito.doReturn(authList).when(frontendBaseTemplateGenerator).getAuthEntitiesNamesList(authenticationInfo);
+		Assertions.assertThat(frontendBaseTemplateGenerator.getEntityNamesList(list, authenticationInfo)).isEqualTo(entityNamesList);
+	
 	}
-//	public Map<String, String> getEntityNamesList(List<String> entityList, AuthenticationInfo authenticationInfo){
-//
-//		Map<String, String> entityNamesList = new HashMap<String, String>();
-//		for(String entity: entityList) {
-//			String cName = entity.substring(entity.lastIndexOf(".") + 1);
-//			entityNamesList.put(codeGeneratorUtils.camelCaseToKebabCase(cName), cName);
-//		}
-//		
-//		String customUser = authenticationInfo.getAuthenticationTable();
-//		AuthenticationType authType = authenticationInfo.getAuthenticationType();
-//		Boolean userOnly = authenticationInfo.getUserOnly();
-//
-//		if(!authType.equals(AuthenticationType.NONE)) {
-//			entityNamesList.put(codeGeneratorUtils.camelCaseToKebabCase("Role"), "Role");
-//			entityNamesList.put(codeGeneratorUtils.camelCaseToKebabCase("Permission"), "Permission");
-//			entityNamesList.put(codeGeneratorUtils.camelCaseToKebabCase("Rolepermission"), "Rolepermission");
-//
-//			if(authType.equals(AuthenticationType.DATABASE) || (!authType.equals(AuthenticationType.DATABASE) && userOnly) )
-//			{
-//				if(customUser == null) {
-//					entityNamesList.put(codeGeneratorUtils.camelCaseToKebabCase("User"), "User");
-//					entityNamesList.put(codeGeneratorUtils.camelCaseToKebabCase("Userpermission"), "Userpermission");
-//					entityNamesList.put(codeGeneratorUtils.camelCaseToKebabCase("Userrole"), "Userrole");
-//				} else {
-//					entityNamesList.put(codeGeneratorUtils.camelCaseToKebabCase(customUser + "permission"), customUser + "permission");
-//					entityNamesList.put(codeGeneratorUtils.camelCaseToKebabCase(customUser + "role"), customUser + "role");
-//				}
-//			}
-//		}
-//		
-//		
-//		return entityNamesList;
-//	}
+	
+	@Test
+	public void getAuthEntitiesNamesList_authenticationTypeIsNone_returnList()
+	{
+		AuthenticationInfo authenticationInfo = new AuthenticationInfo();
+		authenticationInfo.setAuthenticationTable(null);
+		authenticationInfo.setAuthenticationType(AuthenticationType.NONE);
+		authenticationInfo.setUserOnly(false);
+		
+		List<String> authList = new ArrayList<String>();
+		
+		Assertions.assertThat(frontendBaseTemplateGenerator.getAuthEntitiesNamesList(authenticationInfo)).isEqualTo(authList);
+		
+	}
+	
+	@Test
+	public void getAuthEntitiesNamesList_authenticationTypeIsDatabaseAndAuthenticationTableIsNotNull_returnList()
+	{
+		AuthenticationInfo authenticationInfo = new AuthenticationInfo();
+		authenticationInfo.setAuthenticationTable("Entity1");
+		authenticationInfo.setAuthenticationType(AuthenticationType.DATABASE);
+		authenticationInfo.setUserOnly(false);
+		
+		List<String> authList = new ArrayList<String>();
+		authList.add("Role");
+		authList.add("Permission");
+		authList.add("Rolepermission");
+		authList.add("Entity1");
+		authList.add("Entity1permission");
+		authList.add("Entity1role");
+		
+		Assertions.assertThat(frontendBaseTemplateGenerator.getAuthEntitiesNamesList(authenticationInfo)).isEqualTo(authList);
+		
+	}
+	
+	@Test
+	public void getAuthEntitiesNamesList_authenticationTypeIsDatabaseAndAuthenticationTableIsNull_returnList()
+	{
+		AuthenticationInfo authenticationInfo = new AuthenticationInfo();
+		authenticationInfo.setAuthenticationTable(null);
+		authenticationInfo.setAuthenticationType(AuthenticationType.LDAP);
+		authenticationInfo.setUserOnly(true);
+		
+		List<String> authList = new ArrayList<String>();
+		authList.add("Role");
+		authList.add("Permission");
+		authList.add("Rolepermission");
+		authList.add("User");
+		authList.add("Userpermission");
+		authList.add("Userrole");
+		
+		Assertions.assertThat(frontendBaseTemplateGenerator.getAuthEntitiesNamesList(authenticationInfo)).isEqualTo(authList);
+	}
 
 	@Test
 	public void getTemplates_pathIsValid_returnMap()
@@ -307,6 +346,68 @@ public class FrontendBaseTemplateGeneratorTest {
 		Mockito.doReturn(obj).when(mockedJsonUtils).readJsonFile(anyString());
 		Mockito.doNothing().when(mockedJsonUtils).writeJsonToFile(anyString(), anyString());
 		frontendBaseTemplateGenerator.editAngularJsonFile(newTempFolder.getAbsolutePath(), "exampleClient");
+	}
+	
+	@Test
+	public void editAngularJsonFile_pathIsNotValid_throwIOException() throws IOException, ParseException
+	{
+		Mockito.doThrow(new IOException()).when(mockedJsonUtils).readJsonFile(anyString());
+		frontendBaseTemplateGenerator.editAngularJsonFile("", "exampleClient");
+	}
+	
+	
+	@Test
+	public void editTsConfigJsonFile_pathIsNotValid_throwIOException() throws IOException, ParseException
+	{
+
+		Mockito.doThrow(new IOException()).when(mockedJsonUtils).readJsonFile(anyString());
+		frontendBaseTemplateGenerator.editTsConfigJsonFile("");
+	}
+	
+	@Test
+	public void editTsConfigJsonFile_pathIsValid_returnNothing() throws IOException, ParseException
+	{
+		File newTempFolder = folder.newFile("tsconfig.json");
+		String data=  getTsConfigData();
+		FileUtils.writeStringToFile(newTempFolder, data);
+		JSONParser parser = new JSONParser();
+		FileReader fr = new FileReader(newTempFolder.getAbsolutePath());
+		Object obj = parser.parse(fr);
+		fr.close();
+
+		Mockito.doReturn(obj).when(mockedJsonUtils).readJsonFile(anyString());
+		Mockito.doNothing().when(mockedJsonUtils).writeJsonToFile(anyString(), anyString());
+		frontendBaseTemplateGenerator.editTsConfigJsonFile(newTempFolder.getAbsolutePath());
+	}
+	
+	private String getTsConfigData()
+	{
+		return "{\r\n" + 
+				"  \"compileOnSave\": false,\r\n" + 
+				"  \"angularCompilerOptions\": {\r\n" + 
+				"    \"fullTemplateTypeCheck\": true,\r\n" + 
+				"    \"strictInjectionParameters\": true\r\n" + 
+				"  },\r\n" + 
+				"  \"compilerOptions\": {\r\n" + 
+				"    \"experimentalDecorators\": true,\r\n" + 
+				"    \"lib\": [\r\n" + 
+				"      \"es2018\",\r\n" + 
+				"      \"dom\"\r\n" + 
+				"    ],\r\n" + 
+				"    \"sourceMap\": true,\r\n" + 
+				"    \"module\": \"esnext\",\r\n" + 
+				"    \"importHelpers\": true,\r\n" + 
+				"    \"typeRoots\": [\r\n" + 
+				"      \"node_modules/@types\"\r\n" + 
+				"    ],\r\n" + 
+				"    \"declaration\": false,\r\n" + 
+				"    \"outDir\": \"./dist/out-tsc\",\r\n" + 
+				"    \"target\": \"es2015\",\r\n" + 
+				"    \"downlevelIteration\": true,\r\n" + 
+				"    \"baseUrl\": \"./\",\r\n" + 
+				"    \"moduleResolution\": \"node\"\r\n" + 
+				"  }\r\n" + 
+				"}";
 	}
 	
 	private String getAngularJsonData()

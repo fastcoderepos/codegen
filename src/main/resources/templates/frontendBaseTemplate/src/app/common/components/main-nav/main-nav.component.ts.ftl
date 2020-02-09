@@ -6,7 +6,7 @@ import { MatSidenav, MatSidenavContent } from '@angular/material';
 <#if AuthenticationType != "none">
 import { AuthenticationService } from 'src/app/core/authentication.service';
 import { GlobalPermissionService } from 'src/app/core/global-permission.service';
-import { AuthEntities, Entities} from './entities';
+import { AuthEntities, Entities } from './entities';
 </#if>
 
 import { FastCodeCoreTranslateUiService, Globals } from 'projects/fast-code-core/src/public_api';
@@ -33,6 +33,7 @@ export class MainNavComponent {
 	
 	<#if AuthenticationType != "none">
 	entityPermissions = {};
+	authEntityList = AuthEntities;
 	</#if>
 	
 	constructor(
@@ -54,12 +55,13 @@ export class MainNavComponent {
 		});
 		
 		this.selectedLanguage = localStorage.getItem('selectedLanguage');
-		<#if AuthenticationType == "oidc">
+		<#if AuthenticationType != "none">
 		this.authenticationService.permissionsChange.subscribe(() => {
 			this.setPermissions();
-		})
-		<#elseif AuthenticationType != "none">
+		});
+		<#if AuthenticationType != "oidc">
 		this.setPermissions();
+		</#if>
 		</#if>
 	}
 

@@ -20,10 +20,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import java.util.stream.Collectors;
 import [=PackageName].domain.model.JwtEntity;
+import [=PackageName].domain.irepository.IJwtRepository;
 </#if>
 import java.net.URL;
 import org.springframework.security.core.authority.AuthorityUtils;
-import [=PackageName].domain.irepository.IJwtRepository;
 <#if AuthenticationType == "oidc">
 import com.nimbusds.jose.*;
 import com.nimbusds.jwt.*;
@@ -68,7 +68,7 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
         this.environment = ctx.getBean(Environment.class);
     	this.securityUtils = ctx.getBean(SecurityUtils.class);
     	<#if UserOnly>
-    	this._userMgr = ctx.getBean(IUserManager.class);
+    	this._userMgr = ctx.getBean(I[=AuthenticationTable]Manager.class);
     	<#else>
     	this._roleManager = ctx.getBean(IRoleManager.class);
     	</#if>

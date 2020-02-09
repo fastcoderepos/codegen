@@ -25,7 +25,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-<#if Cache !false>
+<#if Cache>
 import org.springframework.cache.CacheManager;
 </#if>
 import org.springframework.data.web.SortHandlerMethodArgumentResolver;
@@ -83,12 +83,10 @@ public class RolepermissionControllerTest {
 	
 	private MockMvc mvc;
 	
-	<#if Cache !false>
+	<#if Cache>
 	@Autowired 
 	private CacheManager cacheManager; 
-	
-	</#if>
-	<#if Cache !false>
+
 	public void evictAllCaches(){ 
 	    for(String name : cacheManager.getCacheNames()){
 	        cacheManager.getCache(name).clear(); 
@@ -116,7 +114,7 @@ public class RolepermissionControllerTest {
 		em.getTransaction().commit();
 	}
    
-	public RolepermissionEntity createEntity() {
+		public RolepermissionEntity createEntity() {
 		RolepermissionEntity rolepermission = new RolepermissionEntity();
 		rolepermission.setPermissionId(DEFAULT_PERMISSION_ID );
 		rolepermission.setRoleId(DEFAULT_ROLE_ID);
@@ -125,14 +123,6 @@ public class RolepermissionControllerTest {
 		rolepermission.setRole(createRoleEntity());
 		rolepermission.setPermission(createPermissionEntity());
 
-		return rolepermission;
-	}
-
-	public static CreateRolepermissionInput createRolepermissionInput() {
-		CreateRolepermissionInput rolepermission = new CreateRolepermissionInput();
-		rolepermission.setPermissionId(3L);
-		rolepermission.setRoleId(3L);
-		
 		return rolepermission;
 	}
 	
@@ -152,7 +142,6 @@ public class RolepermissionControllerTest {
 	    permission.setName("P1");
 	    
 	    return permission;
-	    
 	}
 	
 	public FindRoleByIdOutput createRoleByIdOuput()
@@ -165,18 +154,47 @@ public class RolepermissionControllerTest {
 		return role;
 	}
 	
-	public RolepermissionEntity createNewEntity() {
-		RolepermissionEntity rolepermission = new RolepermissionEntity();
-		
-		RoleEntity role =createRoleEntity();
+	public RolepermissionEntity createNewEntityForDelete() {
+		RoleEntity role = new RoleEntity ();
+		role.setDisplayName("D2");
 		role.setId(2L);
-		role=roleRepository.save(role);
-		rolepermission.setRole(role);
+		role.setName("R2");
+		role= roleRepository.save(role);
+		
 		PermissionEntity permission = createPermissionEntity();
+		permission.setDisplayName("D2");
+		permission.setName("P2");
 		permission.setId(2L);
 		permission=permissionRepository.save(permission);
+		
+		RolepermissionEntity rolepermission = new RolepermissionEntity();
 		rolepermission.setPermissionId(permission.getId());
 		rolepermission.setRoleId(role.getId());
+		rolepermission.setRole(role);
+		rolepermission.setPermission(permission);
+
+		return rolepermission;
+	}
+
+	public RolepermissionEntity createNewEntityForUpdate() {
+		
+		RoleEntity role = new RoleEntity ();
+		role.setDisplayName("D5");
+		role.setId(5L);
+		role.setName("R5");
+		
+		role= roleRepository.save(role);
+		
+		PermissionEntity permission = createPermissionEntity();
+		permission.setName("P5");
+		permission.setDisplayName("D5");
+		permission.setId(5L);
+		permission=permissionRepository.save(permission);
+		
+		RolepermissionEntity rolepermission = new RolepermissionEntity();
+		rolepermission.setPermissionId(permission.getId());
+		rolepermission.setRoleId(role.getId());
+		rolepermission.setRole(role);
 		rolepermission.setPermission(permission);
 
 		return rolepermission;
@@ -185,7 +203,7 @@ public class RolepermissionControllerTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        <#if Cache !false>
+        <#if Cache>
         evictAllCaches();
         </#if>
         final RolepermissionController rolepermissionController = new RolepermissionController(rolepermissionAppService,logHelper);
@@ -213,29 +231,6 @@ public class RolepermissionControllerTest {
 		
 	}
 
-//	@After
-//	public void cleanup() {
-//		
-////		Properties p = new Properties();
-////        try {
-////			p.load(new FileReader(new File("E:\\TestA\\testDD\\src\\test\\resources\\application-test.properties")));
-////		} catch (FileNotFoundException e) {
-////			// TODO Auto-generated catch block
-////			e.printStackTrace();
-////		} catch (IOException e) {
-////			// TODO Auto-generated catch block
-////			e.printStackTrace();
-////		}
-////
-////        EntityManagerFactory emf = Persistence.createEntityManagerFactory("PERSISTENCE",p);
-//	    EntityManager em = emf.createEntityManager();
-//	    em.getTransaction().begin();
-//	    em.createNativeQuery("drop table rolepermission CASCADE").executeUpdate();
-//	    em.createNativeQuery("drop table role CASCADE").executeUpdate();
-//	    em.createNativeQuery("drop table permission CASCADE").executeUpdate();
-//	    em.getTransaction().commit();
-//	}
-//	
 	@Test
 	public void FindById_IdIsValid_ReturnStatusOk() throws Exception {
 
@@ -250,7 +245,6 @@ public class RolepermissionControllerTest {
 	      mvc.perform(get("/rolepermission/permissionId:32,roleId:32")
 	    		  .contentType(MediaType.APPLICATION_JSON))
 	    		  .andExpect(status().isNotFound());
-	
 	}    
 	
 	@Test
@@ -275,28 +269,29 @@ public class RolepermissionControllerTest {
 	public void CreateRolepermission_RolepermissionDoesNotExist_ReturnStatusOk() throws Exception {
 	
 		RoleEntity role = new RoleEntity();
-	    role.setDisplayName("D1");
+	    role.setDisplayName("D3");
 	    role.setId(3L);
-	    role.setName("R1");
+	    role.setName("R3");
 	    
-	    roleRepository.save(role);
+	    role=roleRepository.save(role);
 	    
 	    PermissionEntity permission = new PermissionEntity();
-	    permission.setDisplayName("D1");
+	    permission.setDisplayName("D3");
 	    permission.setId(3L);
-	    permission.setName("P1");
+	    permission.setName("P3");
 	    
-	    permissionRepository.save(permission);
+	    permission=permissionRepository.save(permission);
 	    
+		CreateRolepermissionInput rolepermission = new CreateRolepermissionInput();
+		rolepermission.setPermissionId(permission.getId());
+		rolepermission.setRoleId(role.getId());
 		
-		CreateRolepermissionInput rolepermission = createRolepermissionInput();
 		ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
 		String json = ow.writeValueAsString(rolepermission);
       
 		 mvc.perform(post("/rolepermission").contentType(MediaType.APPLICATION_JSON).content(json))
 		  .andExpect(status().isOk());
 		 
-	
 	}  
 	
 	@Test
@@ -306,7 +301,6 @@ public class RolepermissionControllerTest {
      	 org.assertj.core.api.Assertions.assertThatThrownBy(() ->  mvc.perform(delete("/rolepermission/21")
      			 .contentType(MediaType.APPLICATION_JSON))
 		  .andExpect(status().isOk())).hasCause(new EntityNotFoundException("Invalid id=21"));
-
 	}  
 	
 	@Test
@@ -322,7 +316,7 @@ public class RolepermissionControllerTest {
 	@Test
 	public void Delete_IdIsValid_ReturnStatusNoContent() throws Exception {
 		
-		RolepermissionEntity up = rolepermissionRepository.save(createNewEntity());
+		RolepermissionEntity up = rolepermissionRepository.save(createNewEntityForDelete());
 	
 		FindRolepermissionByIdOutput output= new FindRolepermissionByIdOutput();
 	    output.setRoleId(up.getRoleId());
@@ -333,9 +327,6 @@ public class RolepermissionControllerTest {
 	     mvc.perform(delete("/rolepermission/permissionId:"+up.getPermissionId() + ",roleId:" + up.getRoleId())
      			 .contentType(MediaType.APPLICATION_JSON))
 		  .andExpect(status().isNoContent());
-     	 
-     	 
-     	 
 	}  
 	
 	@Test
@@ -346,7 +337,7 @@ public class RolepermissionControllerTest {
 	    rolepermission.setPermissionId(21L);
 		ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
 		String json = ow.writeValueAsString(rolepermission);
-		//doReturn(null).when(rolepermissionAppService).FindById(new RolepermissionId(32L, 32L));
+		
     	 org.assertj.core.api.Assertions.assertThatThrownBy(() ->  mvc.perform(put("/rolepermission/21")
     			 .contentType(MediaType.APPLICATION_JSON).content(json))
 		  .andExpect(status().isOk())).hasCause(new EntityNotFoundException("Invalid id=21"));
@@ -365,13 +356,12 @@ public class RolepermissionControllerTest {
 		mvc.perform(put("/rolepermission/permissionId:99,roleId:99")
     			 .contentType(MediaType.APPLICATION_JSON).content(json))
 		  .andExpect(status().isNotFound());
-
 	}
 	
 	@Test
 	public void UpdateRolepermission_RolepermissionExists_ReturnStatusOk() throws Exception {
 		
-		RolepermissionEntity up = rolepermissionRepository.save(createNewEntity());
+		RolepermissionEntity up = rolepermissionRepository.save(createNewEntityForUpdate());
 		
 		FindRolepermissionByIdOutput output= new FindRolepermissionByIdOutput();
 	    output.setRoleId(up.getRoleId());
@@ -389,7 +379,7 @@ public class RolepermissionControllerTest {
         mvc.perform(put("/rolepermission/permissionId:"+up.getPermissionId() + ",roleId:" + up.getRoleId()).contentType(MediaType.APPLICATION_JSON).content(json))
 	    .andExpect(status().isOk());
 
-        RolepermissionEntity entity= createNewEntity();
+        RolepermissionEntity entity= new RolepermissionEntity();
         entity.setRoleId(up.getRoleId());
         entity.setPermissionId(up.getPermissionId());
         rolepermissionRepository.delete(entity);
@@ -409,7 +399,6 @@ public class RolepermissionControllerTest {
 		 org.assertj.core.api.Assertions.assertThatThrownBy(() ->  mvc.perform(get("/rolepermission?search=id[equals]=1&limit=10&offset=1")
 				 .contentType(MediaType.APPLICATION_JSON))
 	    		  .andExpect(status().isOk())).hasCause(new Exception("Wrong URL Format: Property id not found!"));
-	
 	} 
 	
 	@Test
@@ -418,7 +407,6 @@ public class RolepermissionControllerTest {
 		org.assertj.core.api.Assertions.assertThatThrownBy(() ->  mvc.perform(get("/rolepermission/permissionId:3/role")
 				.contentType(MediaType.APPLICATION_JSON))
 	    		  .andExpect(status().isOk())).hasCause(new EntityNotFoundException("Invalid id=permissionId:3"));
-	
 	}    
 	
 	@Test
@@ -444,7 +432,6 @@ public class RolepermissionControllerTest {
 		org.assertj.core.api.Assertions.assertThatThrownBy(() ->  mvc.perform(get("/rolepermission/permissionId:36/permission")
 				.contentType(MediaType.APPLICATION_JSON))
 	    		  .andExpect(status().isOk())).hasCause(new EntityNotFoundException("Invalid id=permissionId:36"));
-	
 	}    
 	
 	@Test
@@ -453,7 +440,6 @@ public class RolepermissionControllerTest {
 	    mvc.perform(get("/rolepermission/permissionId:35,roleId:35/permission")
 				.contentType(MediaType.APPLICATION_JSON))
 	    		  .andExpect(status().isNotFound());
-	
 	}    
 	
 	@Test
@@ -462,6 +448,6 @@ public class RolepermissionControllerTest {
 	   mvc.perform(get("/rolepermission/permissionId:1,roleId:1/permission")
 				.contentType(MediaType.APPLICATION_JSON))
 	    		  .andExpect(status().isOk());
-	}  
+	}   
 	
 }

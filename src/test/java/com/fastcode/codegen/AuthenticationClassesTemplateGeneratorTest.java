@@ -99,7 +99,7 @@ public class AuthenticationClassesTemplateGeneratorTest {
 		root.put("PrimaryKeys", entityDetails.getPrimaryKeys());
 
 		Assertions.assertThat(authenticationClassesTemplateGenerator.buildBackendRootMap(packageName, testValue,
-				authenticationInfo, details, true)).isEqualTo(root);
+				authenticationInfo, details, true)).isEqualTo(root);  
 	}
 
 	@Test 
@@ -410,5 +410,13 @@ public class AuthenticationClassesTemplateGeneratorTest {
 		Mockito.verify(mockedCodeGeneratorUtils,Mockito.never()).generateFiles(new HashMap<String, Object>(), new HashMap<String, Object>(), destPath.getAbsolutePath(), testValue);
 
 	}
-
+	
+	@Test
+	public void generateSilentRefreshFile_pathIsValid_returnNothing()
+	{
+		Mockito.doNothing().when(mockedCodeGeneratorUtils).generateFiles(any(HashMap.class), any(HashMap.class), anyString(), anyString());
+		authenticationClassesTemplateGenerator.generateSilentRefreshFile(destPath.getAbsolutePath());
+		Mockito.verify(mockedCodeGeneratorUtils,Mockito.never()).generateFiles(new HashMap<String, Object>(), new HashMap<String, Object>(), destPath.getAbsolutePath(), testValue);
+	}
+	
 }

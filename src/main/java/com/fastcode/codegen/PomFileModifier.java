@@ -97,7 +97,7 @@ public class PomFileModifier {
 		else if(database.equals("mysql")) 
 			return new Dependency("mysql","mysql-connector-java","8.0.15");
 		else if(database.equals("oracle")) 
-			return new Dependency("com.oracle","ojdbc8","19.3.0.0");
+			return new Dependency("com.oracle","ojdbc8","19.3.0.0");  
 		else
 			return null;
 	}

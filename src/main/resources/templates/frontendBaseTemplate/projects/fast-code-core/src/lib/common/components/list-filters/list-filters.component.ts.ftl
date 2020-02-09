@@ -41,6 +41,9 @@ export class ListFiltersComponent implements OnInit {
 
   addFieldDialogRef: MatDialogRef<any>;
 
+  mySelector: Boolean = false;
+  field: IListColumn;
+
   constructor(
     private formBuilder: FormBuilder,
     public dialog: MatDialog,
@@ -49,6 +52,7 @@ export class ListFiltersComponent implements OnInit {
 
   ngOnInit() {
     this.initializeFilterForms();
+    this.setFilterableFields();
   }
 
   initializeFilterForms(): void {
@@ -61,15 +65,28 @@ export class ListFiltersComponent implements OnInit {
     });
     this.basicFilterForm.addControl("searchText", new FormControl(''));
     this.basicFilterForm.addControl("addFilter", new FormControl(''));
+  }
 
+  /**
+   * Filters filterable fields from
+   * columns list.
+   */
+  setFilterableFields(){
     this.columnsList.forEach((column) => {
       if (column.filter) {
-        this.noFilterableFields = false;
         this.filterFields.push(column);
       }
     });
+
+    if(this.filterFields.length > 0){
+      this.noFilterableFields = false;
+    }
   }
 
+  /**
+   * emits onSearch event with selected
+   * criteria and resets the form.
+   */
   search(): void {
     if (this.field) {
       this.selectFilterField();
@@ -81,6 +98,11 @@ export class ListFiltersComponent implements OnInit {
     this.mySelector = false;
   }
 
+  /**
+   * Gets currently loaded field from
+   * filter form and adds it to selected
+   * fields list.
+   */
   selectFilterField(){
     let formData = this.basicFilterForm.value;
     this.parseDateFields(formData);
@@ -88,6 +110,12 @@ export class ListFiltersComponent implements OnInit {
     this.selectedFilterFields.push(formData);
   }
 
+  /**
+   * Gets search values from
+   * filter form and in case of
+   * date types, parses them
+   * into specific string formats
+   */
   parseDateFields(formData) {
     let searchValue = formData.searchValue;
     let startingValue = formData.startingValue;
@@ -109,6 +137,11 @@ export class ListFiltersComponent implements OnInit {
     }
   }
 
+  /**
+   * Gets searched field information from
+   * given form data and sets it in the chip.
+   * @param formData Object containing field and search-content information
+   */
   setSelectedDisplayFilterfield(formData) {
     switch (formData.operator) {
       case operatorType.Contains:
@@ -135,22 +168,32 @@ export class ListFiltersComponent implements OnInit {
     }
   }
 
-  // default format: yyyy-MM-dd HH:mm:ss.SSS
-  parseDateToDefaultStringFormat(d: Date): string {
+  /**
+   * Parses given date into specific
+   * string format.
+   * default format: yyyy-MM-dd HH:mm:ss.SSS
+   * @param date
+   * @returns Parsed string.
+   */
+  parseDateToDefaultStringFormat(date: Date): string {
     var datestring =
-      d.getFullYear() + "-" +
-      ("0" + (d.getMonth() + 1)).slice(-2) + "-" +
-      ("0" + d.getDate()).slice(-2) + " " +
-      ("0" + d.getHours()).slice(-2) + ":" +
-      ("0" + d.getMinutes()).slice(-2) + ":" +
-      ("0" + d.getSeconds()).slice(-2) + "." +
-      ("00" + d.getMilliseconds()).slice(-3)
-      ;
+    date.getFullYear() + "-" +
+      ("0" + (date.getMonth() + 1)).slice(-2) + "-" +
+      ("0" + date.getDate()).slice(-2) + " " +
+      ("0" + date.getHours()).slice(-2) + ":" +
+      ("0" + date.getMinutes()).slice(-2) + ":" +
+      ("0" + date.getSeconds()).slice(-2) + "." +
+      ("00" + date.getMilliseconds()).slice(-3);
 
     return datestring;
   }
-  mySelector: Boolean = false;
-  field: IListColumn;
+
+  /**
+   * Handler function for option selected
+   * event of autocomplete. Sets operators 
+   * and selected field in form.
+   * @param event Emitted MatAutocompleteSelectedEvent object.
+   */
   selected(event: MatAutocompleteSelectedEvent): void {
     console.log("Selct Value Event :", event);
     //getting Icolumnfield object for selected field
@@ -160,8 +203,16 @@ export class ListFiltersComponent implements OnInit {
     this.mySelector = true;
   }
 
+  /**
+   * Handler function for the remove
+   * event of chip. Removes given field
+   * from chip, adds it back to list of
+   * fields and triggers onSearch event.
+   * @param field Field to be removed.
+   * @param index Index of the field in 
+   * the list of selected fields.
+   */
   remove(field: string, index: number): void {
-    // const index = this.selectedDisplayFilterFields.indexOf(field);
 
     // get listcolumn object from filter field
     let filterField = this.columnsList.find(x => {
@@ -176,6 +227,10 @@ export class ListFiltersComponent implements OnInit {
     this.onSearch.emit(this.selectedFilterFields);
   }
 
+  /**
+   * Sets operators based on selected
+   * field type.
+   */
   setOperators() {
     this.operators = Object.keys(operatorType).map(k => operatorType[k as any]);
     if (this.field.type == listColumnType.String) {

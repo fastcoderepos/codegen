@@ -20,6 +20,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.slf4j.Logger;
@@ -46,6 +47,7 @@ import com.querydsl.core.types.Predicate;
 public class RolepermissionAppServiceTest {
 
 	@InjectMocks
+	@Spy
 	RolepermissionAppService _appService;
 
 	@Mock
@@ -188,10 +190,11 @@ public class RolepermissionAppServiceTest {
 		Pageable pageable = mock(Pageable.class);
 		List<FindRolepermissionByIdOutput> output = new ArrayList<>();
 		SearchCriteria search= new SearchCriteria();
-		search.setType(1);
-		search.setValue("xyz");
-		search.setOperator("equals");
+//		search.setType(1);
+//		search.setValue("xyz");
+//		search.setOperator("equals");
 
+		Mockito.when(_appService.Search(any(SearchCriteria.class))).thenReturn(new BooleanBuilder());
 		Mockito.when(_rolepermissionManager.FindAll(any(Predicate.class),any(Pageable.class))).thenReturn(foundPage);
 		Assertions.assertThat(_appService.Find(search, pageable)).isEqualTo(output);
 	}
@@ -206,10 +209,12 @@ public class RolepermissionAppServiceTest {
 		Pageable pageable = mock(Pageable.class);
 		List<FindRolepermissionByIdOutput> output = new ArrayList<>();
 		SearchCriteria search= new SearchCriteria();
-		search.setType(1);
-		search.setValue("xyz");
-		search.setOperator("equals");
+//		search.setType(1);
+//		search.setValue("xyz");
+//		search.setOperator("equals");
 		output.add(_mapper.RolepermissionEntityToFindRolepermissionByIdOutput(rolepermission));
+		
+		Mockito.when(_appService.Search(any(SearchCriteria.class))).thenReturn(new BooleanBuilder());
 		Mockito.when(_rolepermissionManager.FindAll(any(Predicate.class),any(Pageable.class))).thenReturn(foundPage);
 		Assertions.assertThat(_appService.Find(search, pageable)).isEqualTo(output);
 	}

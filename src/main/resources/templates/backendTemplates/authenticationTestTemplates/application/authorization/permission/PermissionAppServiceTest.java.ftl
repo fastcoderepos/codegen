@@ -21,6 +21,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.MockitoAnnotations;
 import org.slf4j.Logger;
 import org.springframework.data.domain.Page;
@@ -45,6 +46,7 @@ import com.querydsl.core.types.Predicate;
 public class PermissionAppServiceTest {
 
 	@InjectMocks
+	@Spy
 	PermissionAppService permissionAppService;
 	
 	@Mock
@@ -146,10 +148,11 @@ public class PermissionAppServiceTest {
 
 		List<FindPermissionByIdOutput> output = new ArrayList<>();
 		SearchCriteria search= new SearchCriteria();
-		search.setType(1);
-		search.setValue("xyz");
-		search.setOperator("equals");
-
+//		search.setType(1);
+//		search.setValue("xyz");
+//		search.setOperator("equals");
+		
+		Mockito.when(permissionAppService.Search(any(SearchCriteria.class))).thenReturn(new BooleanBuilder());
 		Mockito.when(permissionManager.FindAll(any(Predicate.class),any(Pageable.class))).thenReturn(foundPage);
 		Assertions.assertThat(permissionAppService.Find(search,pageable)).isEqualTo(output);
 	}
@@ -163,12 +166,13 @@ public class PermissionAppServiceTest {
 		Page<PermissionEntity> foundPage = new PageImpl(list);
 		Pageable pageable =mock(Pageable.class);
 		SearchCriteria search= new SearchCriteria();
-		search.setType(1);
-		search.setValue("xyz");
-		search.setOperator("equals");
+//		search.setType(1);
+//		search.setValue("xyz");
+//		search.setOperator("equals");
 
 		List<FindPermissionByIdOutput> output = new ArrayList<>();
 		output.add(permissionMapper.PermissionEntityToFindPermissionByIdOutput(permission));
+		Mockito.when(permissionAppService.Search(any(SearchCriteria.class))).thenReturn(new BooleanBuilder());
 		Mockito.when(permissionManager.FindAll(any(Predicate.class),any(Pageable.class))).thenReturn(foundPage);
 		Assertions.assertThat(permissionAppService.Find(search,pageable)).isEqualTo(output);
 	}

@@ -89,22 +89,23 @@ public class FrontendBaseTemplateGenerator {
 	
 	public Map<String, String> getEntityNamesList(List<String> entityList, AuthenticationInfo authenticationInfo){
 
-		Map<String, String> entityNamesList = new HashMap<String, String>();
-		for(String entity: entityList) {
-			String cName = entity.substring(entity.lastIndexOf(".") + 1);
-			entityNamesList.put(codeGeneratorUtils.camelCaseToKebabCase(cName), cName);
-		}
-		
 		String customUser = authenticationInfo.getAuthenticationTable();
 		AuthenticationType authType = authenticationInfo.getAuthenticationType();
-		Boolean userOnly = authenticationInfo.getUserOnly();
-
-		if(!authType.equals(AuthenticationType.NONE)) {
+		
+		Map<String, String> entityNamesList = new HashMap<String, String>();
+		for(String entity: entityList) {
+			String className = entity.substring(entity.lastIndexOf(".") + 1);
+			if(!className.equalsIgnoreCase(customUser)) {
+				entityNamesList.put(codeGeneratorUtils.camelCaseToKebabCase(className), className);
+			}
+		}
+  
+		if(!authType.equals(AuthenticationType.NONE)) {  
 			List<String> authEntitiesList = getAuthEntitiesNamesList(authenticationInfo);
 			for(String authEntity: authEntitiesList) {
 				entityNamesList.put(codeGeneratorUtils.camelCaseToKebabCase(authEntity), authEntity);
 			}
-		}
+		} 
 		
 		
 		return entityNamesList;
@@ -121,6 +122,9 @@ public class FrontendBaseTemplateGenerator {
 			entityNamesList.add("Role");
 			entityNamesList.add("Permission");
 			entityNamesList.add("Rolepermission");
+			if(customUser != null) {
+				entityNamesList.add(customUser);
+			}
 
 			if(authType.equals(AuthenticationType.DATABASE) || (!authType.equals(AuthenticationType.DATABASE) && userOnly) )
 			{
@@ -139,7 +143,7 @@ public class FrontendBaseTemplateGenerator {
 		return entityNamesList;
 	}
 	
-	public Map<String, Object> getTemplates(String path) {
+	public Map<String, Object> getTemplates(String path) {   
 		List<String> filesList = codeGeneratorUtils.readFilesFromDirectory(path);
 		filesList = codeGeneratorUtils.replaceFileNames(filesList, path);
 		Map<String, Object> templates = new HashMap<>();
@@ -241,7 +245,7 @@ public class FrontendBaseTemplateGenerator {
           JSONObject jsonObject = (JSONObject) jsonUtils.readJsonFile(path);
           JSONObject compilerOptions = (JSONObject) jsonObject.get("compilerOptions");
 
-          compilerOptions.put("resolveJsonModule",true);
+      //    compilerOptions.put("resolveJsonModule",true);
           compilerOptions.put("esModuleInterop",true);
           compilerOptions.put("allowSyntheticDefaultImports",true);
 

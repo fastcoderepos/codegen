@@ -8,7 +8,6 @@ public class CreateUserOutput {
     private int accessFailedCount;
     private String emailAddress;
     private String emailConfirmationCode;
-    private Boolean isActive;
     private Boolean isEmailConfirmed;
     private Boolean isLockoutEnabled;
     private Boolean isPhoneNumberConfirmed;
@@ -19,6 +18,7 @@ public class CreateUserOutput {
     private String scimId;
     </#if>
     <#if AuthenticationType =="database">
+    private Boolean isActive;
     private String passwordResetCode;
     private Boolean shouldChangePasswordOnNextLogin;
     </#if>
@@ -62,14 +62,6 @@ public class CreateUserOutput {
 
     public void setEmailConfirmationCode(String emailConfirmationCode) {
         this.emailConfirmationCode = emailConfirmationCode;
-    }
-
-    public Boolean getIsActive() {
-        return isActive;
-    }
-
-    public void setIsActive(Boolean active) {
-        isActive = active;
     }
 
     public Boolean getIsEmailConfirmed() {
@@ -119,8 +111,8 @@ public class CreateUserOutput {
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
+    
     <#if AuthenticationType =="oidc">
-  
   	public String getScimId() {
   		return scimId;
   	}
@@ -128,8 +120,17 @@ public class CreateUserOutput {
   	public void setScimId(String scimId){
   		this.scimId = scimId;
   	}
+  	
   	</#if>
 	<#if AuthenticationType =="database">
+	public Boolean getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(Boolean active) {
+        isActive = active;
+    }
+    
     public String getPasswordResetCode() {
         return passwordResetCode;
     }
@@ -145,6 +146,7 @@ public class CreateUserOutput {
     public void setShouldChangePasswordOnNextLogin(Boolean shouldChangePasswordOnNextLogin) {
         this.shouldChangePasswordOnNextLogin = shouldChangePasswordOnNextLogin;
     }
+    
 	</#if>
     public String getPhoneNumber() {
         return phoneNumber;
@@ -193,38 +195,5 @@ public class CreateUserOutput {
     public void setUserName(String userName) {
         this.userName = userName;
     }
-    <#if Audit!false>
-    
-    public java.util.Date getCreationTime() {
-        return creationTime;
-    }
-
-    public void setCreationTime(java.util.Date creationTime) {
-      	this.creationTime = creationTime;
-    }
-
-    public String getLastModifierUserId() {
-      	return lastModifierUserId;
-    }
-
-    public void setLastModifierUserId(String lastModifierUserId) {
-      	this.lastModifierUserId = lastModifierUserId;
-    }
-
-    public java.util.Date getLastModificationTime() {
-      	return lastModificationTime;
-    }
-
-    public void setLastModificationTime(java.util.Date lastModificationTime) {
-      	this.lastModificationTime = lastModificationTime;
-    }
-
-    public String getCreatorUserId() {
-      	return creatorUserId;
-    }
-
-    public void setCreatorUserId(String creatorUserId) {
-      	this.creatorUserId = creatorUserId;
-    }
-    </#if>
+   
 }

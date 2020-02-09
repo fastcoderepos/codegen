@@ -144,7 +144,8 @@ public class UserInput {
 		index= getFieldsInput(fieldsList.size());
 
 		FieldDetails selected = fieldsList.get(index - 1);
-		while(!selected.getFieldType().equalsIgnoreCase("String") || !selected.getIsNullable())
+		
+		while(!selected.getFieldType().equalsIgnoreCase("String") || selected.getIsNullable())
 		{
 			System.out.println("Please choose valid required String field");
 			index= getFieldsInput(fieldsList.size());
@@ -159,7 +160,7 @@ public class UserInput {
 
 		// jdbc:postgresql://localhost:5432/FCV2Db?username=postgres;password=fastcode
 		// jdbc:postgresql://localhost:5432/Demo?username=postgres;password=fastcode
-		input.setUpgrade(root.get("upgrade") == null
+		input.setUpgrade(root.get("upgrade") == null  
 				? false: (root.get("upgrade").toLowerCase().equals("true") ? true : false));
 		input.setConnectionStr(root.get("conn") != null ? root.get("conn") : null);
 		input = validateConnectionStringAndSetSchema(input, root.get("s"), scanner);
@@ -256,6 +257,9 @@ public class UserInput {
 					String logonName = scanner.nextLine();
 					authenticationInfo.setLogonName(logonName);
 				}
+			}
+			else {
+				authenticationInfo.setUserOnly(false);
 			}
 
 			System.out.print("\nDo you have a User table in your data model? (y/n)");

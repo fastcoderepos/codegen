@@ -32,7 +32,7 @@ public class CodegenDependenciesIdentifier {
 
 		String result = commandUtils.runProcess(command,destinationPath);
 		
-		if(result == "") {
+		if(result == "") { 
 			logHelper.getLogger().error("SpringCli is not found on your computer.");
 			return false;
 		}

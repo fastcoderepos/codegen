@@ -4,7 +4,7 @@ public class AuthenticationInfo {
 	private String authenticationTable;
 	private AuthenticationType authenticationType;
 	private String logonName;
-	private Boolean userOnly;
+	private Boolean userOnly =false;
 	
 	public String getAuthenticationTable() {
 		return authenticationTable;

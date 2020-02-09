@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
-import { throwError<#if AuthenticationType == "oidc">, Subject<#else>, Observable</#if> } from 'rxjs';
+import { throwError, Subject<#if AuthenticationType != "oidc">, Observable</#if> } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment<#if AuthenticationType == "oidc">, AuthOidcConfig</#if> } from 'src/environments/environment';
 import { JwtHelperService } from "@auth0/angular-jwt";
@@ -16,9 +16,9 @@ const helper = new JwtHelperService();
 
 @Injectable()
 export class AuthenticationService {
-  private decodedToken: ITokenDetail; 
-  <#if AuthenticationType == "oidc">
+  private decodedToken: ITokenDetail;
   permissionsChange: Subject<string> = new Subject<string>();
+  <#if AuthenticationType == "oidc">
   public authUrl = environment.authUrl;
   
   constructor(

@@ -1,6 +1,6 @@
 package [=PackageName];
 
-<#if Cache !false>
+<#if Cache>
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,7 +49,7 @@ public class BeanConfig {
     }
 </#if>
 
-<#if Cache !false>
+<#if Cache>
      @Bean
      JedisConnectionFactory jedisConnectionFactory() {
          RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration(environment.getProperty("redis.server.address"), Integer.parseInt(environment.getProperty("redis.server.port")));

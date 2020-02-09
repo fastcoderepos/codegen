@@ -33,7 +33,7 @@ public class AuthenticationClassesTemplateGenerator {
 
 		generateBackendFiles(authenticationInfo,root,backendAppFolder,backendTestFolder);
 		generateFrontendAuthorization(destination, packageName,authenticationInfo, root);
-		generateAppStartupRunner(details, backendAppFolder,root);
+		generateAppStartupRunner(details, backendAppFolder,root); 
 	}
 
 	public void generateBackendFiles(AuthenticationInfo authenticationInfo, Map<String, Object> root,String backendAppFolder, String backendTestFolder )
@@ -50,12 +50,11 @@ public class AuthenticationClassesTemplateGenerator {
 		{
 			templates=getBackendAuthorizationFiles(AUTHORIZATION_TEMPLATE_FOLDER, authSchema, authType);
 			testTemplates=getBackendAuthorizationTestFiles(AUTHORIZATION_TEST_TEMPLATE_FOLDER,authSchema);
-
 		}
 		else
 		{
 			templates = getAuthenticationTemplatesForUserGroupCase(AUTHORIZATION_TEMPLATE_FOLDER, authType);
-			testTemplates = getAuthenticationTemplatesForUserGroupCase(AUTHORIZATION_TEST_TEMPLATE_FOLDER, authType);
+			testTemplates=getAuthenticationTemplatesForUserGroupCase(AUTHORIZATION_TEST_TEMPLATE_FOLDER,authType);
 		}
 
 		codeGeneratorUtils.generateFiles(templates, root, backendAppFolder,AUTHORIZATION_TEMPLATE_FOLDER);
@@ -105,13 +104,17 @@ public class AuthenticationClassesTemplateGenerator {
 
 		for (String filePath : filesList) {
 			String outputFileName = filePath.substring(0, filePath.lastIndexOf('.'));
+			if(!(authenticationType.equals(AuthenticationType.OIDC) && (outputFileName.contains("IJwtRepository") || outputFileName.contains("JWTAppService"))))
+			{
 			Boolean includeTemplates = (outputFileName.contains("UserDetailsServiceImpl") && authenticationType.equals(AuthenticationType.DATABASE)) || outputFileName.contains("LoginUser");
+			
 			if(!(outputFileName.toLowerCase().contains("user") && !includeTemplates))
 			{ 	
 				if(!(outputFileName.contains("JWTAuthentication") && authenticationType.equals(AuthenticationType.OIDC)))
 				{
 					templates.put(filePath, outputFileName);
 				}
+			}
 			}
 		}
 
@@ -126,7 +129,8 @@ public class AuthenticationClassesTemplateGenerator {
 
 		for (String filePath : filesList) {
 			String outputFileName = filePath.substring(0, filePath.lastIndexOf('.'));
-
+			if(!(authType.equals(AuthenticationType.OIDC) && (outputFileName.contains("IJwtRepository") || outputFileName.contains("JWTAppService"))))
+			{
 			if(authTable==null)
 			{
 				if(shouldIncludeTemplatesIfDefaultUser(outputFileName, authType))
@@ -151,6 +155,7 @@ public class AuthenticationClassesTemplateGenerator {
 					templates.put(filePath, outputFileName);
 				}
 
+			}
 			}
 		}
 
@@ -184,7 +189,7 @@ public class AuthenticationClassesTemplateGenerator {
 		filesList = codeGeneratorUtils.replaceFileNames(filesList, templatePath);
 
 		Map<String, Object> templates = new HashMap<>(); 
-
+	
 		for (String filePath : filesList) { 
 			String outputFileName = filePath.substring(0, filePath.lastIndexOf('.'));
 			if(authTable==null)
@@ -198,9 +203,9 @@ public class AuthenticationClassesTemplateGenerator {
 					outputFileName = outputFileName.replace("User", authTable);
 					outputFileName = outputFileName.replace("user", authTable.toLowerCase());
 				}
-                String fName = outputFileName.toLowerCase(); 
-				if( !fName.contains("user") && (fName.contains(authTable.toLowerCase().concat("permission")) 
-						|| fName.contains(authTable.toLowerCase().concat("role"))))
+               
+				if(!(outputFileName.toLowerCase().contains("user") && !(outputFileName.toLowerCase().contains(authTable.toLowerCase().concat("permission")) 
+						|| outputFileName.toLowerCase().contains(authTable.toLowerCase().concat("role")))))
 				{ 		
 					templates.put(filePath, outputFileName);
 				}
@@ -222,7 +227,7 @@ public class AuthenticationClassesTemplateGenerator {
 		String appName =packageName.substring(packageName.lastIndexOf(".") + 1);
 		String appFolderPath = destPath + "/" + appName + "Client/src/app/";
 	
-		List<String> authorizationEntities = getAuthorizatonEntities(destPath, appName, authType, userOnly);
+		List<String> authorizationEntities = getAuthorizatonEntities(destPath, appName, authenticationInfo);
 		
 		for(String entity: authorizationEntities) {
 			String entityPath = FRONTEND_AUTHORIZATION_TEMPLATE_FOLDER + "/" + entity;
@@ -240,8 +245,11 @@ public class AuthenticationClassesTemplateGenerator {
 
 	}
 
-	public List<String> getAuthorizatonEntities(String destPath, String appName, AuthenticationType authType, Boolean userOnly)
+	public List<String> getAuthorizatonEntities(String destPath, String appName, AuthenticationInfo authenticationInfo)
 	{
+		String customUser = authenticationInfo.getAuthenticationTable();
+		AuthenticationType authType = authenticationInfo.getAuthenticationType();
+		Boolean userOnly = authenticationInfo.getUserOnly();
 		List<String> authorizationEntities = new ArrayList<String>();
 
 		authorizationEntities.add("role");
@@ -259,6 +267,9 @@ public class AuthenticationClassesTemplateGenerator {
 
 		if(authType.equals(AuthenticationType.DATABASE) || (!authType.equals(AuthenticationType.DATABASE) && userOnly) )
 		{
+			if(customUser == null) {
+				authorizationEntities.add("user");
+			}
 			authorizationEntities.add("userpermission");
 			authorizationEntities.add("userrole");
 		}
@@ -335,7 +346,7 @@ public class AuthenticationClassesTemplateGenerator {
 	}
 
 	public void generateSilentRefreshFile(String destination){
-
+   
 		Map<String, Object> template = new HashMap<>();
 		template.put("silent-refresh.html.ftl", "silent-refresh.html");
 		new File(destination).mkdirs();

@@ -7,228 +7,231 @@ import java.util.Date;
 
 public class UpdateUserInput {
 
-  @NotNull(message = "Id Should not be null")
-  private Long id;
+	@NotNull(message = "Id Should not be null")
+  	private Long id;
     
-  private Integer accessFailedCount;
+  	private Integer accessFailedCount;
   
-  @Length(max = 64, message = "authenticationSource must be less than 64 characters")
-  private String authenticationSource;
+  	@Length(max = 64, message = "authenticationSource must be less than 64 characters")
+  	private String authenticationSource;
   
-  @NotNull(message = "emailAddress Should not be null")
-  @Length(max = 256, message = "emailAddress must be less than 256 characters")
-  @Email(message = "Email Address should be valid ")
-  private String emailAddress;
+  	@NotNull(message = "emailAddress Should not be null")
+  	@Length(max = 256, message = "emailAddress must be less than 256 characters")
+  	@Email(message = "Email Address should be valid ")
+  	private String emailAddress;
   
-  @Length(max = 328, message = "emailConfirmationCode must be less than 328 characters")
-  private String emailConfirmationCode;
+  	@Length(max = 328, message = "emailConfirmationCode must be less than 328 characters")
+  	private String emailConfirmationCode;
   
-  @NotNull(message = "firstName Should not be null")
-  @Length(max = 32, message = "firstName must be less than 32 characters")
-  private String firstName;
+  	@NotNull(message = "firstName Should not be null")
+  	@Length(max = 32, message = "firstName must be less than 32 characters")
+  	private String firstName;
   
-  <#if AuthenticationType =="oidc">
-  @NotNull(message = "ScimId Should not be null")
-  @Length(max = 36, message = "scimId must be less than 36 characters")
-  private String scimId;
+  	<#if AuthenticationType =="oidc">
+  	@NotNull(message = "ScimId Should not be null")
+  	@Length(max = 36, message = "scimId must be less than 36 characters")
+  	private String scimId;
+  	
+  	</#if>
+  	private Boolean isEmailConfirmed;
   
-  </#if>
-  @NotNull(message = "isActive Should not be null")
-  private Boolean isActive;
+  	private Boolean isLockoutEnabled;
   
-  private Boolean isEmailConfirmed;
+  	@Length(max = 255, message = "isPhoneNumberConfirmed must be less than 255 characters")
+  	private String isPhoneNumberConfirmed;
   
-  private Boolean isLockoutEnabled;
+  	private Date lastLoginTime;
   
-  @Length(max = 255, message = "isPhoneNumberConfirmed must be less than 255 characters")
-  private String isPhoneNumberConfirmed;
+  	@NotNull(message = "lastName Should not be null")
+  	@Length(max = 32, message = "lastName must be less than 32 characters")
+  	private String lastName;
   
-  private Date lastLoginTime;
+  	private Date lockoutEndDateUtc;
   
-  @NotNull(message = "lastName Should not be null")
-  @Length(max = 32, message = "lastName must be less than 32 characters")
-  private String lastName;
+  	<#if AuthenticationType =="database">
+  	@NotNull(message = "isActive Should not be null")
+  	private Boolean isActive;
   
-  private Date lockoutEndDateUtc;
-  <#if AuthenticationType =="database">
-  private String password;
+  	private String password;
    
-  @Length(max = 328, message = "passwordResetCode must be less than 328 characters")
-  private String passwordResetCode;
-  </#if>
-  @Length(max = 32, message = "phoneNumber must be less than 32 characters")
-  private String phoneNumber;
+  	@Length(max = 328, message = "passwordResetCode must be less than 328 characters")
+  	private String passwordResetCode;
   
-  private Long profilePictureId;
+  	</#if>
+  	@Length(max = 32, message = "phoneNumber must be less than 32 characters")
+  	private String phoneNumber;
   
-  private Boolean twoFactorEnabled;
+  	private Long profilePictureId;
   
-  @NotNull(message = "userName Should not be null")
-  @Length(max = 32, message = "userName must be less than 32 characters")
-  private String userName;
+  	private Boolean twoFactorEnabled;
   
-  public Integer getAccessFailedCount() {
-  return accessFailedCount;
-  }
+  	@NotNull(message = "userName Should not be null")
+  	@Length(max = 32, message = "userName must be less than 32 characters")
+  	private String userName;
+  
+  	public Integer getAccessFailedCount() {
+  		return accessFailedCount;
+  	}
 
-  public void setAccessFailedCount(Integer accessFailedCount){
-  this.accessFailedCount = accessFailedCount;
-  }
+  	public void setAccessFailedCount(Integer accessFailedCount){
+  		this.accessFailedCount = accessFailedCount;
+  	}
   
-  public String getAuthenticationSource() {
-  return authenticationSource;
-  }
+  	public String getAuthenticationSource() {
+  		return authenticationSource;
+  	}
 
-  public void setAuthenticationSource(String authenticationSource){
-  this.authenticationSource = authenticationSource;
-  }
+  	public void setAuthenticationSource(String authenticationSource){
+  		this.authenticationSource = authenticationSource;
+  	}
   
-  public String getEmailAddress() {
-  return emailAddress;
-  }
+  	public String getEmailAddress() {
+  		return emailAddress;
+  	}
 
-  public void setEmailAddress(String emailAddress){
-  this.emailAddress = emailAddress;
-  }
+  	public void setEmailAddress(String emailAddress){
+  		this.emailAddress = emailAddress;
+  	}
   
-  public String getEmailConfirmationCode() {
-  return emailConfirmationCode;
-  }
+  	public String getEmailConfirmationCode() {
+  		return emailConfirmationCode;
+  	}
 
-  public void setEmailConfirmationCode(String emailConfirmationCode){
-  this.emailConfirmationCode = emailConfirmationCode;
-  }
+  	public void setEmailConfirmationCode(String emailConfirmationCode){
+  		this.emailConfirmationCode = emailConfirmationCode;
+  	}
   
-  public String getFirstName() {
-  return firstName;
-  }
+  	public String getFirstName() {
+  		return firstName;
+  	}
 
-  public void setFirstName(String firstName){
-  this.firstName = firstName;
-  }
+  	public void setFirstName(String firstName){
+  		this.firstName = firstName;
+  	}
   
-  public Boolean getIsActive() {
-  return isActive;
-  }
+  	public Boolean getIsEmailConfirmed() {
+  		return isEmailConfirmed;
+  	}
 
-  public void setIsActive(Boolean isActive){
-  this.isActive = isActive;
-  }
+  	public void setIsEmailConfirmed(Boolean isEmailConfirmed){
+  		this.isEmailConfirmed = isEmailConfirmed;
+  	}
   
-  public Boolean getIsEmailConfirmed() {
-  return isEmailConfirmed;
-  }
+  	public Boolean getIsLockoutEnabled() {
+  		return isLockoutEnabled;
+  	}
 
-  public void setIsEmailConfirmed(Boolean isEmailConfirmed){
-  this.isEmailConfirmed = isEmailConfirmed;
-  }
+  	public void setIsLockoutEnabled(Boolean isLockoutEnabled){
+  		this.isLockoutEnabled = isLockoutEnabled;
+  	}
   
-  public Boolean getIsLockoutEnabled() {
-  return isLockoutEnabled;
-  }
+  	public String getIsPhoneNumberConfirmed() {
+  		return isPhoneNumberConfirmed;
+  	}
 
-  public void setIsLockoutEnabled(Boolean isLockoutEnabled){
-  this.isLockoutEnabled = isLockoutEnabled;
-  }
+  	public void setIsPhoneNumberConfirmed(String isPhoneNumberConfirmed){
+  		this.isPhoneNumberConfirmed = isPhoneNumberConfirmed;
+  	}
   
-  public String getIsPhoneNumberConfirmed() {
-  return isPhoneNumberConfirmed;
-  }
+  	public Date getLastLoginTime() {
+  		return lastLoginTime;
+  	}
 
-  public void setIsPhoneNumberConfirmed(String isPhoneNumberConfirmed){
-  this.isPhoneNumberConfirmed = isPhoneNumberConfirmed;
-  }
+  	public void setLastLoginTime(Date lastLoginTime){
+  		this.lastLoginTime = lastLoginTime;
+  	}
   
-  public Date getLastLoginTime() {
-  return lastLoginTime;
-  }
+  	public String getLastName() {
+  		return lastName;
+  	}
 
-  public void setLastLoginTime(Date lastLoginTime){
-  this.lastLoginTime = lastLoginTime;
-  }
+  	public void setLastName(String lastName){
+  		this.lastName = lastName;
+  	}
   
-  public String getLastName() {
-  return lastName;
-  }
-
-  public void setLastName(String lastName){
-  this.lastName = lastName;
-  }
-  <#if AuthenticationType =="oidc">
+  	<#if AuthenticationType =="oidc">
   
-  public String getScimId() {
-  	return scimId;
-  }
+  	public String getScimId() {
+  		return scimId;
+  	}
 
-  public void setScimId(String scimId){
-  	this.scimId = scimId;
-  }
-  </#if>
-  <#if AuthenticationType =="database">
+  	public void setScimId(String scimId){
+  		this.scimId = scimId;
+  	}
   
-  public String getPassword() {
-  return password;
-  }
+  	</#if>
+  	<#if AuthenticationType =="database">
+  	public Boolean getIsActive() {
+  		return isActive;
+  	}
 
-  public void setPassword(String password){
-  this.password = password;
-  }
+  	public void setIsActive(Boolean isActive){
+  		this.isActive = isActive;
+  	}
   
-  public String getPasswordResetCode() {
-  return passwordResetCode;
-  }
+  	public String getPassword() {
+  		return password;
+  	}
 
-  public void setPasswordResetCode(String passwordResetCode){
-  this.passwordResetCode = passwordResetCode;
-  }
-  </#if>
+  	public void setPassword(String password){
+  		this.password = password;
+  	}
   
-  public Date getLockoutEndDateUtc() {
-  return lockoutEndDateUtc;
-  }
+  	public String getPasswordResetCode() {
+  		return passwordResetCode;
+  	}
 
-  public void setLockoutEndDateUtc(Date lockoutEndDateUtc){
-  this.lockoutEndDateUtc = lockoutEndDateUtc;
-  }
+  	public void setPasswordResetCode(String passwordResetCode){
+  		this.passwordResetCode = passwordResetCode;
+  	}
   
-  public String getPhoneNumber() {
-  return phoneNumber;
-  }
+  	</#if>
+  	public Date getLockoutEndDateUtc() {
+    	return lockoutEndDateUtc;
+  	}
 
-  public void setPhoneNumber(String phoneNumber){
-  this.phoneNumber = phoneNumber;
-  }
+  	public void setLockoutEndDateUtc(Date lockoutEndDateUtc){
+  		this.lockoutEndDateUtc = lockoutEndDateUtc;
+  	}
   
-  public Long getProfilePictureId() {
-  return profilePictureId;
-  }
+  	public String getPhoneNumber() {
+  		return phoneNumber;
+  	}
 
-  public void setProfilePictureId(Long profilePictureId){
-  this.profilePictureId = profilePictureId;
-  }
+  	public void setPhoneNumber(String phoneNumber){
+  		this.phoneNumber = phoneNumber;
+  	}
   
-  public Boolean getTwoFactorEnabled() {
-  return twoFactorEnabled;
-  }
+  	public Long getProfilePictureId() {
+  		return profilePictureId;
+  	}
 
-  public void setTwoFactorEnabled(Boolean twoFactorEnabled){
-  this.twoFactorEnabled = twoFactorEnabled;
-  }
+  	public void setProfilePictureId(Long profilePictureId){
+  		this.profilePictureId = profilePictureId;
+  	}
   
-  public String getUserName() {
-  return userName;
-  }
+  	public Boolean getTwoFactorEnabled() {
+  		return twoFactorEnabled;
+  	}
 
-  public void setUserName(String userName){
-  this.userName = userName;
-  }
+  	public void setTwoFactorEnabled(Boolean twoFactorEnabled){
+  		this.twoFactorEnabled = twoFactorEnabled;
+  	}
+  
+  	public String getUserName() {
+  		return userName;
+  	}
 
-  public Long getId() {
-   return id;
-  }
+  	public void setUserName(String userName){
+  		this.userName = userName;
+  	}
 
-  public void setId(Long id) {
-    this.id = id;
-  }
+  	public Long getId() {
+   		return id;
+  	}
+
+  	public void setId(Long id) {
+    	this.id = id;
+  	}
 
 }

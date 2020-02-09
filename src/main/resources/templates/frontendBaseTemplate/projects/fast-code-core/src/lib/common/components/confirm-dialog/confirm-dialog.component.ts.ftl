@@ -12,23 +12,30 @@ export class ConfirmDialogComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: any,
     public dialogRef: MatDialogRef<ConfirmDialogComponent>,
     public translate: TranslateService,
-  ){}
+  ) { }
 
-  public confirmMessage:string;
-  public title:string;
-  public action:string;
+  public confirmMessage: string;
+  public title: string;
+  public action: string;
 
   ngOnInit() {
-    if(this.data.confirmationType == "delete"){
+    this.setData();
+  }
+
+  /**
+   * sets dialog title, message and 
+   * action texts.
+   */
+  setData() {
+    if (this.data.confirmationType == "delete") {
       this.confirmMessage = this.translate.instant('CONFIRM-DIALOG.DELETE.MESSAGE');
       this.title = this.translate.instant('CONFIRM-DIALOG.DELETE.TITLE');
       this.action = this.translate.instant('FASTCODE-CORE-GENERAL.ACTIONS.DELETE');
     }
-    else{
-      this.confirmMessage = this.data.message? this.data.message: this.translate.instant('CONFIRM-DIALOG.MESSAGE');
-      this.title = this.data.title? this.data.title: this.translate.instant('CONFIRM-DIALOG.TITLE');
-      this.action = this.data.action? this.data.action: this.translate.instant('FASTCODE-CORE-GENERAL.ACTIONS.CONFIRM');
+    else {
+      this.confirmMessage = this.data.message ? this.data.message : this.translate.instant('CONFIRM-DIALOG.MESSAGE');
+      this.title = this.data.title ? this.data.title : this.translate.instant('CONFIRM-DIALOG.TITLE');
+      this.action = this.data.action ? this.data.action : this.translate.instant('FASTCODE-CORE-GENERAL.ACTIONS.CONFIRM');
     }
   }
 }
-
